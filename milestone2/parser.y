@@ -457,6 +457,7 @@ annassign : COLON test annasign_op{
                   n->children.push_back($1);
                   n->children.push_back($2);
                   n->children.push_back($3);
+                  n->type=$2->label;
                   $$=n;
                  }
             | COLON test 
