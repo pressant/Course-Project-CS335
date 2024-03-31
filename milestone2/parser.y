@@ -457,10 +457,16 @@ annassign : COLON test annasign_op{
                   n->children.push_back($1);
                   n->children.push_back($2);
                   n->children.push_back($3);
-                  n->type=$2->label;
+                  n->type=$2->type;
                   $$=n;
                  }
-            | COLON test 
+            | COLON test{
+                  Node* n =create_node("annassign");
+                  n->children.push_back($1);
+                  n->children.push_back($2);
+                  n->type=$2->type;
+                  $$=n;
+                 } 
           ;
 annasign_op : EQUAL_SIGN test{
                   Node* n =create_node("annassign_op");
@@ -1042,12 +1048,14 @@ atom_expr :
     n->children.push_back($1);
     n->children.push_back($2);
     n->children.push_back($3);
+    n->type = $2->type + $3->type;
   }
   |atom trailer_rep{
     Node* n = create_node("Atom Expression");
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    n->type = $1->type + $2->type;
     if(yybye) cout<<"atom trailer_rep atom_expr: "<<endl;
   }
   |atom{
@@ -1199,6 +1207,7 @@ trailer :
     n->children.push_back($1);
     n->children.push_back($2);
     n->children.push_back($3);
+    $$->type = $1->type + $2->type + $3->type;
   }
   |LBRACKET RBRACKET{ 
     Node* n = create_node("Trailer");
