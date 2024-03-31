@@ -84,7 +84,7 @@ public:
         printf("%d\n", SYMSCOPE);
         cout<< SYMVAL.size() << endl;
     for (auto it = SYMVAL.begin(); it != SYMVAL.end(); ++it) {
-        cout << it->first << "," << it->second.identity << "," << SYMSCOPE << endl;
+        cout << it->first << "," <<  "," << SYMSCOPE << it->second.type <<endl;
     }
     for (auto& ti : childs) {
         ti->PrintSYMTAB();
@@ -92,6 +92,7 @@ public:
 }
 
 };
+
 
 
 
