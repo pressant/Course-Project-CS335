@@ -154,7 +154,7 @@ funcname : DEF NAME {
                 tab->SYMVAL[$2->label].identity=FUNC;
                 tab->SYMVAL[$2->label].scope=curr_scope;
                 tab->SYMVAL[$2->label].line_no=$1->line_number;
-               cout<<tab->SYMVAL[$2->label].name<<endl;
+              //  cout<<tab->SYMVAL[$2->label].name<<endl;
                SYMTAB* newtab=new SYMTAB();
                newtab->SYMSCOPE=++curr_scope;
                newtab->parent=tab;
@@ -1132,6 +1132,8 @@ atom_expr :
     n->children.push_back($2);
     n->type = $1->type + $2->type;
     if(yybye) cout<<"atom trailer_rep atom_expr: "<<endl;
+    
+
   }
   |atom{
     $$ = $1;
@@ -1539,6 +1541,12 @@ arglist :
     n->children.push_back($2);
     n->children.push_back($3);
     $$->parameters.push_back($1->type);
+    $$->parameters.insert($$->parameters.end(), $2->parameters.begin(), $2->parameters.end());
+    // cout<<"Arglist 1";
+    // for (auto it = $2->parameters.begin(); it != $2->parameters.end(); ++it) {
+    //     std::cout << *it << " ";
+    // }
+    // cout<<endl;
 
   }
   | argument COMMA{
@@ -1553,29 +1561,37 @@ arglist :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    // cout<<"Arglist 3 "<<endl;
     $$->parameters.push_back($1->type);
+    $$->parameters.insert($$->parameters.end(), $2->parameters.begin(), $2->parameters.end());
+    // for (auto it = $$->parameters.begin(); it != $$->parameters.end(); ++it) {
+    //   std::cout << *it << " ";
+    // }
+    // cout<<endl;
   };
   |argument{$$ =$1;
-            $$->parameters.push_back($1->type);
+  $$->parameters.push_back($1->type);
   }
 ;
 COMMA_argument_rep : 
   COMMA_argument_rep COMMA argument { 
-    Node* n = create_node("Comma Argument rep");
+    Node* n = create_node("Comma Argument rep1");
     $$ = n;
-    for(int i=0; i<$1->children.size(); i++){
-      n->children.push_back($1->children[i]);
-    }
+    // for(int i=0; i<$1->children.size(); i++){
+    //   n->children.push_back($1->children[i]);
+    // }
+    n->children.push_back($1);
     n->children.push_back($2);
     n->children.push_back($3);
+    $$->parameters.insert($$->parameters.end(), $1->parameters.begin(), $1->parameters.end());
     $$->parameters.push_back($3->type);
   }
   | COMMA argument {
-    Node* n = create_node("Comma Argument rep");
+    Node* n = create_node("Comma Argument rep2");
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
-    $$->parameters.push_back($1->type);
+    $$->parameters.push_back($2->type);
 
   }
 ;

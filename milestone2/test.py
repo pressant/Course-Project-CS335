@@ -23,7 +23,7 @@ def power(x:int, y:int)->int:
 
 def main():
     x: float = 3.14  # float not assignable to bool
-    # power(1, "yp", True) # check function parameters
+    power(1, "yp", True) # check function parameters
     return 
     # z = 9 # declare before use
     # x: str # redeclaration in same scope not allowed
