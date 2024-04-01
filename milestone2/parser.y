@@ -39,7 +39,7 @@ void yyerror(const char*);
 int yybye =0;
 void diff_data(int x)
 {
-  cout<<"Different datatypes compared in line no "<< x<<endl;
+  cout<<"Datatype mismatch in line no "<< x<<endl;
 }
 void check_type(string s1,string s2, int x)
 {
@@ -160,6 +160,10 @@ funcname : DEF NAME {
                newtab->parent=tab;
                tab->childs.push_back(newtab);
                tab=newtab;
+             }
+             else {
+              cout<<"Function redeclared in line no "<< $2->line_number<<endl;
+              exit(1);
              }
             // cout<<"funcname "<<$1->line_number<<endl;
           }
@@ -1287,6 +1291,7 @@ trailer :
     n->children.push_back($1);
     n->children.push_back($2);
     n->children.push_back($3);
+    $$->parameters = $2->parameters;
   }
   |LPAREN RPAREN{
     Node* n = create_node("Trailer");
@@ -1533,20 +1538,26 @@ arglist :
     n->children.push_back($1);
     n->children.push_back($2);
     n->children.push_back($3);
+    $$->parameters.push_back($1->type);
+
   }
   | argument COMMA{
     Node* n = create_node("Arglist");
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    $$->parameters.push_back($1->label);
   }
   | argument COMMA_argument_rep{
     Node* n = create_node("Arglist");
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    $$->parameters.push_back($1->type);
   };
-  |argument{$$ =$1;}
+  |argument{$$ =$1;
+            $$->parameters.push_back($1->type);
+  }
 ;
 COMMA_argument_rep : 
   COMMA_argument_rep COMMA argument { 
@@ -1557,12 +1568,15 @@ COMMA_argument_rep :
     }
     n->children.push_back($2);
     n->children.push_back($3);
+    $$->parameters.push_back($3->type);
   }
   | COMMA argument {
     Node* n = create_node("Comma Argument rep");
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    $$->parameters.push_back($1->type);
+
   }
 ;
 argument : 
