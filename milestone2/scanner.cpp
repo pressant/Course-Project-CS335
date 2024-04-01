@@ -1256,7 +1256,7 @@ YY_DECL
       yylval.node->label = lexeme;\
       yylval.node->type = lexeme;\
       yylval.node->category = token;\
-      yylval.node->line_no = yylineno;\
+      yylval.node->line_number = yylineno;\
     }\
     return cat;
 

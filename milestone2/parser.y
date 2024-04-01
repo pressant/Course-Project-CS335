@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 #define YYDEBUG 1
+#define YYDEB 0
 using namespace std;
 extern FILE *yyin;
 extern FILE *yyout;
@@ -36,6 +37,18 @@ extern int yylineno;
 extern int yylex();
 void yyerror(const char*);
 int yybye =0;
+void diff_data(int x)
+{
+  cout<<"Different datatypes compared in line no "<< x<<endl;
+}
+void check_type(string s1,string s2, int x)
+{
+    if(s1 != s2)
+    {
+      diff_data(x);
+      exit(1);
+    }
+}
 Node *root = create_node("File_input");
 SYMTAB* tab=new SYMTAB();
 SYMTAB* gt=tab;
@@ -136,10 +149,11 @@ funcname : DEF NAME {
             n->children.push_back($1);
             n->children.push_back($2);
             $$ = n;
+            $$->line_number = $1->line_number;
             if(tab->SYMVAL.find($2->label)== tab->SYMVAL.end()){
                 tab->SYMVAL[$2->label].identity=FUNC;
                 tab->SYMVAL[$2->label].scope=curr_scope;
-                tab->SYMVAL[$2->label].line_no=yylineno;
+                tab->SYMVAL[$2->label].line_no=$1->line_number;
                cout<<tab->SYMVAL[$2->label].name<<endl;
                SYMTAB* newtab=new SYMTAB();
                newtab->SYMSCOPE=++curr_scope;
@@ -147,6 +161,7 @@ funcname : DEF NAME {
                tab->childs.push_back(newtab);
                tab=newtab;
              }
+            // cout<<"funcname "<<$1->line_number<<endl;
           }
          ;
 
@@ -163,8 +178,8 @@ funcdef :  funcname parameters ARROW test COLON suite {
              if(tab->SYMVAL.find($1->label)!= tab->SYMVAL.end()){
                 tab->SYMVAL[$1->label].identity=FUNC;
                 tab->SYMVAL[$1->label].scope=curr_scope;
-                tab->SYMVAL[$1->label].line_no=yylineno;
-                tab->SYMVAL[$1->label].type=$4->label;
+                tab->SYMVAL[$1->label].line_no=$1->line_number;
+                tab->SYMVAL[$1->label].type=$4->type;
                 tab->SYMVAL[$1->label].name=$1->label;
                 tab->SYMVAL[$1->label].size=$2->count;
                 //int g_index;
@@ -178,10 +193,15 @@ funcdef :  funcname parameters ARROW test COLON suite {
                 }
               
              }
+
              else{
               cout<<"error";
               exit(0);
              }
+            //  cout<<$1->line_number<<endl;
+              if(YYDEB) cout<<$4->type <<" "<<$6->type<<endl;
+             check_type($4->type , $6->type , $1->line_number);
+
          }
        | funcname parameters COLON suite {
              Node* n = create_node("Function");
@@ -196,7 +216,7 @@ funcdef :  funcname parameters ARROW test COLON suite {
                if(tab->SYMVAL.find($1->label)!= tab->SYMVAL.end()){
                   tab->SYMVAL[$1->label].identity=FUNC;
                   tab->SYMVAL[$1->label].scope=curr_scope;
-                  tab->SYMVAL[$1->label].line_no=yylineno;
+                  tab->SYMVAL[$1->label].line_no=$1->line_number;
                   tab->SYMVAL[$1->label].type="void";
                   tab->SYMVAL[$1->label].name=$1->label;
                   tab->SYMVAL[$1->label].size=$2->count;
@@ -215,6 +235,8 @@ funcdef :  funcname parameters ARROW test COLON suite {
                 cout<<"error";
                 exit(0);
                }
+             check_type("void" , $4->type , $1->line_number);
+              if(YYDEB) cout<<$4->label <<" "<<endl;
              }
              
          }
@@ -262,7 +284,7 @@ typedargslist : NAME {
                 }
                  tab->SYMVAL[$1->label].identity=NORMIE;
                   tab->SYMVAL[$1->label].scope=curr_scope;
-                  tab->SYMVAL[$1->label].line_no=yylineno;
+                  tab->SYMVAL[$1->label].line_no=$1->line_number;
                   tab->SYMVAL[$1->label].type=$3->label;
                   tab->SYMVAL[$1->label].name=$1->label;
                   tab->SYMVAL[$1->label].size=0;
@@ -310,7 +332,7 @@ typedargslist : NAME {
                 }
                  tab->SYMVAL[$1->label].identity=NORMIE;
                   tab->SYMVAL[$1->label].scope=curr_scope;
-                  tab->SYMVAL[$1->label].line_no=yylineno;
+                  tab->SYMVAL[$1->label].line_no=$1->line_number;
                   tab->SYMVAL[$1->label].type=$3->label;
                   tab->SYMVAL[$1->label].name=$1->label;
                   tab->SYMVAL[$1->label].size=0;
@@ -346,6 +368,7 @@ simple_stmt : small_stmt NEWLINE{
                Node* n = create_node("simple_stmt");
                n->children.push_back($1);
                $$=n;
+               $$->type = $1->type;
             }
             |small_stmt small_stmt_list NEWLINE{
 
@@ -401,23 +424,26 @@ expr_stmt : testlist_star_expr expr_stmt_tail{
               n->children.push_back($2);
               if($2->label=="annassign"){
                 if(tab->SYMVAL.find($1->label)!=tab->SYMVAL.end()){
-                  cout<<"Already declared"<<$1->label<<endl;
-                  return 0;
+                  cout<<"Already declared "<<$1->label<<endl;
+                  cout<<endl;
+                  // exit(1);
                 }
                  tab->SYMVAL[$1->label].identity=NORMIE;
                   tab->SYMVAL[$1->label].scope=curr_scope;
-                  tab->SYMVAL[$1->label].line_no=yylineno;
+                  tab->SYMVAL[$1->label].line_no=$1->line_number;
                   tab->SYMVAL[$1->label].type=$2->type;
                   tab->SYMVAL[$1->label].name=$2->label;
                   tab->SYMVAL[$1->label].size=0;
               }
               else if(tab->SYMVAL.find($1->label)!=tab->SYMVAL.end())
               {
-                if($1->type != $2->type)
-                {
-                  cout<<"Different datatypes compared int line no "<<$$->line_no<<endl;
-                  exit(1);
-                }
+                check_type($1->type , $2->type, $1->line_number);
+                // cout<<yylineno<<endl;
+                // if($1->type != $2->type)
+                // {
+                //   cout<<"Different datatypes compared in line no "<<$1->line_no<<endl;
+                //   exit(1);
+                // }
               }
               $$=n;
              }
@@ -544,7 +570,7 @@ pass_stmt: PASS{$$=$1;}
          ;
 flow_stmt: break_stmt {$$=$1;}
          | continue_stmt {$$=$1;}
-         | return_stmt {$$=$1;}
+         | return_stmt {$$=$1; }
          | yield_stmt{$$=$1;}
          ;
          
@@ -556,8 +582,10 @@ return_stmt: RETURN testlist{
               n->children.push_back($1);
               n->children.push_back($2);      
               $$=n; 
+              $$->type = $2->type;
+              if(YYDEB) cout<<"return_stmt" <<" "<<$2->type<<endl;
             }
-            | RETURN { $$ = $1;}
+            | RETURN { $$ = $1; $$->type = "void";}
 ;
 yield_stmt: yield_expr{$$=$1;};
 global_stmt: GLOBAL global_name_list{
@@ -709,6 +737,9 @@ suite : simple_stmt {if(yybye) cout<<"LINE 462 \n"; $$ = $1;}
         n->children.push_back($2);
         n->children.push_back($3);
         n->children.push_back($4);
+        $$->type = $3->type;
+        if(YYDEB) cout<<"suite" <<$3->type <<endl;
+
       }
 ; 
 stmt_rep : 
@@ -719,6 +750,8 @@ stmt_rep :
               n->children.push_back($1->children[i]);
             }
             n->children.push_back($2);
+            $$->type = $2->type;
+            if(YYDEB) cout<<$2->type<<" stmt_rep"<<endl;
           }
           | stmt {$$=$1; }
 ;
@@ -805,6 +838,13 @@ comparison :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    check_type($1->type , $2->type, $1->line_number);
+    // if($1->type != $2->type){
+    //   diff_data($1->line_no);
+    //   exit(1);
+    // }
+    $$->type = $1->type;
+
   }
   |expr{$$=$1;}
 ;
@@ -824,6 +864,7 @@ comparison_rep :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    $$->type = $2->type;
  }
 ;
 comp_op : LESS_THAN{$$ =$1;}
@@ -965,21 +1006,30 @@ arith_expr :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    check_type($1->type , $2->type, $1->line_number);
+    // if($1->type != $2->type)
+    // {
+    //   diff_data($1->line_no);
+    //   exit(1);
+    // }
+    $$->type = $1->type;
   }
   |term { if(yybye) cout<<"term arith_expr: "<<endl;$$=$1;}
 ;
 arith_expr_rep : 
   arith_expr_rep arith_expr_rep_c1 term {
-    Node* n = create_node("Arithmetic Expression Rep");
+    Node* n = create_node("Arithmetic Expression Rep1");
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
     n->children.push_back($3);
   }
-  |arith_expr_rep_c1 term{Node* n = create_node("Arithmetic Expression Rep");
+  |arith_expr_rep_c1 term{Node* n = create_node("Arithmetic Expression Rep2");
     $$ = n;
     n->children.push_back($1);
-    n->children.push_back($2);}
+    n->children.push_back($2);
+    $$->type = $2->type;
+    }
 ;
 arith_expr_rep_c1 : 
   PLUS { $$ = $1;}
@@ -992,6 +1042,13 @@ term :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    check_type($1->type , $2->type, $1->line_number);
+    // if($1->type != $2->type)
+    // {
+    //   diff_data($1->line_no);
+    //   exit(1);
+    // }
+    $$->type = $1->type;
   }
   |factor{if(yybye) cout<<"factor term: "<<endl;$$=$1;}
 ;
@@ -1008,7 +1065,9 @@ term_rep :
   | term_rep_c1 factor { Node* n = create_node("TERM Rep");
     $$ = n;
     n->children.push_back($1);
-    n->children.push_back($2);}
+    n->children.push_back($2);
+    $$->type = $2->type;
+    }
 ;
 term_rep_c1 : TIMES { $$ =$1;}
             | AT { $$ =$1;}
@@ -1035,6 +1094,9 @@ power :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    check_type($1->type , $2->type , $1->line_number);
+    $$->type = $1->type;
+
   }
   | atom_expr{
     $$ = $1;
@@ -1047,6 +1109,7 @@ power_opt :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    $$->type = $2->type;
   }
 ;
 atom_expr : 
@@ -1135,13 +1198,13 @@ atom : LPAREN atom_opt1 RPAREN {
                 }
 
       }
-      | NUMBER  { $$ =$1;}
-      | FLOAT {$$ = $1;}
-      | string_rep { $$ = $1;} 
+      | NUMBER  { $$ =$1; $$->type = "int";}
+      | FLOAT {$$ = $1; $$->type = "float";}
+      | string_rep { $$ = $1; $$->type = "string";} 
       | TRIPLEDOT  { $$ =$1;}
       | NONE  { $$ =$1;}
-      | TRUE_TOKEN  { $$ =$1;}
-      | FALSE_TOKEN { $$ =$1;}
+      | TRUE_TOKEN  { $$ =$1; $$->type = "bool";}
+      | FALSE_TOKEN { $$ =$1; $$->type = "bool";}
       ;
 atom_opt1 : yield_expr {$$ = $1;}
           | testlist_comp{$$ = $1; if(yybye) cout<<"atom_opt1 testlist_comp: "<<endl;}

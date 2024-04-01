@@ -1,12 +1,33 @@
-a:int=6
+# def add(x :int, y:int):
+#     return x + y
 
-def fn(a:int,b:bool)->int:
-    return a
+# def subtract(x:int, y:int):
+#     return x - y
 
-# class ant:
-#     x: int
-#     y: list[float]
+# # def multiply(x:int, y:int):
+# #     return x * y
+
+# def divide(x:int, y:int):
+#     if y == 1:
+#         return "Cannot divide by zero!"
+#     return x / 1
+
+# class A:
+#     def fn(self, x: int):
+#         print(x)
+
+def power(x:int, y:int):
+    x = x+y 
+    y = y- 1
+    return x ** y
+
+def main():
+    x: float = 3.14  # float not assignable to bool
+    return 
+    # z = 9 # declare before use
+    # x: str # redeclaration in same scope not allowed
+    # power(1, "yp", True) # check function parameters
+    # obj : A = A(3) # check function parameters
+    # obj += obj # most operators not supported for class objects and lists
+    #and not       allowed for only for bool & int
     
-#     def add(x: int):
-#         return x+1
-fn(1,True)

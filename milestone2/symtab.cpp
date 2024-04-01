@@ -86,6 +86,7 @@ public:
     for (auto it = SYMVAL.begin(); it != SYMVAL.end(); ++it) {
         cout << it->first << ","<<it->second.type <<endl;
     }
+    cout<<endl;
     for (auto& ti : childs) {
         ti->PrintSYMTAB();
     }
