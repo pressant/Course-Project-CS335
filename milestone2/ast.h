@@ -16,7 +16,7 @@ struct Node {
   std::string category;
   std::vector<Node*> children;
   std::string type;
-
+  int line_no;
 };
 
 // void print_node(Node *n, std::string, int);

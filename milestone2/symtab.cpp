@@ -81,10 +81,10 @@ public:
 
     void PrintSYMTAB() {
         printf("SYMBOL TABLE\n");
-        printf("%d\n", SYMSCOPE);
-        cout<< SYMVAL.size() << endl;
+        printf("Scope : %d\n", SYMSCOPE);
+        cout<< "Entries in table :"<<SYMVAL.size() << endl;
     for (auto it = SYMVAL.begin(); it != SYMVAL.end(); ++it) {
-        cout << it->first << "," <<  "," << SYMSCOPE << it->second.type <<endl;
+        cout << it->first << ","<<it->second.type <<endl;
     }
     for (auto& ti : childs) {
         ti->PrintSYMTAB();

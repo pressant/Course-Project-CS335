@@ -103,7 +103,6 @@ file_input
     $$ = root;
     root->children.push_back($1);
     root->children.push_back($2);
-    cout<< "start of file" << endl; 
   }
   | ENDMARKER {
     if(yybye) cout<<"LINE 115";
@@ -412,6 +411,14 @@ expr_stmt : testlist_star_expr expr_stmt_tail{
                   tab->SYMVAL[$1->label].name=$2->label;
                   tab->SYMVAL[$1->label].size=0;
               }
+              else if(tab->SYMVAL.find($1->label)!=tab->SYMVAL.end())
+              {
+                if($1->type != $2->type)
+                {
+                  cout<<"Different datatypes compared int line no "<<$$->line_no<<endl;
+                  exit(1);
+                }
+              }
               $$=n;
              }
              |testlist_star_expr { $$ = $1;}
@@ -434,7 +441,7 @@ augassign_op : yield_expr{$$=$1;}
              | testlist{$$=$1;}
              ;
 rep_expr_stmt_tail : rep_expr_stmt_tail EQUAL_SIGN rep_expr_stmt_tail_op { 
-                      Node* n =create_node("rep_expr_stmt_tail");
+                      Node* n =create_node("rep_expr_stmt_tail1");
                       for(int i=0; i<$1->children.size(); i++){
                         n->children.push_back($1->children[i]);
                       }
@@ -443,10 +450,11 @@ rep_expr_stmt_tail : rep_expr_stmt_tail EQUAL_SIGN rep_expr_stmt_tail_op {
                       $$=n;
                      }
                     |EQUAL_SIGN rep_expr_stmt_tail_op {
-                      Node* n =create_node("rep_expr_stmt_tail");
+                      Node* n =create_node("rep_expr_stmt_tail2");
                       n->children.push_back($1);
                       n->children.push_back($2);
                       $$=n;
+                      $$->type = $2->type;
                     }
                    ;
 rep_expr_stmt_tail_op : yield_expr{$$=$1;}
@@ -1043,7 +1051,7 @@ power_opt :
 ;
 atom_expr : 
   await_opt atom trailer_rep{
-    Node* n = create_node("Atom Expression");
+    Node* n = create_node("Atom Expression1");
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
@@ -1051,7 +1059,7 @@ atom_expr :
     n->type = $2->type + $3->type;
   }
   |atom trailer_rep{
-    Node* n = create_node("Atom Expression");
+    Node* n = create_node("Atom Expression2");
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
@@ -1060,6 +1068,7 @@ atom_expr :
   }
   |atom{
     $$ = $1;
+    // cout<<"atom " <<$$->type<<endl;
     if(yybye) cout<<"atom_expr atom: "<<endl; 
   }
 ;
@@ -1104,7 +1113,28 @@ atom : LPAREN atom_opt1 RPAREN {
         n->children.push_back($1);
         n->children.push_back($2);
       }
-      | NAME  { $$ =$1;}
+      | NAME  { $$ =$1;
+                if(tab->SYMVAL.find($1->label)!=tab->SYMVAL.end())
+                {
+                  // cout<<"Already declared"<<endl;
+                  $$->type = tab->SYMVAL[$1->label].type;
+                  // cout<<$$->type<<endl;
+                }
+                else{
+
+                if($1->label == "int")
+                  $$->type = "int";
+                else if($1->label == "float")
+                  $$->type = "float";
+                else if($1->label == "str")
+                  $$->type = "str";
+                else if($1->label == "bool")
+                  $$->type = "bool";
+                else if($1->label == "len")
+                  $$->type = "int";
+                }
+
+      }
       | NUMBER  { $$ =$1;}
       | FLOAT {$$ = $1;}
       | string_rep { $$ = $1;} 
@@ -1554,7 +1584,6 @@ yield_arg : FROM test{
 
 int main(int argc, char* argv[]) {
     /* yybye = 1; */
-    printf("hi");
     if (argc < 2) {
         cout << "Usage: " << argv[0] << " " << endl;
         return 1;

@@ -62,8 +62,10 @@ exponent        [eE][+-]?{digitpart}
     yylval.node = create_node(lexeme);\
     if( token != "")\
     {\
-      yylval.node->type = token;\
+      yylval.node->label = lexeme;\
+      yylval.node->type = lexeme;\
       yylval.node->category = token;\
+      yylval.node->line_no = yylineno;\
     }\
     return cat;
 %}
