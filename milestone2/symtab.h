@@ -8,7 +8,13 @@
 #define BY_VALUE 1
 #define BY_REFER 2
 
-
+/* Types of values that we can have */
+typedef union Value{
+	int ival;
+	double fval;
+	char cval;
+	char *sval;
+}Value;
 
 
 

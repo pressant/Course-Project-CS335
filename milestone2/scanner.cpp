@@ -1,6 +1,6 @@
-#line 1 "scanner.cpp"
+#line 2 "scanner.cpp"
 
-#line 3 "scanner.cpp"
+#line 4 "scanner.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -1009,9 +1009,9 @@ char *copyyytext;
 char* string_literal_value = NULL;
 int lno=1;
 
-#line 1012 "scanner.cpp"
+#line 1013 "scanner.cpp"
 
-#line 1014 "scanner.cpp"
+#line 1015 "scanner.cpp"
 
 #define INITIAL 0
 #define DEDENTATION 1
@@ -1261,7 +1261,7 @@ YY_DECL
     return cat;
 
 
-#line 1264 "scanner.cpp"
+#line 1265 "scanner.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1932,7 +1932,7 @@ YY_RULE_SETUP
 #line 275 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 1935 "scanner.cpp"
+#line 1936 "scanner.cpp"
 
 	case YY_END_OF_BUFFER:
 		{

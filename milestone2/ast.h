@@ -17,9 +17,7 @@ struct Node {
   std::vector<Node*> children;
   std::string type;
   int line_number;
-  string temp_var;
   vector<string> parameters;
-  int i_number;
 };
 
 // void print_node(Node *n, std::string, int);

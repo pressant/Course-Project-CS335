@@ -12,19 +12,17 @@
 #         return "Cannot divide by zero!"
 #     return x / 1
 
-# class A:
-#     def fn(self, x: int):
-#         print(x)
 
-def power(x:int, y:int)->int:
-    x = x+y 
-    y = y- 1
-    return x ** y
 
 def main():
-    x: float = 3.14  # float not assignable to bool
-    power(1, "yp", True) # check function parameters
-    return 
+    x: float = 4.3  # float not assignable to bool
+    y: list[int] = [1 ,2, 3]
+    # len(y)
+    # print(y[0])
+    # obj : A = A("harsh")
+    
+    # y[i] = 1
+    # power(1,1.1) # check function parameters
     # z = 9 # declare before use
     # x: str # redeclaration in same scope not allowed
     # obj : A = A(3) # check function parameters

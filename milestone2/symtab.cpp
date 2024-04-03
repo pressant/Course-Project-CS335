@@ -70,7 +70,8 @@ class SYMTAB {
 public:
     unordered_map<string, MAPVAL> SYMVAL;
     int SYMSCOPE;
-    vector<SYMTAB*> childs;
+    // vector<SYMTAB*> childs;
+    unordered_map<string,SYMTAB*> childs;
     SYMTAB* parent;
 
     // Constructor
@@ -85,10 +86,19 @@ public:
         cout<< "Entries in table :"<<SYMVAL.size() << endl;
     for (auto it = SYMVAL.begin(); it != SYMVAL.end(); ++it) {
         cout << it->first << ","<<it->second.type <<endl;
+        if(it->second.identity == FUNC)
+        {
+            // cout<<"Parameters"<<endl;
+            for(int i = 0; i< it->second.params.size();i++)
+            {
+                cout<< it->second.params[i]->par_type<<" "<<it->second.params[i]->par_name<<endl;
+            }
+        }
     }
     cout<<endl;
     for (auto& ti : childs) {
-        ti->PrintSYMTAB();
+        cout<< ti.first<<" ";
+        ti.second->PrintSYMTAB();
     }
 }
 
