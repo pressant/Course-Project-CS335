@@ -29,63 +29,69 @@
 #include <string.h>
 #include "3ac.h"
 
-vector <quadruple> code;
-vector <quadruple> current;
-
-extern string out_file_name;
-long long int variable_number=0;
-long long int label_number=0;
-int inst_num;
 
 using namespace std;
 
 
+typedef struct quadruple{
+    string op;
+    string arg1;
+    string arg2;
+    string result;
+    int index;// target label for this particular instruction
+}quadruple;
+
+int inst_num=0;
+vector <quadruple> code;
+vector <quadruple> curr;
+int var_num = 0;
 void emitt(string op,string arg1, string arg2, string result, int idx){
     quadruple entry;
-    entry.op=op;
-    entry.arg1=arg1;
-    entry.arg2=arg2;
-    entry.result=result;
-    entry.index=idx;
+    entry.op = op;
+    entry.arg1 = arg1;
+    entry.arg2 = arg2;
+    entry.result = result;
+    entry.index = idx;
     code.push_back(entry);
     inst_num++;
 }
 
-string array_access(string name, vector<int> a, vector<int> b){
-    string t = new_temporary();
-    for(int i=0;i<a.size();i++){
-        if(i==0) emitt("*","#t_"+to_string(a[i]),"#t_"+to_string(b[i]),t,-1);
+
+string array_access(string name,vector<int> a,vector<int> b){
+    string t = "t_"+to_string(var_num);
+    var_num++;
+    for(int i = 0; i<a.size();i++){
+        if(i==0) emitt("*","t_"+to_string(a[i]),"t"+to_string(b[i]),t,-1);
         else{
-            string s = new_temporary();
-            emitt("*","#t_"+to_string(a[i]),"#t_"+to_string(b[i]),s,-1);
+            string s = "t_"+to_string(var_num);
+            var_num++;
+            emitt("*","t_"+to_string(a[i]),"t_"+to_string(b[i]),s,-1);
             emitt("+",t,s,t,-1);
         }
     }
     return "*("+name+" + "+t+")";
 }
-
-string new_temporary(){
-    string temp_var="#t_"+to_string(variable_number);
-    variable_number++;
-    return temp_var;
-}
-
-int reduce(string name){
-    return stoi(name.substr(3,name.size()-1));
-}
-
-void print3AC_code(){
+void print3ac(){
     ofstream tac_file;
-    string file_name = out_file_name+"3ac.txt";
+    string file_name = "3ac.txt";
     tac_file.open(file_name);
     for(int i=0;i<code.size();i++){
         if(code[i].op == "array"){
-            emitt("string","push_param "+code[i].arg1,"","",-1);
+            emitt("string","pushparam "+code[i].arg1,"","",-1);
             emitt("string","stack_pointer +8","","",-1);
-            emitt("string","call alloc 1","","",-1);
+            emitt("string","call allocmem 1","","",-1);
             emitt("string","stack_pointer -8","","",-1);
             emitt("","pop 4","",code[i].result,-1);
-            emitt("string","pop 4","","",-1);
+            emitt("string","popparam 4","","",-1);
+        }
+        if(code[i].op == "param"){
+            tac_file<<i<<":  "<<code[i].arg1<<endl;
+        }
+        if(code[i].op == "pushparam"){
+            tac_file<<i<<":  "<<code[i].arg1<<endl;
+        }
+        if(code[i].op == "pushparam"){
+            tac_file<<i<<":  "<<code[i].arg1<<endl;
         }
         else if(code[i].op == "string"){
             tac_file<<i<<":    "<<code[i].arg1<<endl;
@@ -113,6 +119,12 @@ void print3AC_code(){
         }
     }
 }
+vector<int> merge(vector <int>& list1, vector <int>& list2){
+    for(int i=0;i<list2.size();i++){
+        list1.push_back(list2[i]);
+    }
+    return list1;
+}
 
 void backpatch(vector <int>&instructions, int target){
     for (int i=0;i<instructions.size();i++){
@@ -122,15 +134,7 @@ void backpatch(vector <int>&instructions, int target){
     //cout<<endl;
 
 }
-
-vector<int> merge(vector <int>& list1, vector <int>& list2){
-    for(int i=0;i<list2.size();i++){
-        list1.push_back(list2[i]);
-    }
-    return list1;
-}
-
-void array_func(string name, vector<int>&dim, string type){
+void array_func(string name, string type){
     string size;
     if(type.substr(0,3)=="int" || type.substr(0,5)=="float") size="4";
     else if(type.substr(0,4)=="char" || type.substr(0,4)=="short") size="2";
@@ -140,13 +144,15 @@ void array_func(string name, vector<int>&dim, string type){
         cout<<"Unexpected Error Occurred. Pls give diff input"<<endl;
         exit(1);
     }
-    string t = new_temporary();
+    string t = "t_"+to_string(var_num);
+    var_num++;
     emitt("",size,"",t,-1);
-    for(int i=dim.size()-1;i>=0;i--){
-        string k = new_temporary();
-        emitt("*","#t_"+to_string(dim[i]),t,k,-1);
-        dim[i]=reduce(t);
-        t=k;
-    }
     emitt("array",t,"",name,-1);
 }
+
+string new_temporary(){
+    string temp_var="t_"+to_string(var_num);
+    var_num++;
+    return temp_var;
+}
+
