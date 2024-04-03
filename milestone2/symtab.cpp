@@ -31,6 +31,7 @@ using namespace std;
 #define NORMIE 0
 #define ARRAY 1
 #define FUNC 2
+#define CLS 3
 
 struct Value {
     string val;
@@ -50,7 +51,6 @@ struct MAPVAL {
     string type;
     string name;
     int size;
-    string temp_var;
 
     // register stuff
     int g_index;
@@ -86,7 +86,7 @@ public:
         printf("Scope : %d\n", SYMSCOPE);
         cout<< "Entries in table :"<<SYMVAL.size() << endl;
     for (auto it = SYMVAL.begin(); it != SYMVAL.end(); ++it) {
-        cout << it->first << ","<<it->second.type <<endl;
+        cout << "Label : "<<it->first << ", Type :"<<it->second.type <<endl;
         if(it->second.identity == FUNC)
         {
             // cout<<"Parameters"<<endl;

@@ -11,13 +11,18 @@
 #     if y == 1:
 #         return "Cannot divide by zero!"
 #     return x / 1
-
-
-x=5
 def main():
     x: float = 4.3  # float not assignable to bool
-    y: list[int] = [1 ,2, 3]
-    # len(y)
+    y: list[i]
+    len(y)
+    return
+class myclass:
+    var : int
+    x:int = 5
+    def func(self):
+        self.var = 10
+        # print(self.x, self.va)
+
     # print(y[0])
     # obj : A = A("harsh")
     

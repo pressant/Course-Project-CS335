@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include  "3ac.cpp"
+#include <regex>
 #define YYDEBUG 1
 #define YYDEB 0
 using namespace std;
@@ -65,18 +65,8 @@ Node *root = create_node("File_input");
 SYMTAB* tab=new SYMTAB();
 SYMTAB* gt=tab;
 int curr_scope=tab->SYMSCOPE;
+
 std::string* target_program;
-
-int get_siz(string type){
-    if(type.substr(0,3)=="int" || type.substr(0,5)=="float") return 4;
-    else if(type.substr(0,4)=="char" ) return 2;
-    else if(type.substr(0,4)=="bool") return 1;
-    else if(type.substr(0,4)=="long" || type.substr(0,6)=="double") return 8;
-    else return 8;
-}
-extern int inst_num;
-vector<tuple<string,string,string,int,int> > arguments;
-
 %}
 
 
@@ -119,7 +109,7 @@ vector<tuple<string,string,string,int,int> > arguments;
 %type<node> shift_expr shift_expr_rep arith_expr arith_expr_rep term term_rep factor factor_c1 power power_opt atom_expr await_opt trailer trailer_rep atom atom_opt1 atom_opt2 string_rep
 %type<node> testlist_comp testlist_comp_c1 testlist_comp_c2 subscriptlist COMMA_subscript_rep subscript test_opt1 sliceop exprlist COMMA_expr_star_expr_rep testlist COMMA_test_rep
 %type<node>  test_star_expr classdef classdef_opt1 arglist COMMA_argument_rep argument comp_for_opt comp_iter sync_comp_for
-%type<node> comp_iter_opt comp_for ASYNC_opt comp_if yield_expr yield_arg async_stmt with_stmt
+%type<node> comp_iter_opt comp_for ASYNC_opt comp_if yield_expr yield_arg async_stmt with_stmt class_name
 
 
 %left OR
@@ -171,11 +161,8 @@ funcname : DEF NAME {
             Node* n = create_node($2->label);
             n->children.push_back($1);
             n->children.push_back($2);
-            n->label = $2->label;
             $$ = n;
             $$->line_number = $1->line_number;
-
-
             if(tab->SYMVAL.find($2->label)== tab->SYMVAL.end()){
                 tab->SYMVAL[$2->label].identity=FUNC;
                 tab->SYMVAL[$2->label].scope=curr_scope;
@@ -190,7 +177,7 @@ funcname : DEF NAME {
              }
              else {
               cout<<"Function redeclared in line no "<< $2->line_number<<endl;
-                      /* exit(1); */
+                      exit(1);
              }
             // cout<<"funcname "<<$1->line_number<<endl;
           }
@@ -229,8 +216,6 @@ funcdef :  funcname parameters ARROW test COLON suite {
               cout<<"error";
               exit(0);
              }
-              
-             emitt("begin",$2->label,"","",-1);
             //  cout<<$1->line_number<<endl;
              check_type($4->type , $6->type , $1->line_number);
 
@@ -270,9 +255,7 @@ funcdef :  funcname parameters ARROW test COLON suite {
              check_type("void" , $4->type , $1->line_number);
               if(YYDEB) cout<<$4->label <<" "<<endl;
              }
-             emitt("begin",$2->label,"","",-1);
-        string temp = new_temporary();
-        $$->i_number = inst_num-1;
+             
          }
        ;
 
@@ -300,7 +283,6 @@ typedargslist : NAME {
                   n->p_f.push_back(temp);
                   n->count=1;
                   $$=n;
-                  arguments.push_back(make_tuple(temp->par_name,"",$1->type,0,0));
                   } 
                  | NAME COLON datatype {
                   if(yybye) cout<<"LINE 188";
@@ -324,9 +306,6 @@ typedargslist : NAME {
                   tab->SYMVAL[$1->label].name=$1->label;
                   tab->SYMVAL[$1->label].size=0;
                   $$ = n;
-                  string t = new_temporary();
-                  tab->SYMVAL[$1->label].temp_var=t;
-                  arguments.push_back(make_tuple($1->label,t,$3->label,0,0));
                 }
               | NAME COMMA typedargslist {
                   if(yybye) cout<<"LINE 196";
@@ -376,9 +355,6 @@ typedargslist : NAME {
                   tab->SYMVAL[$1->label].name=$1->label;
                   tab->SYMVAL[$1->label].size=0;
                   $$ = n;
-                  string t = new_temporary();
-                  tab->SYMVAL[$1->label].temp_var=t;
-                  arguments.push_back(make_tuple($1->label,t,$3->label,0,0));
                 }
               ;
 
@@ -469,7 +445,7 @@ expr_stmt : testlist_star_expr expr_stmt_tail{
                 if(tab->SYMVAL.find($1->label)!=tab->SYMVAL.end()){
                   cout<<"Already declared "<<$1->label<<endl;
                   cout<<endl;
-                          /* exit(1); */
+                          exit(1);
                 }
                   // cout<<"enterd expr_stmt "<<$2->type<<endl;
                   tab->SYMVAL[$1->label].identity=NORMIE;
@@ -496,7 +472,7 @@ expr_stmt : testlist_star_expr expr_stmt_tail{
                 // if($1->type != $2->type)
                 // {
                 //   cout<<"Different datatypes compared in line no "<<$1->line_no<<endl;
-                //           /* exit(1); */
+                //           exit(1);
                 // }
               }
                 // cout<<$1->type <<" hii "<<$2->type<<endl;
@@ -911,7 +887,7 @@ comparison :
     check_type($1->type , $2->type, $1->line_number);
     // if($1->type != $2->type){
     //   diff_data($1->line_no);
-    //           /* exit(1); */
+    //           exit(1);
     // }
     $$->type = $1->type;
 
@@ -1144,7 +1120,7 @@ term :
     // if($1->type != $2->type)
     // {
     //   diff_data($1->line_no);
-    //           /* exit(1); */
+    //           exit(1);
     // }
     // $$->type = $1->type;
   }
@@ -1224,18 +1200,18 @@ atom_expr :
     n->children.push_back($1);
     n->children.push_back($2);
     n->type = $1->type + $2->type;
-    if((gt->SYMVAL.find($1->label) != tab->SYMVAL.end()) && $2->type == "Func")
+    if((gt->SYMVAL.find($1->label) != tab->SYMVAL.end()) && $2->category == "Func")
     {
       vector<Param*> p = gt->SYMVAL[$1->label].params;
       if(p.size() > $2->p_f.size())
       {
         cout<<"Lesser number of arguments for function call "<< $1->label <<" in line number "<< $1->line_number<<endl;
-                /* exit(1); */
+                exit(1);
       }
       else if(p.size() < $2->p_f.size())
       {
         cout<<"Greater number of arguments for function call "<< $1->label <<" in line number "<< $1->line_number<<endl;
-                /* exit(1); */
+                exit(1);
       }
       else {
         for(int i=0;i<p.size();i++)
@@ -1249,17 +1225,29 @@ atom_expr :
             }
             else{
               cout<<" Type mismatch for argument "<<i<<" in function call "<< $1->label <<" in line number "<<$1->line_number<<endl;
-                      /* exit(1); */
+                      exit(1);
             }
           }
         }
       }
       
     }
-    else if($2->type == "Func")
+    else if($2->category == "Func")
     {
-      cout<<"Undeclared Function in line no : "<< $1->line_number<<endl;
-              /* exit(1); */
+      if($1->label == "len" || $1->label == "print"){
+        std::regex pattern("list\\[\\w+\\]");
+
+        if (std::regex_match($2->type, pattern)) {
+            std::cout << "String matches the pattern.\n";
+        } else {
+            std::cout << "String does not match the pattern.\n";
+            exit(1);
+        }
+      }
+      else{
+        cout<<"Undeclared Function in line no : "<< $1->line_number<<endl;
+        exit(1);
+      }
     }
     $$ = n;
     if(yybye) cout<<"atom trailer_rep atom_expr: "<<endl;
@@ -1297,7 +1285,8 @@ atom : LPAREN atom_opt1 RPAREN {
         n->children.push_back($1);
         n->children.push_back($2);
         n->children.push_back($3);
-        $$->type = "Func";
+        $$->category = "Func";
+        $$->type = $2->type;
       }
       | LBRACKET atom_opt2 RBRACKET {
         if(yybye) cout<<"atom atom_opt2: "<<endl;
@@ -1657,34 +1646,129 @@ COMMA_test_rep :
 test_star_expr : test{ $$ = $1;}
                | star_expr{$$ = $1;}
                ;
-classdef : CLASS NAME LPAREN arglist RPAREN COLON suite{
+
+class_name :CLASS NAME{
+            Node* n = create_node($2->label);
+            n->children.push_back($1);
+            n->children.push_back($2);
+            $$ = n;
+            $$->line_number = $1->line_number;
+            if(tab->SYMVAL.find($2->label)== tab->SYMVAL.end()){
+                tab->SYMVAL[$2->label].identity=CLS;
+                tab->SYMVAL[$2->label].scope=curr_scope;
+                tab->SYMVAL[$2->label].line_no=$1->line_number;
+               cout<<tab->SYMVAL[$2->label].name<<endl;
+               SYMTAB* newtab=new SYMTAB();
+               newtab->SYMSCOPE=++curr_scope;
+               newtab->parent=tab;
+              //  tab->childs.push_back(newtab);
+               tab->childs[$2->label] = newtab;
+               tab=newtab;
+             }
+             else {
+              cout<<"Class redeclared in line no "<< $2->line_number<<endl;
+                      exit(1);
+             }
+};
+classdef : class_name LPAREN arglist RPAREN COLON suite{
     Node* n = create_node("Class Def");
-    $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
     n->children.push_back($3);
     n->children.push_back($4);
     n->children.push_back($5);
     n->children.push_back($6);
-    n->children.push_back($7);
-}
-| CLASS NAME LPAREN RPAREN COLON suite{
-    Node* n = create_node("Class Def");
     $$ = n;
+    tab=tab->parent;
+  //   if(tab->SYMVAL.find($1->label)!= tab->SYMVAL.end()){
+  //     tab->SYMVAL[$1->label].identity=CLS;
+  //     tab->SYMVAL[$1->label].scope=curr_scope;
+  //     tab->SYMVAL[$1->label].line_no=$1->line_number;
+  //     tab->SYMVAL[$1->label].type=$4->type;
+  //     tab->SYMVAL[$1->label].name=$1->label;
+  //     tab->SYMVAL[$1->label].size=$2->count;
+  //     // tab-SYMVAL[$1->labe].params = 
+  //     //int g_index;
+  //     //int reg_name;
+  //     for(int i=0;i<$2->children.size();i++){
+  //       Node* t=$2->children[i];
+  //       string temp=t->label;
+  //        if(temp!="[" && temp!="]"){
+  //           tab->SYMVAL[$1->label].params=$2->p_f;
+  //        }
+  //     }              
+  //  }
+
+  //  else{
+  //   cout<<"error"<<endl;
+  //   exit(0);
+  //  }   
+
+}
+| class_name LPAREN RPAREN COLON suite{
+    Node* n = create_node("Class Def");
     n->children.push_back($1);
     n->children.push_back($2);
     n->children.push_back($3);
     n->children.push_back($4);
     n->children.push_back($5);
-    n->children.push_back($6);
-}
-| CLASS NAME COLON suite{
-    Node* n = create_node("Class Def");
     $$ = n;
+    tab=tab->parent;
+  //   if(tab->SYMVAL.find($1->label)!= tab->SYMVAL.end()){
+  //     tab->SYMVAL[$1->label].identity=CLS;
+  //     tab->SYMVAL[$1->label].scope=curr_scope;
+  //     tab->SYMVAL[$1->label].line_no=$1->line_number;
+  //     tab->SYMVAL[$1->label].type=$4->type;
+  //     tab->SYMVAL[$1->label].name=$1->label;
+  //     tab->SYMVAL[$1->label].size=$2->count;
+  //     // tab-SYMVAL[$1->labe].params = 
+  //     //int g_index;
+  //     //int reg_name;
+  //     for(int i=0;i<$2->children.size();i++){
+  //       Node* t=$2->children[i];
+  //       string temp=t->label;
+  //        if(temp!="[" && temp!="]"){
+  //           tab->SYMVAL[$1->label].params=$2->p_f;
+  //        }
+  //     }              
+  //  }
+
+  //  else{
+  //   cout<<"error"<<endl;
+  //   exit(0);
+  //  }   
+}
+| class_name COLON suite{
+    Node* n = create_node("Class Def");
     n->children.push_back($1);
     n->children.push_back($2);
     n->children.push_back($3);
-    n->children.push_back($4);
+    $$ = n;
+    tab=tab->parent;
+    if(tab->SYMVAL.find($1->label)!= tab->SYMVAL.end()){
+      tab->SYMVAL[$1->label].identity=CLS;
+      tab->SYMVAL[$1->label].scope=curr_scope;
+      tab->SYMVAL[$1->label].line_no=$1->line_number;
+      tab->SYMVAL[$1->label].type=$1->label;
+      tab->SYMVAL[$1->label].name=$1->label;
+      // tab->SYMVAL[$1->label].size=$2->count;
+      // tab-SYMVAL[$1->labe].params = 
+      //int g_index;
+      //int reg_name;
+      // for(int i=0;i<$2->children.size();i++){
+      //   Node* t=$2->children[i];
+      //   string temp=t->label;
+      //    if(temp!="[" && temp!="]"){
+      //       tab->SYMVAL[$1->label].params=$2->p_f;
+      //    }
+      // }              
+   }
+
+   else{
+    cout<<"error"<<endl;
+    exit(0);
+   }   
+
 }
 ;
 arglist : 
@@ -1892,7 +1976,7 @@ int main(int argc, char* argv[]) {
     yyin = fopen(input_filename, "r");
     if(yyin == NULL) {
         cerr << ": Error: Input file " << input_filename << " not found.\n";
-        /*         /* exit(1); */ 
+        exit(1); 
     }
     yyparse();
     cout<<endl;
