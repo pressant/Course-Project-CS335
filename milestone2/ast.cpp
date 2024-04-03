@@ -15,6 +15,7 @@ Node *create_node(std::string label)
   result->label = label;
   result->count=0;
   result->category = "";
+  result->temp_var = "";
   return result;
 }
 std::string escapeQuotes(const std::string& input) {
