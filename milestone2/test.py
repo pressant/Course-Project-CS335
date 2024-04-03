@@ -13,7 +13,7 @@
 #     return x / 1
 
 
-
+x=5
 def main():
     x: float = 4.3  # float not assignable to bool
     y: list[int] = [1 ,2, 3]

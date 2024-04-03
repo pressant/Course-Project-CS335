@@ -20,6 +20,11 @@ struct Node {
   vector<string> parameters;
   string temp_var;
   int i_number;
+  vector<int>true_list;
+    vector<int>false_list;
+    vector<int>next_list;
+    vector<int>end_list;
+    vector<int>dimension;
 };
 
 // void print_node(Node *n, std::string, int);
