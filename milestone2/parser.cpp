@@ -116,7 +116,7 @@ void check_type(string s1,string s2, int x)
 {
     if(s1 != s2)
     {
-      cout<<s1<<" "<<s2<<endl;
+      // cout<<s1<<" "<<s2<<endl;
       diff_data(x);
       exit(1); 
     }
