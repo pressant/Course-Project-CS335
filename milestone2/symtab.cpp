@@ -50,6 +50,7 @@ struct MAPVAL {
     string type;
     string name;
     int size;
+    string temp_var;
 
     // register stuff
     int g_index;

@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include  "3ac.cpp"
 #define YYDEBUG 1
 #define YYDEB 0
 using namespace std;
@@ -65,6 +66,17 @@ SYMTAB* tab=new SYMTAB();
 SYMTAB* gt=tab;
 int curr_scope=tab->SYMSCOPE;
 std::string* target_program;
+
+int get_siz(string type){
+    if(type.substr(0,3)=="int" || type.substr(0,5)=="float") return 4;
+    else if(type.substr(0,4)=="char" ) return 2;
+    else if(type.substr(0,4)=="bool") return 1;
+    else if(type.substr(0,4)=="long" || type.substr(0,6)=="double") return 8;
+    else return 8;
+}
+extern int inst_num;
+vector<tuple<string,string,string,int,int> > arguments;
+
 %}
 
 
@@ -159,8 +171,11 @@ funcname : DEF NAME {
             Node* n = create_node($2->label);
             n->children.push_back($1);
             n->children.push_back($2);
+            n->label = $2->label;
             $$ = n;
             $$->line_number = $1->line_number;
+
+
             if(tab->SYMVAL.find($2->label)== tab->SYMVAL.end()){
                 tab->SYMVAL[$2->label].identity=FUNC;
                 tab->SYMVAL[$2->label].scope=curr_scope;
@@ -214,6 +229,8 @@ funcdef :  funcname parameters ARROW test COLON suite {
               cout<<"error";
               exit(0);
              }
+              
+             emitt("begin",$2->label,"","",-1);
             //  cout<<$1->line_number<<endl;
              check_type($4->type , $6->type , $1->line_number);
 
@@ -253,7 +270,9 @@ funcdef :  funcname parameters ARROW test COLON suite {
              check_type("void" , $4->type , $1->line_number);
               if(YYDEB) cout<<$4->label <<" "<<endl;
              }
-             
+             emitt("begin",$2->label,"","",-1);
+        string temp = new_temporary();
+        $$->i_number = inst_num-1;
          }
        ;
 
@@ -281,6 +300,7 @@ typedargslist : NAME {
                   n->p_f.push_back(temp);
                   n->count=1;
                   $$=n;
+                  arguments.push_back(make_tuple(temp->par_name,"",$1->type,0,0));
                   } 
                  | NAME COLON datatype {
                   if(yybye) cout<<"LINE 188";
@@ -304,6 +324,9 @@ typedargslist : NAME {
                   tab->SYMVAL[$1->label].name=$1->label;
                   tab->SYMVAL[$1->label].size=0;
                   $$ = n;
+                  string t = new_temporary();
+                  tab->SYMVAL[$1->label].temp_var=t;
+                  arguments.push_back(make_tuple($1->label,t,$3->label,0,0));
                 }
               | NAME COMMA typedargslist {
                   if(yybye) cout<<"LINE 196";
@@ -353,6 +376,9 @@ typedargslist : NAME {
                   tab->SYMVAL[$1->label].name=$1->label;
                   tab->SYMVAL[$1->label].size=0;
                   $$ = n;
+                  string t = new_temporary();
+                  tab->SYMVAL[$1->label].temp_var=t;
+                  arguments.push_back(make_tuple($1->label,t,$3->label,0,0));
                 }
               ;
 

@@ -18,6 +18,8 @@ struct Node {
   std::string type;
   int line_number;
   vector<string> parameters;
+  string temp_var;
+  int i_number;
 };
 
 // void print_node(Node *n, std::string, int);

@@ -98,6 +98,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include  "3ac.cpp"
 #define YYDEBUG 1
 #define YYDEB 0
 using namespace std;
@@ -136,7 +137,18 @@ SYMTAB* gt=tab;
 int curr_scope=tab->SYMSCOPE;
 std::string* target_program;
 
-#line 140 "parser.cpp"
+int get_siz(string type){
+    if(type.substr(0,3)=="int" || type.substr(0,5)=="float") return 4;
+    else if(type.substr(0,4)=="char" ) return 2;
+    else if(type.substr(0,4)=="bool") return 1;
+    else if(type.substr(0,4)=="long" || type.substr(0,6)=="double") return 8;
+    else return 8;
+}
+extern int inst_num;
+vector<tuple<string,string,string,int,int> > arguments;
+
+
+#line 152 "parser.cpp"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -758,32 +770,32 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   125,   125,   131,   138,   146,   155,   156,   158,   184,
-     221,   260,   269,   276,   285,   308,   325,   359,   366,   378,
-     379,   382,   389,   397,   404,   413,   423,   431,   432,   433,
-     434,   435,   437,   478,   481,   489,   492,   498,   511,   515,
-     523,   524,   547,   556,   563,   568,   573,   577,   578,   581,
-     590,   592,   593,   594,   595,   596,   597,   598,   599,   600,
-     601,   602,   603,   604,   607,   613,   615,   616,   617,   618,
-     621,   623,   624,   631,   633,   634,   641,   651,   653,   654,
-     655,   656,   657,   658,   661,   664,   665,   668,   681,   692,
-     703,   712,   723,   732,   743,   752,   765,   776,   777,   791,
-     800,   802,   811,   814,   817,   824,   827,   836,   842,   848,
-     851,   861,   868,   875,   880,   893,   897,   906,   914,   915,
-     916,   917,   918,   919,   920,   921,   927,   928,   936,   944,
-     950,   953,   962,   968,   974,   979,   988,   994,  1000,  1003,
-    1012,  1018,  1024,  1027,  1036,  1042,  1045,  1048,  1065,  1068,
-    1088,  1096,  1097,  1100,  1125,  1128,  1137,  1144,  1145,  1146,
-    1147,  1148,  1151,  1157,  1159,  1160,  1161,  1164,  1173,  1179,
-    1188,  1196,  1243,  1249,  1254,  1263,  1267,  1276,  1287,  1294,
-    1316,  1317,  1318,  1319,  1320,  1321,  1322,  1324,  1325,  1327,
-    1330,  1331,  1341,  1350,  1353,  1354,  1357,  1358,  1366,  1367,
-    1370,  1382,  1393,  1400,  1409,  1421,  1429,  1438,  1445,  1454,
-    1462,  1468,  1474,  1477,  1481,  1490,  1498,  1499,  1508,  1515,
-    1522,  1529,  1535,  1541,  1547,  1549,  1555,  1557,  1564,  1570,
-    1576,  1578,  1579,  1582,  1591,  1606,  1618,  1634,  1645,  1655,
-    1665,  1683,  1693,  1709,  1717,  1733,  1746,  1752,  1758,  1764,
-    1770,  1772,  1773,  1775,  1784,  1793,  1798,  1800,  1807,  1813
+       0,   137,   137,   143,   150,   158,   167,   168,   170,   199,
+     238,   279,   288,   295,   305,   331,   348,   385,   392,   404,
+     405,   408,   415,   423,   430,   439,   449,   457,   458,   459,
+     460,   461,   463,   504,   507,   515,   518,   524,   537,   541,
+     549,   550,   573,   582,   589,   594,   599,   603,   604,   607,
+     616,   618,   619,   620,   621,   622,   623,   624,   625,   626,
+     627,   628,   629,   630,   633,   639,   641,   642,   643,   644,
+     647,   649,   650,   657,   659,   660,   667,   677,   679,   680,
+     681,   682,   683,   684,   687,   690,   691,   694,   707,   718,
+     729,   738,   749,   758,   769,   778,   791,   802,   803,   817,
+     826,   828,   837,   840,   843,   850,   853,   862,   868,   874,
+     877,   887,   894,   901,   906,   919,   923,   932,   940,   941,
+     942,   943,   944,   945,   946,   947,   953,   954,   962,   970,
+     976,   979,   988,   994,  1000,  1005,  1014,  1020,  1026,  1029,
+    1038,  1044,  1050,  1053,  1062,  1068,  1071,  1074,  1091,  1094,
+    1114,  1122,  1123,  1126,  1151,  1154,  1163,  1170,  1171,  1172,
+    1173,  1174,  1177,  1183,  1185,  1186,  1187,  1190,  1199,  1205,
+    1214,  1222,  1269,  1275,  1280,  1289,  1293,  1302,  1313,  1320,
+    1342,  1343,  1344,  1345,  1346,  1347,  1348,  1350,  1351,  1353,
+    1356,  1357,  1367,  1376,  1379,  1380,  1383,  1384,  1392,  1393,
+    1396,  1408,  1419,  1426,  1435,  1447,  1455,  1464,  1471,  1480,
+    1488,  1494,  1500,  1503,  1507,  1516,  1524,  1525,  1534,  1541,
+    1548,  1555,  1561,  1567,  1573,  1575,  1581,  1583,  1590,  1596,
+    1602,  1604,  1605,  1608,  1617,  1632,  1644,  1660,  1671,  1681,
+    1691,  1709,  1719,  1735,  1743,  1759,  1772,  1778,  1784,  1790,
+    1796,  1798,  1799,  1801,  1810,  1819,  1824,  1826,  1833,  1839
 };
 #endif
 
@@ -2067,27 +2079,27 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* file_input: newline_stat_rep ENDMARKER  */
-#line 125 "parser.y"
+#line 137 "parser.y"
                                {
     if(yybye) cout<<"LINE 107";
     (yyval.node) = root;
     root->children.push_back((yyvsp[-1].node));
     root->children.push_back((yyvsp[0].node));
   }
-#line 2078 "parser.cpp"
+#line 2090 "parser.cpp"
     break;
 
   case 3: /* file_input: ENDMARKER  */
-#line 131 "parser.y"
+#line 143 "parser.y"
               {
     if(yybye) cout<<"LINE 115";
     (yyval.node) = NULL;
     }
-#line 2087 "parser.cpp"
+#line 2099 "parser.cpp"
     break;
 
   case 4: /* newline_stat_rep: newline_stat_rep NEWLINE  */
-#line 138 "parser.y"
+#line 150 "parser.y"
                              {
     if(yybye) cout<<"LINE 119";
     Node* n = create_node("newline_stat_rep");
@@ -2096,11 +2108,11 @@ yyreduce:
       n->children.push_back((yyvsp[-1].node)->children[i]);
     }
   }
-#line 2100 "parser.cpp"
+#line 2112 "parser.cpp"
     break;
 
   case 5: /* newline_stat_rep: newline_stat_rep stmt  */
-#line 146 "parser.y"
+#line 158 "parser.y"
                           { 
     if(yybye) cout<<"LINE 126";
     Node* n = create_node("newline_stat_rep");
@@ -2110,29 +2122,32 @@ yyreduce:
     }
     n->children.push_back((yyvsp[0].node));
   }
-#line 2114 "parser.cpp"
-    break;
-
-  case 6: /* newline_stat_rep: stmt  */
-#line 155 "parser.y"
-         { (yyval.node) = (yyvsp[0].node) ; if(yybye) cout<<"LINE 132"; (yyval.node) = (yyvsp[0].node);}
-#line 2120 "parser.cpp"
-    break;
-
-  case 7: /* newline_stat_rep: NEWLINE  */
-#line 156 "parser.y"
-            {  if(yybye) cout<<"LINE 133"; cout<<yylineno<<endl;}
 #line 2126 "parser.cpp"
     break;
 
+  case 6: /* newline_stat_rep: stmt  */
+#line 167 "parser.y"
+         { (yyval.node) = (yyvsp[0].node) ; if(yybye) cout<<"LINE 132"; (yyval.node) = (yyvsp[0].node);}
+#line 2132 "parser.cpp"
+    break;
+
+  case 7: /* newline_stat_rep: NEWLINE  */
+#line 168 "parser.y"
+            {  if(yybye) cout<<"LINE 133"; cout<<yylineno<<endl;}
+#line 2138 "parser.cpp"
+    break;
+
   case 8: /* funcname: DEF NAME  */
-#line 158 "parser.y"
+#line 170 "parser.y"
                     {
             Node* n = create_node((yyvsp[0].node)->label);
             n->children.push_back((yyvsp[-1].node));
             n->children.push_back((yyvsp[0].node));
+            n->label = (yyvsp[0].node)->label;
             (yyval.node) = n;
             (yyval.node)->line_number = (yyvsp[-1].node)->line_number;
+
+
             if(tab->SYMVAL.find((yyvsp[0].node)->label)== tab->SYMVAL.end()){
                 tab->SYMVAL[(yyvsp[0].node)->label].identity=FUNC;
                 tab->SYMVAL[(yyvsp[0].node)->label].scope=curr_scope;
@@ -2151,11 +2166,11 @@ yyreduce:
              }
             // cout<<"funcname "<<$1->line_number<<endl;
           }
-#line 2155 "parser.cpp"
+#line 2170 "parser.cpp"
     break;
 
   case 9: /* funcdef: funcname parameters ARROW test COLON suite  */
-#line 184 "parser.y"
+#line 199 "parser.y"
                                                       {
              Node* n = create_node("Function");
              n->children.push_back((yyvsp[-5].node));
@@ -2189,15 +2204,17 @@ yyreduce:
               cout<<"error";
               exit(0);
              }
+              
+             emitt("begin",(yyvsp[-4].node)->label,"","",-1);
             //  cout<<$1->line_number<<endl;
              check_type((yyvsp[-2].node)->type , (yyvsp[0].node)->type , (yyvsp[-5].node)->line_number);
 
          }
-#line 2197 "parser.cpp"
+#line 2214 "parser.cpp"
     break;
 
   case 10: /* funcdef: funcname parameters COLON suite  */
-#line 221 "parser.y"
+#line 238 "parser.y"
                                          {
              Node* n = create_node("Function");
              n->children.push_back((yyvsp[-3].node));
@@ -2233,13 +2250,15 @@ yyreduce:
              check_type("void" , (yyvsp[0].node)->type , (yyvsp[-3].node)->line_number);
               if(YYDEB) cout<<(yyvsp[0].node)->label <<" "<<endl;
              }
-             
+             emitt("begin",(yyvsp[-2].node)->label,"","",-1);
+        string temp = new_temporary();
+        (yyval.node)->i_number = inst_num-1;
          }
-#line 2239 "parser.cpp"
+#line 2258 "parser.cpp"
     break;
 
   case 11: /* parameters: LPAREN typedargslist RPAREN  */
-#line 260 "parser.y"
+#line 279 "parser.y"
                                          {
                 Node* n = create_node("Parameters");
                 n->children.push_back((yyvsp[-2].node));
@@ -2249,21 +2268,21 @@ yyreduce:
                 n->p_f=(yyvsp[-1].node)->p_f;
                 (yyval.node)=n;
             }
-#line 2253 "parser.cpp"
+#line 2272 "parser.cpp"
     break;
 
   case 12: /* parameters: LPAREN RPAREN  */
-#line 269 "parser.y"
+#line 288 "parser.y"
                            {
                 (yyval.node) = create_node("Parameters");
                 (yyval.node)->children.push_back((yyvsp[-1].node));
                 (yyval.node)->children.push_back((yyvsp[0].node));
             }
-#line 2263 "parser.cpp"
+#line 2282 "parser.cpp"
     break;
 
   case 13: /* typedargslist: NAME  */
-#line 276 "parser.y"
+#line 295 "parser.y"
                      {
                   Node *n = create_node("Typedargslist1");
                   n->children.push_back((yyvsp[0].node));
@@ -2272,12 +2291,13 @@ yyreduce:
                   n->p_f.push_back(temp);
                   n->count=1;
                   (yyval.node)=n;
+                  arguments.push_back(make_tuple(temp->par_name,"",(yyvsp[0].node)->type,0,0));
                   }
-#line 2277 "parser.cpp"
+#line 2297 "parser.cpp"
     break;
 
   case 14: /* typedargslist: NAME COLON datatype  */
-#line 285 "parser.y"
+#line 305 "parser.y"
                                        {
                   if(yybye) cout<<"LINE 188";
                   Node *n = create_node("Typedargslist2");
@@ -2300,12 +2320,15 @@ yyreduce:
                   tab->SYMVAL[(yyvsp[-2].node)->label].name=(yyvsp[-2].node)->label;
                   tab->SYMVAL[(yyvsp[-2].node)->label].size=0;
                   (yyval.node) = n;
+                  string t = new_temporary();
+                  tab->SYMVAL[(yyvsp[-2].node)->label].temp_var=t;
+                  arguments.push_back(make_tuple((yyvsp[-2].node)->label,t,(yyvsp[0].node)->label,0,0));
                 }
-#line 2305 "parser.cpp"
+#line 2328 "parser.cpp"
     break;
 
   case 15: /* typedargslist: NAME COMMA typedargslist  */
-#line 308 "parser.y"
+#line 331 "parser.y"
                                          {
                   if(yybye) cout<<"LINE 196";
                   Node *n = create_node("Typedargslist3");
@@ -2323,11 +2346,11 @@ yyreduce:
                   t2.insert(t2.end(),(yyvsp[0].node)->p_f.begin(),(yyvsp[0].node)->p_f.end());
                   n->p_f=t2;
                 }
-#line 2327 "parser.cpp"
+#line 2350 "parser.cpp"
     break;
 
   case 16: /* typedargslist: NAME COLON datatype COMMA typedargslist  */
-#line 325 "parser.y"
+#line 348 "parser.y"
                                                         {
                   if(yybye) cout<<"LINE 203";
                   Node *n = create_node("Typedargslist4");
@@ -2359,12 +2382,15 @@ yyreduce:
                   tab->SYMVAL[(yyvsp[-4].node)->label].name=(yyvsp[-4].node)->label;
                   tab->SYMVAL[(yyvsp[-4].node)->label].size=0;
                   (yyval.node) = n;
+                  string t = new_temporary();
+                  tab->SYMVAL[(yyvsp[-4].node)->label].temp_var=t;
+                  arguments.push_back(make_tuple((yyvsp[-4].node)->label,t,(yyvsp[-2].node)->label,0,0));
                 }
-#line 2364 "parser.cpp"
+#line 2390 "parser.cpp"
     break;
 
   case 17: /* datatype: NAME  */
-#line 359 "parser.y"
+#line 385 "parser.y"
                 {
               if(yybye) cout<<"LINE 215";
               Node *n = create_node("Datatype");
@@ -2372,11 +2398,11 @@ yyreduce:
               n->label=(yyvsp[0].node)->label;
               (yyval.node) = n;
             }
-#line 2376 "parser.cpp"
+#line 2402 "parser.cpp"
     break;
 
   case 18: /* datatype: NAME LBRACKET NAME RBRACKET  */
-#line 366 "parser.y"
+#line 392 "parser.y"
                                        {
               if(yybye) cout<<"LINE 222";
               Node *n = create_node("Datatype");
@@ -2387,23 +2413,23 @@ yyreduce:
               n->label=(yyvsp[-3].node)->label+(yyvsp[-2].node)->label+(yyvsp[-1].node)->label+(yyvsp[0].node)->label;
               (yyval.node) = n;
             }
-#line 2391 "parser.cpp"
+#line 2417 "parser.cpp"
     break;
 
   case 19: /* stmt: simple_stmt  */
-#line 378 "parser.y"
+#line 404 "parser.y"
                       { if(yybye) cout<<"LINE 231 \n";(yyval.node)=(yyvsp[0].node);}
-#line 2397 "parser.cpp"
+#line 2423 "parser.cpp"
     break;
 
   case 20: /* stmt: compound_stmt  */
-#line 379 "parser.y"
+#line 405 "parser.y"
                        {if(yybye) cout<<"LINE 232 \n";(yyval.node)=(yyvsp[0].node);}
-#line 2403 "parser.cpp"
+#line 2429 "parser.cpp"
     break;
 
   case 21: /* simple_stmt: small_stmt NEWLINE  */
-#line 382 "parser.y"
+#line 408 "parser.y"
                                 {
               if(yybye) cout<<"LINE 235 \n";
                Node* n = create_node("simple_stmt");
@@ -2411,11 +2437,11 @@ yyreduce:
                (yyval.node)=n;
                (yyval.node)->type = (yyvsp[-1].node)->type;
             }
-#line 2415 "parser.cpp"
+#line 2441 "parser.cpp"
     break;
 
   case 22: /* simple_stmt: small_stmt small_stmt_list NEWLINE  */
-#line 389 "parser.y"
+#line 415 "parser.y"
                                                {
 
                 if(yybye) cout<<"LINE 241 \n";
@@ -2424,11 +2450,11 @@ yyreduce:
                 n->children.push_back((yyvsp[-1].node));
                 (yyval.node)=n;
               }
-#line 2428 "parser.cpp"
+#line 2454 "parser.cpp"
     break;
 
   case 23: /* simple_stmt: small_stmt SEMICOLON NEWLINE  */
-#line 397 "parser.y"
+#line 423 "parser.y"
                                          {
                 if(yybye) cout<<"LINE 242 \n";
                 Node* n =create_node("simple_stmt");
@@ -2436,11 +2462,11 @@ yyreduce:
                 n->children.push_back((yyvsp[-1].node));
                 (yyval.node)=n;
               }
-#line 2440 "parser.cpp"
+#line 2466 "parser.cpp"
     break;
 
   case 24: /* simple_stmt: small_stmt small_stmt_list SEMICOLON NEWLINE  */
-#line 404 "parser.y"
+#line 430 "parser.y"
                                                          {
                 if(yybye) cout<<"LINE 243 \n";
                 Node* n =create_node("simple_stmt");
@@ -2448,11 +2474,11 @@ yyreduce:
                 n->children.push_back((yyvsp[-2].node));
                 n->children.push_back((yyvsp[-1].node));              
               }
-#line 2452 "parser.cpp"
+#line 2478 "parser.cpp"
     break;
 
   case 25: /* small_stmt_list: small_stmt_list SEMICOLON small_stmt  */
-#line 413 "parser.y"
+#line 439 "parser.y"
                                                       {
                   if(yybye) cout<<"LINE 247 \n";
                   Node* n =create_node("small_stmt_list");
@@ -2463,11 +2489,11 @@ yyreduce:
                   n->children.push_back((yyvsp[0].node));
                   (yyval.node)=n;
                 }
-#line 2467 "parser.cpp"
+#line 2493 "parser.cpp"
     break;
 
   case 26: /* small_stmt_list: SEMICOLON small_stmt  */
-#line 423 "parser.y"
+#line 449 "parser.y"
                                       {
                   if(yybye) cout<<"LINE 255 \n";
                   Node* n =create_node("small_stmt_list");
@@ -2475,41 +2501,41 @@ yyreduce:
                   n->children.push_back((yyvsp[0].node));
                   (yyval.node)=n;
                 }
-#line 2479 "parser.cpp"
+#line 2505 "parser.cpp"
     break;
 
   case 27: /* small_stmt: expr_stmt  */
-#line 431 "parser.y"
+#line 457 "parser.y"
                       {if(yybye) cout<<"LINE 262 \n"; (yyval.node)=(yyvsp[0].node);}
-#line 2485 "parser.cpp"
+#line 2511 "parser.cpp"
     break;
 
   case 28: /* small_stmt: del_stmt  */
-#line 432 "parser.y"
+#line 458 "parser.y"
                      {(yyval.node)=(yyvsp[0].node);}
-#line 2491 "parser.cpp"
+#line 2517 "parser.cpp"
     break;
 
   case 29: /* small_stmt: pass_stmt  */
-#line 433 "parser.y"
+#line 459 "parser.y"
                       {(yyval.node)=(yyvsp[0].node);}
-#line 2497 "parser.cpp"
+#line 2523 "parser.cpp"
     break;
 
   case 30: /* small_stmt: flow_stmt  */
-#line 434 "parser.y"
+#line 460 "parser.y"
                       {(yyval.node)=(yyvsp[0].node);}
-#line 2503 "parser.cpp"
+#line 2529 "parser.cpp"
     break;
 
   case 31: /* small_stmt: global_stmt  */
-#line 435 "parser.y"
+#line 461 "parser.y"
                          {(yyval.node)=(yyvsp[0].node);}
-#line 2509 "parser.cpp"
+#line 2535 "parser.cpp"
     break;
 
   case 32: /* expr_stmt: testlist_star_expr expr_stmt_tail  */
-#line 437 "parser.y"
+#line 463 "parser.y"
                                              { 
               Node* n =create_node("expr_stmt");
               n->children.push_back((yyvsp[-1].node));
@@ -2551,17 +2577,17 @@ yyreduce:
               }
                 // cout<<$1->type <<" hii "<<$2->type<<endl;
              }
-#line 2555 "parser.cpp"
+#line 2581 "parser.cpp"
     break;
 
   case 33: /* expr_stmt: testlist_star_expr  */
-#line 478 "parser.y"
+#line 504 "parser.y"
                                  { (yyval.node) = (yyvsp[0].node);}
-#line 2561 "parser.cpp"
+#line 2587 "parser.cpp"
     break;
 
   case 34: /* expr_stmt_tail: COLON decl_type annassign  */
-#line 481 "parser.y"
+#line 507 "parser.y"
                                            {
                   (yyval.node) =create_node("annassign");
                   (yyval.node)->children.push_back((yyvsp[-2].node));
@@ -2570,30 +2596,30 @@ yyreduce:
                   (yyval.node)->type = (yyvsp[-1].node)->type;
                   check_type((yyvsp[-1].node)->type, (yyvsp[0].node)->type, (yyvsp[-2].node)->line_number);
                   }
-#line 2574 "parser.cpp"
+#line 2600 "parser.cpp"
     break;
 
   case 35: /* expr_stmt_tail: annassign  */
-#line 489 "parser.y"
+#line 515 "parser.y"
                           {
                   (yyval.node) = (yyvsp[0].node);
                }
-#line 2582 "parser.cpp"
+#line 2608 "parser.cpp"
     break;
 
   case 36: /* expr_stmt_tail: COLON decl_type  */
-#line 492 "parser.y"
+#line 518 "parser.y"
                                  {
                   (yyval.node) =create_node("annassign");
                   (yyval.node)->children.push_back((yyvsp[-1].node));
                   (yyval.node)->children.push_back((yyvsp[0].node));
                   (yyval.node)->type = (yyvsp[0].node)->type;
                }
-#line 2593 "parser.cpp"
+#line 2619 "parser.cpp"
     break;
 
   case 37: /* expr_stmt_tail: augassign augassign_op  */
-#line 498 "parser.y"
+#line 524 "parser.y"
                                         {
                   Node* n =create_node("expr_stmt_tail");
                   n->children.push_back((yyvsp[-1].node));
@@ -2602,20 +2628,20 @@ yyreduce:
                   (yyval.node)->type = (yyvsp[0].node)->type;
                   // cout<<$$->type <<" expr_stmt_tail"<<endl;
                }
-#line 2606 "parser.cpp"
+#line 2632 "parser.cpp"
     break;
 
   case 38: /* decl_type: NAME  */
-#line 511 "parser.y"
+#line 537 "parser.y"
                 {
                 (yyval.node) = create_node("decl_type");
                 (yyval.node)->type = (yyvsp[0].node)->type;
             }
-#line 2615 "parser.cpp"
+#line 2641 "parser.cpp"
     break;
 
   case 39: /* decl_type: NAME LBRACKET NAME RBRACKET  */
-#line 515 "parser.y"
+#line 541 "parser.y"
                                           {
                 if((yyvsp[-3].node)->label != "list"){
                   cout << "Invalid datatype at line no: " << (yyvsp[-3].node)->line_number << endl;
@@ -2623,23 +2649,23 @@ yyreduce:
                 }
                 (yyval.node)->type = (yyvsp[-3].node)->type + (yyvsp[-2].node)->label + (yyvsp[-1].node)->type + (yyvsp[0].node)->label;
             }
-#line 2627 "parser.cpp"
+#line 2653 "parser.cpp"
     break;
 
   case 40: /* augassign_op: yield_expr  */
-#line 523 "parser.y"
+#line 549 "parser.y"
                          {(yyval.node)=(yyvsp[0].node);}
-#line 2633 "parser.cpp"
+#line 2659 "parser.cpp"
     break;
 
   case 41: /* augassign_op: testlist  */
-#line 524 "parser.y"
+#line 550 "parser.y"
                        {(yyval.node)=(yyvsp[0].node);}
-#line 2639 "parser.cpp"
+#line 2665 "parser.cpp"
     break;
 
   case 42: /* annassign: EQUAL_SIGN test  */
-#line 547 "parser.y"
+#line 573 "parser.y"
                            {
                   Node* n =create_node("annassign_op");
                    n->children.push_back((yyvsp[-1].node));
@@ -2648,11 +2674,11 @@ yyreduce:
                    (yyval.node)->type = (yyvsp[0].node)->type;
                   //  cout<<$$->type <<"HII"<<endl;
 }
-#line 2652 "parser.cpp"
+#line 2678 "parser.cpp"
     break;
 
   case 43: /* testlist_star_expr: testlist_star_expr_opt1 testlist_star_expr_rep COMMA  */
-#line 556 "parser.y"
+#line 582 "parser.y"
                                                                          {
                      Node* n =create_node("testlist_star_expr");
                      n->children.push_back((yyvsp[-2].node));
@@ -2660,49 +2686,49 @@ yyreduce:
                      n->children.push_back((yyvsp[0].node));
                      (yyval.node)=n;
                     }
-#line 2664 "parser.cpp"
+#line 2690 "parser.cpp"
     break;
 
   case 44: /* testlist_star_expr: testlist_star_expr_opt1 testlist_star_expr_rep  */
-#line 563 "parser.y"
+#line 589 "parser.y"
                                                                    { 
                       Node* n =create_node("testlist_star_expr");
                       n->children.push_back((yyvsp[-1].node));
                       n->children.push_back((yyvsp[0].node));
                     }
-#line 2674 "parser.cpp"
+#line 2700 "parser.cpp"
     break;
 
   case 45: /* testlist_star_expr: testlist_star_expr_opt1 COMMA  */
-#line 568 "parser.y"
+#line 594 "parser.y"
                                                   {
                      Node* n =create_node("testlist_star_expr");
                      n->children.push_back((yyvsp[-1].node));
                      n->children.push_back((yyvsp[0].node));
                     }
-#line 2684 "parser.cpp"
+#line 2710 "parser.cpp"
     break;
 
   case 46: /* testlist_star_expr: testlist_star_expr_opt1  */
-#line 573 "parser.y"
+#line 599 "parser.y"
                                              { (yyval.node) = (yyvsp[0].node);}
-#line 2690 "parser.cpp"
+#line 2716 "parser.cpp"
     break;
 
   case 47: /* testlist_star_expr_opt1: test  */
-#line 577 "parser.y"
+#line 603 "parser.y"
                               {(yyval.node)=(yyvsp[0].node);}
-#line 2696 "parser.cpp"
+#line 2722 "parser.cpp"
     break;
 
   case 48: /* testlist_star_expr_opt1: star_expr  */
-#line 578 "parser.y"
+#line 604 "parser.y"
                                    {(yyval.node)=(yyvsp[0].node);}
-#line 2702 "parser.cpp"
+#line 2728 "parser.cpp"
     break;
 
   case 49: /* testlist_star_expr_rep: testlist_star_expr_rep COMMA testlist_star_expr_opt1  */
-#line 581 "parser.y"
+#line 607 "parser.y"
                                                           {
       Node* n =create_node("testlist_star_expr_rep");
       for(int i=0; i<(yyvsp[-2].node)->children.size(); i++){
@@ -2712,147 +2738,147 @@ yyreduce:
       n->children.push_back((yyvsp[0].node));
       (yyval.node)=n;
   }
-#line 2716 "parser.cpp"
+#line 2742 "parser.cpp"
     break;
 
   case 50: /* testlist_star_expr_rep: COMMA testlist_star_expr_opt1  */
-#line 590 "parser.y"
+#line 616 "parser.y"
                                   {(yyval.node) = NULL;}
-#line 2722 "parser.cpp"
+#line 2748 "parser.cpp"
     break;
 
   case 51: /* augassign: PLUS_EQUAL  */
-#line 592 "parser.y"
+#line 618 "parser.y"
                        {(yyval.node)=(yyvsp[0].node);}
-#line 2728 "parser.cpp"
+#line 2754 "parser.cpp"
     break;
 
   case 52: /* augassign: MINUS_EQUAL  */
-#line 593 "parser.y"
+#line 619 "parser.y"
                         {(yyval.node)=(yyvsp[0].node);}
-#line 2734 "parser.cpp"
+#line 2760 "parser.cpp"
     break;
 
   case 53: /* augassign: TIMES_EQUAL  */
-#line 594 "parser.y"
+#line 620 "parser.y"
                         {(yyval.node)=(yyvsp[0].node);}
-#line 2740 "parser.cpp"
+#line 2766 "parser.cpp"
     break;
 
   case 54: /* augassign: AT_EQUAL  */
-#line 595 "parser.y"
+#line 621 "parser.y"
                      {(yyval.node)=(yyvsp[0].node);}
-#line 2746 "parser.cpp"
+#line 2772 "parser.cpp"
     break;
 
   case 55: /* augassign: DIVIDEDBY_EQUAL  */
-#line 596 "parser.y"
+#line 622 "parser.y"
                             {(yyval.node)=(yyvsp[0].node);}
-#line 2752 "parser.cpp"
+#line 2778 "parser.cpp"
     break;
 
   case 56: /* augassign: MODULO_EQUAL  */
-#line 597 "parser.y"
+#line 623 "parser.y"
                          {(yyval.node)=(yyvsp[0].node);}
-#line 2758 "parser.cpp"
+#line 2784 "parser.cpp"
     break;
 
   case 57: /* augassign: BITWISE_AND_EQUAL  */
-#line 598 "parser.y"
+#line 624 "parser.y"
                               {(yyval.node)=(yyvsp[0].node);}
-#line 2764 "parser.cpp"
+#line 2790 "parser.cpp"
     break;
 
   case 58: /* augassign: BITWISE_OR_EQUAL  */
-#line 599 "parser.y"
+#line 625 "parser.y"
                              {(yyval.node)=(yyvsp[0].node);}
-#line 2770 "parser.cpp"
+#line 2796 "parser.cpp"
     break;
 
   case 59: /* augassign: BITWISE_XOR_EQUAL  */
-#line 600 "parser.y"
+#line 626 "parser.y"
                               {(yyval.node)=(yyvsp[0].node);}
-#line 2776 "parser.cpp"
+#line 2802 "parser.cpp"
     break;
 
   case 60: /* augassign: SHIFT_LEFT_EQUAL  */
-#line 601 "parser.y"
+#line 627 "parser.y"
                              {(yyval.node)=(yyvsp[0].node);}
-#line 2782 "parser.cpp"
+#line 2808 "parser.cpp"
     break;
 
   case 61: /* augassign: SHIFT_RIGHT_EQUAL  */
-#line 602 "parser.y"
+#line 628 "parser.y"
                               {(yyval.node)=(yyvsp[0].node);}
-#line 2788 "parser.cpp"
+#line 2814 "parser.cpp"
     break;
 
   case 62: /* augassign: POWER_EQUAL  */
-#line 603 "parser.y"
+#line 629 "parser.y"
                         {(yyval.node)=(yyvsp[0].node);}
-#line 2794 "parser.cpp"
+#line 2820 "parser.cpp"
     break;
 
   case 63: /* augassign: FLOORDIV_EQUAL  */
-#line 604 "parser.y"
+#line 630 "parser.y"
                            {(yyval.node)=(yyvsp[0].node);}
-#line 2800 "parser.cpp"
+#line 2826 "parser.cpp"
     break;
 
   case 64: /* del_stmt: DEL exprlist  */
-#line 607 "parser.y"
+#line 633 "parser.y"
                       {Node* n =create_node("del_stmt");
                          n->children.push_back((yyvsp[-1].node));
                          n->children.push_back((yyvsp[0].node));
                          (yyval.node)=n;
                           }
-#line 2810 "parser.cpp"
+#line 2836 "parser.cpp"
     break;
 
   case 65: /* pass_stmt: PASS  */
-#line 613 "parser.y"
+#line 639 "parser.y"
                {(yyval.node)=(yyvsp[0].node);}
-#line 2816 "parser.cpp"
+#line 2842 "parser.cpp"
     break;
 
   case 66: /* flow_stmt: break_stmt  */
-#line 615 "parser.y"
+#line 641 "parser.y"
                       {(yyval.node)=(yyvsp[0].node);}
-#line 2822 "parser.cpp"
+#line 2848 "parser.cpp"
     break;
 
   case 67: /* flow_stmt: continue_stmt  */
-#line 616 "parser.y"
+#line 642 "parser.y"
                          {(yyval.node)=(yyvsp[0].node);}
-#line 2828 "parser.cpp"
+#line 2854 "parser.cpp"
     break;
 
   case 68: /* flow_stmt: return_stmt  */
-#line 617 "parser.y"
+#line 643 "parser.y"
                        {(yyval.node)=(yyvsp[0].node); }
-#line 2834 "parser.cpp"
+#line 2860 "parser.cpp"
     break;
 
   case 69: /* flow_stmt: yield_stmt  */
-#line 618 "parser.y"
+#line 644 "parser.y"
                      {(yyval.node)=(yyvsp[0].node);}
-#line 2840 "parser.cpp"
+#line 2866 "parser.cpp"
     break;
 
   case 70: /* break_stmt: BREAK  */
-#line 621 "parser.y"
+#line 647 "parser.y"
                  {(yyval.node)=(yyvsp[0].node);}
-#line 2846 "parser.cpp"
+#line 2872 "parser.cpp"
     break;
 
   case 71: /* continue_stmt: CONTINUE  */
-#line 623 "parser.y"
+#line 649 "parser.y"
                        {(yyval.node)=(yyvsp[0].node);}
-#line 2852 "parser.cpp"
+#line 2878 "parser.cpp"
     break;
 
   case 72: /* return_stmt: RETURN testlist  */
-#line 624 "parser.y"
+#line 650 "parser.y"
                             {
               Node* n =create_node("return_stmt");
               n->children.push_back((yyvsp[-1].node));
@@ -2860,34 +2886,34 @@ yyreduce:
               (yyval.node)=n;
               (yyval.node)->type = (yyvsp[0].node)->type;
             }
-#line 2864 "parser.cpp"
+#line 2890 "parser.cpp"
     break;
 
   case 73: /* return_stmt: RETURN  */
-#line 631 "parser.y"
+#line 657 "parser.y"
                      { (yyval.node) = (yyvsp[0].node); (yyval.node)->type = "void";}
-#line 2870 "parser.cpp"
+#line 2896 "parser.cpp"
     break;
 
   case 74: /* yield_stmt: yield_expr  */
-#line 633 "parser.y"
+#line 659 "parser.y"
                       {(yyval.node)=(yyvsp[0].node);}
-#line 2876 "parser.cpp"
+#line 2902 "parser.cpp"
     break;
 
   case 75: /* global_stmt: GLOBAL global_name_list  */
-#line 634 "parser.y"
+#line 660 "parser.y"
                                     {
               Node* n =create_node("global_stmt");
               n->children.push_back((yyvsp[-1].node));
               n->children.push_back((yyvsp[0].node));      
               (yyval.node)=n; 
             }
-#line 2887 "parser.cpp"
+#line 2913 "parser.cpp"
     break;
 
   case 76: /* global_name_list: global_name_list COMMA NAME  */
-#line 641 "parser.y"
+#line 667 "parser.y"
                                               {
                   Node* n =create_node("global_name_list");
                   for(int i=0; i<(yyvsp[-2].node)->children.size(); i++){
@@ -2898,53 +2924,53 @@ yyreduce:
                   
                   (yyval.node)=n;
                 }
-#line 2902 "parser.cpp"
+#line 2928 "parser.cpp"
     break;
 
   case 77: /* global_name_list: NAME  */
-#line 651 "parser.y"
+#line 677 "parser.y"
                        { (yyval.node) = (yyvsp[0].node);}
-#line 2908 "parser.cpp"
+#line 2934 "parser.cpp"
     break;
 
   case 78: /* compound_stmt: if_stmt  */
-#line 653 "parser.y"
+#line 679 "parser.y"
                        {if(yybye) cout<<"cmpd_stmnt 1 \n"; (yyval.node)=(yyvsp[0].node);}
-#line 2914 "parser.cpp"
+#line 2940 "parser.cpp"
     break;
 
   case 79: /* compound_stmt: while_stmt  */
-#line 654 "parser.y"
+#line 680 "parser.y"
                           {(yyval.node)=(yyvsp[0].node);}
-#line 2920 "parser.cpp"
+#line 2946 "parser.cpp"
     break;
 
   case 80: /* compound_stmt: for_stmt  */
-#line 655 "parser.y"
+#line 681 "parser.y"
                         {(yyval.node)=(yyvsp[0].node);}
-#line 2926 "parser.cpp"
+#line 2952 "parser.cpp"
     break;
 
   case 81: /* compound_stmt: funcdef  */
-#line 656 "parser.y"
+#line 682 "parser.y"
                        {if(yybye) cout<<"cmpd_stmnt \n"; (yyval.node)=(yyvsp[0].node);}
-#line 2932 "parser.cpp"
+#line 2958 "parser.cpp"
     break;
 
   case 82: /* compound_stmt: classdef  */
-#line 657 "parser.y"
+#line 683 "parser.y"
                         {(yyval.node)=(yyvsp[0].node);}
-#line 2938 "parser.cpp"
+#line 2964 "parser.cpp"
     break;
 
   case 83: /* compound_stmt: async_stmt  */
-#line 658 "parser.y"
+#line 684 "parser.y"
                           {(yyval.node)=(yyvsp[0].node);}
-#line 2944 "parser.cpp"
+#line 2970 "parser.cpp"
     break;
 
   case 87: /* if_stmt: IF test COLON suite elif_stmt_rep ELSE COLON suite  */
-#line 668 "parser.y"
+#line 694 "parser.y"
                                                             {
     if(yybye) cout<<" if_stmt: \n";
     Node* n=create_node("if_stmt");
@@ -2958,11 +2984,11 @@ yyreduce:
     n->children.push_back((yyvsp[0].node)); 
     (yyval.node)=n;
   }
-#line 2962 "parser.cpp"
+#line 2988 "parser.cpp"
     break;
 
   case 88: /* if_stmt: IF test COLON suite elif_stmt_rep  */
-#line 681 "parser.y"
+#line 707 "parser.y"
                                        {
 
       if(yybye) cout<<"if_stmt 2: \n"; 
@@ -2974,11 +3000,11 @@ yyreduce:
       n->children.push_back((yyvsp[0].node));
       (yyval.node)=n;
   }
-#line 2978 "parser.cpp"
+#line 3004 "parser.cpp"
     break;
 
   case 89: /* if_stmt: IF test COLON suite ELSE COLON suite  */
-#line 692 "parser.y"
+#line 718 "parser.y"
                                           { 
       Node* n=create_node("if_stmt");
       n->children.push_back((yyvsp[-6].node));
@@ -2990,11 +3016,11 @@ yyreduce:
       n->children.push_back((yyvsp[0].node));
       (yyval.node)=n;
     }
-#line 2994 "parser.cpp"
+#line 3020 "parser.cpp"
     break;
 
   case 90: /* if_stmt: IF test COLON suite  */
-#line 703 "parser.y"
+#line 729 "parser.y"
                          { 
       Node* n=create_node("if_stmt");
       n->children.push_back((yyvsp[-3].node));
@@ -3003,11 +3029,11 @@ yyreduce:
       n->children.push_back((yyvsp[0].node)); 
       (yyval.node)=n;
     }
-#line 3007 "parser.cpp"
+#line 3033 "parser.cpp"
     break;
 
   case 91: /* elif_stmt_rep: elif_stmt_rep ELIF test COLON suite  */
-#line 712 "parser.y"
+#line 738 "parser.y"
                                                     {
       Node* n=create_node("elif_stmt_rep");
       for(int i=0; i<(yyvsp[-4].node)->children.size(); i++){
@@ -3019,11 +3045,11 @@ yyreduce:
       n->children.push_back((yyvsp[0].node));
       (yyval.node)=n; 
     }
-#line 3023 "parser.cpp"
+#line 3049 "parser.cpp"
     break;
 
   case 92: /* elif_stmt_rep: ELIF test COLON suite  */
-#line 723 "parser.y"
+#line 749 "parser.y"
                            { 
       Node* n=create_node("elif_stmt_rep");
       n->children.push_back((yyvsp[-3].node));
@@ -3032,11 +3058,11 @@ yyreduce:
       n->children.push_back((yyvsp[0].node)); 
       (yyval.node)=n;
     }
-#line 3036 "parser.cpp"
+#line 3062 "parser.cpp"
     break;
 
   case 93: /* while_stmt: WHILE test COLON suite ELSE COLON suite  */
-#line 732 "parser.y"
+#line 758 "parser.y"
                                                    {
       Node* n=create_node("while_stmt");
       n->children.push_back((yyvsp[-6].node));
@@ -3048,11 +3074,11 @@ yyreduce:
       n->children.push_back((yyvsp[0].node));
       (yyval.node)=n; 
     }
-#line 3052 "parser.cpp"
+#line 3078 "parser.cpp"
     break;
 
   case 94: /* while_stmt: WHILE test COLON suite  */
-#line 743 "parser.y"
+#line 769 "parser.y"
                            { 
       Node* n=create_node("while_stmt");
       n->children.push_back((yyvsp[-3].node));
@@ -3061,11 +3087,11 @@ yyreduce:
       n->children.push_back((yyvsp[0].node)); 
       (yyval.node)=n;
   }
-#line 3065 "parser.cpp"
+#line 3091 "parser.cpp"
     break;
 
   case 95: /* for_stmt: FOR exprlist IN testlist COLON suite ELSE COLON suite  */
-#line 752 "parser.y"
+#line 778 "parser.y"
                                                                {
       Node* n=create_node("for_stmt");
       n->children.push_back((yyvsp[-8].node));
@@ -3079,11 +3105,11 @@ yyreduce:
       n->children.push_back((yyvsp[0].node));
       (yyval.node)=n; 
     }
-#line 3083 "parser.cpp"
+#line 3109 "parser.cpp"
     break;
 
   case 96: /* for_stmt: FOR exprlist IN testlist COLON suite  */
-#line 765 "parser.y"
+#line 791 "parser.y"
                                            {
       Node* n=create_node("while_stmt");
       n->children.push_back((yyvsp[-5].node));
@@ -3094,17 +3120,17 @@ yyreduce:
       n->children.push_back((yyvsp[0].node));
       (yyval.node)=n;
     }
-#line 3098 "parser.cpp"
+#line 3124 "parser.cpp"
     break;
 
   case 97: /* suite: simple_stmt  */
-#line 776 "parser.y"
+#line 802 "parser.y"
                     {if(yybye) cout<<"LINE 462 \n"; (yyval.node) = (yyvsp[0].node);}
-#line 3104 "parser.cpp"
+#line 3130 "parser.cpp"
     break;
 
   case 98: /* suite: NEWLINE INDENT stmt_rep DEDENT  */
-#line 777 "parser.y"
+#line 803 "parser.y"
                                       {
         Node* n = create_node("Suite");
         (yyval.node) = n;
@@ -3117,11 +3143,11 @@ yyreduce:
         if(YYDEB) cout<<"suite" <<(yyvsp[-1].node)->type <<endl;
 
       }
-#line 3121 "parser.cpp"
+#line 3147 "parser.cpp"
     break;
 
   case 99: /* stmt_rep: stmt_rep stmt  */
-#line 791 "parser.y"
+#line 817 "parser.y"
                            {
             Node* n = create_node("Multi Statements");
             (yyval.node) = n;
@@ -3131,17 +3157,17 @@ yyreduce:
             n->children.push_back((yyvsp[0].node));
             (yyval.node)->type = (yyvsp[0].node)->type;
           }
-#line 3135 "parser.cpp"
+#line 3161 "parser.cpp"
     break;
 
   case 100: /* stmt_rep: stmt  */
-#line 800 "parser.y"
+#line 826 "parser.y"
                  {(yyval.node)=(yyvsp[0].node); }
-#line 3141 "parser.cpp"
+#line 3167 "parser.cpp"
     break;
 
   case 101: /* test: or_test IF or_test ELSE test  */
-#line 802 "parser.y"
+#line 828 "parser.y"
                                     {
       Node* n = create_node("Test");
       (yyval.node) = n;
@@ -3151,40 +3177,40 @@ yyreduce:
       n->children.push_back((yyvsp[-1].node));
       n->children.push_back((yyvsp[0].node));
 }
-#line 3155 "parser.cpp"
+#line 3181 "parser.cpp"
     break;
 
   case 102: /* test: or_test  */
-#line 811 "parser.y"
+#line 837 "parser.y"
          {(yyval.node)=(yyvsp[0].node);}
-#line 3161 "parser.cpp"
+#line 3187 "parser.cpp"
     break;
 
   case 103: /* test_nocond: or_test  */
-#line 814 "parser.y"
+#line 840 "parser.y"
           {(yyval.node) = (yyvsp[0].node);}
-#line 3167 "parser.cpp"
+#line 3193 "parser.cpp"
     break;
 
   case 104: /* or_test: and_test or_test_rep  */
-#line 818 "parser.y"
+#line 844 "parser.y"
   {
     Node* n = create_node("OR Test");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 3178 "parser.cpp"
+#line 3204 "parser.cpp"
     break;
 
   case 105: /* or_test: and_test  */
-#line 824 "parser.y"
+#line 850 "parser.y"
            {(yyval.node)=(yyvsp[0].node);}
-#line 3184 "parser.cpp"
+#line 3210 "parser.cpp"
     break;
 
   case 106: /* or_test_rep: or_test_rep OR and_test  */
-#line 827 "parser.y"
+#line 853 "parser.y"
                            {
     Node* n = create_node("ORTestRep");
     (yyval.node) = n;
@@ -3194,37 +3220,37 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 3198 "parser.cpp"
+#line 3224 "parser.cpp"
     break;
 
   case 107: /* or_test_rep: OR and_test  */
-#line 836 "parser.y"
+#line 862 "parser.y"
                {Node* n = create_node("ORTestRep");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));}
-#line 3207 "parser.cpp"
+#line 3233 "parser.cpp"
     break;
 
   case 108: /* and_test: not_test and_test_rep  */
-#line 842 "parser.y"
+#line 868 "parser.y"
                        {
     Node* n = create_node("And Test");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 3218 "parser.cpp"
+#line 3244 "parser.cpp"
     break;
 
   case 109: /* and_test: not_test  */
-#line 848 "parser.y"
+#line 874 "parser.y"
            {(yyval.node)=(yyvsp[0].node);}
-#line 3224 "parser.cpp"
+#line 3250 "parser.cpp"
     break;
 
   case 110: /* and_test_rep: and_test_rep AND not_test  */
-#line 852 "parser.y"
+#line 878 "parser.y"
   {
     Node* n = create_node("AndTestRep");
     (yyval.node) = n;
@@ -3234,39 +3260,39 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 3238 "parser.cpp"
+#line 3264 "parser.cpp"
     break;
 
   case 111: /* and_test_rep: AND not_test  */
-#line 861 "parser.y"
+#line 887 "parser.y"
                 {Node* n = create_node("AndTestRep");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));}
-#line 3247 "parser.cpp"
+#line 3273 "parser.cpp"
     break;
 
   case 112: /* not_test: NOT not_test  */
-#line 869 "parser.y"
+#line 895 "parser.y"
   {
     Node* n = create_node("Not Test");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 3258 "parser.cpp"
+#line 3284 "parser.cpp"
     break;
 
   case 113: /* not_test: comparison  */
-#line 875 "parser.y"
+#line 901 "parser.y"
                {
     (yyval.node) =(yyvsp[0].node);
   }
-#line 3266 "parser.cpp"
+#line 3292 "parser.cpp"
     break;
 
   case 114: /* comparison: expr comparison_rep  */
-#line 880 "parser.y"
+#line 906 "parser.y"
                      {
     Node* n = create_node("Comparison");
     (yyval.node) = n;
@@ -3280,17 +3306,17 @@ yyreduce:
     (yyval.node)->type = (yyvsp[-1].node)->type;
 
   }
-#line 3284 "parser.cpp"
+#line 3310 "parser.cpp"
     break;
 
   case 115: /* comparison: expr  */
-#line 893 "parser.y"
+#line 919 "parser.y"
        {(yyval.node)=(yyvsp[0].node);}
-#line 3290 "parser.cpp"
+#line 3316 "parser.cpp"
     break;
 
   case 116: /* comparison_rep: comparison_rep comp_op expr  */
-#line 897 "parser.y"
+#line 923 "parser.y"
                               {
     Node* n = create_node("Comparison Rep");
     (yyval.node) = n;
@@ -3300,11 +3326,11 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 3304 "parser.cpp"
+#line 3330 "parser.cpp"
     break;
 
   case 117: /* comparison_rep: comp_op expr  */
-#line 906 "parser.y"
+#line 932 "parser.y"
                 {
    Node* n = create_node("Comparison Rep");
     (yyval.node) = n;
@@ -3312,109 +3338,109 @@ yyreduce:
     n->children.push_back((yyvsp[0].node));
     (yyval.node)->type = (yyvsp[0].node)->type;
  }
-#line 3316 "parser.cpp"
+#line 3342 "parser.cpp"
     break;
 
   case 118: /* comp_op: LESS_THAN  */
-#line 914 "parser.y"
+#line 940 "parser.y"
                    {(yyval.node) =(yyvsp[0].node);}
-#line 3322 "parser.cpp"
+#line 3348 "parser.cpp"
     break;
 
   case 119: /* comp_op: GREATER_THAN  */
-#line 915 "parser.y"
+#line 941 "parser.y"
                       {(yyval.node) =(yyvsp[0].node);}
-#line 3328 "parser.cpp"
+#line 3354 "parser.cpp"
     break;
 
   case 120: /* comp_op: EQUAL  */
-#line 916 "parser.y"
+#line 942 "parser.y"
                {(yyval.node) =(yyvsp[0].node);}
-#line 3334 "parser.cpp"
+#line 3360 "parser.cpp"
     break;
 
   case 121: /* comp_op: GREATER_THAN_OR_EQUAL  */
-#line 917 "parser.y"
+#line 943 "parser.y"
                                {(yyval.node) =(yyvsp[0].node);}
-#line 3340 "parser.cpp"
+#line 3366 "parser.cpp"
     break;
 
   case 122: /* comp_op: LESS_THAN_OR_EQUAL  */
-#line 918 "parser.y"
+#line 944 "parser.y"
                             {(yyval.node) =(yyvsp[0].node);}
-#line 3346 "parser.cpp"
+#line 3372 "parser.cpp"
     break;
 
   case 123: /* comp_op: NOT_EQUAL  */
-#line 919 "parser.y"
+#line 945 "parser.y"
                    {(yyval.node) =(yyvsp[0].node);}
-#line 3352 "parser.cpp"
+#line 3378 "parser.cpp"
     break;
 
   case 124: /* comp_op: IN  */
-#line 920 "parser.y"
+#line 946 "parser.y"
             {(yyval.node) =(yyvsp[0].node);}
-#line 3358 "parser.cpp"
+#line 3384 "parser.cpp"
     break;
 
   case 125: /* comp_op: NOT IN  */
-#line 921 "parser.y"
+#line 947 "parser.y"
                 {
           Node* n = create_node("Comparison Operator");
           (yyval.node) = n;
           n->children.push_back((yyvsp[-1].node));
           n->children.push_back((yyvsp[0].node));
         }
-#line 3369 "parser.cpp"
+#line 3395 "parser.cpp"
     break;
 
   case 126: /* comp_op: IS  */
-#line 927 "parser.y"
+#line 953 "parser.y"
             {(yyval.node) =(yyvsp[0].node);}
-#line 3375 "parser.cpp"
+#line 3401 "parser.cpp"
     break;
 
   case 127: /* comp_op: IS NOT  */
-#line 928 "parser.y"
+#line 954 "parser.y"
                {
           Node* n = create_node("Comparison Operator");
           (yyval.node) = n;
           n->children.push_back((yyvsp[-1].node));
           n->children.push_back((yyvsp[0].node));
         }
-#line 3386 "parser.cpp"
+#line 3412 "parser.cpp"
     break;
 
   case 128: /* star_expr: TIMES expr  */
-#line 936 "parser.y"
+#line 962 "parser.y"
             {
     Node* n = create_node("Star Expression");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 3397 "parser.cpp"
+#line 3423 "parser.cpp"
     break;
 
   case 129: /* expr: xor_expr expr_rep  */
-#line 944 "parser.y"
+#line 970 "parser.y"
                    {
     Node* n = create_node("Expression");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 3408 "parser.cpp"
+#line 3434 "parser.cpp"
     break;
 
   case 130: /* expr: xor_expr  */
-#line 950 "parser.y"
+#line 976 "parser.y"
             {(yyval.node)=(yyvsp[0].node);}
-#line 3414 "parser.cpp"
+#line 3440 "parser.cpp"
     break;
 
   case 131: /* expr_rep: expr_rep BITWISE_OR xor_expr  */
-#line 953 "parser.y"
+#line 979 "parser.y"
                                {
     Node* n = create_node("Expression Rep");
     (yyval.node) = n;
@@ -3424,39 +3450,39 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 3428 "parser.cpp"
+#line 3454 "parser.cpp"
     break;
 
   case 132: /* expr_rep: BITWISE_OR xor_expr  */
-#line 962 "parser.y"
+#line 988 "parser.y"
                        {Node* n = create_node("Expression Rep");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));}
-#line 3437 "parser.cpp"
+#line 3463 "parser.cpp"
     break;
 
   case 133: /* xor_expr: and_expr xor_expr_rep  */
-#line 968 "parser.y"
+#line 994 "parser.y"
                        {
     Node* n = create_node("XOR Expression");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 3448 "parser.cpp"
+#line 3474 "parser.cpp"
     break;
 
   case 134: /* xor_expr: and_expr  */
-#line 974 "parser.y"
+#line 1000 "parser.y"
             {
     (yyval.node)=(yyvsp[0].node);
   }
-#line 3456 "parser.cpp"
+#line 3482 "parser.cpp"
     break;
 
   case 135: /* xor_expr_rep: xor_expr_rep BITWISE_XOR and_expr  */
-#line 979 "parser.y"
+#line 1005 "parser.y"
                                     {
     Node* n = create_node("XOR Expression Rep");
     (yyval.node) = n;
@@ -3466,37 +3492,37 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 3470 "parser.cpp"
+#line 3496 "parser.cpp"
     break;
 
   case 136: /* xor_expr_rep: BITWISE_XOR and_expr  */
-#line 988 "parser.y"
+#line 1014 "parser.y"
                        {Node* n = create_node("XOR Expression Rep");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));}
-#line 3479 "parser.cpp"
+#line 3505 "parser.cpp"
     break;
 
   case 137: /* and_expr: shift_expr and_expr_rep  */
-#line 994 "parser.y"
+#line 1020 "parser.y"
                          {
     Node* n = create_node("AND Expression");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 3490 "parser.cpp"
+#line 3516 "parser.cpp"
     break;
 
   case 138: /* and_expr: shift_expr  */
-#line 1000 "parser.y"
+#line 1026 "parser.y"
               {(yyval.node)=(yyvsp[0].node);}
-#line 3496 "parser.cpp"
+#line 3522 "parser.cpp"
     break;
 
   case 139: /* and_expr_rep: and_expr_rep BITWISE_AND shift_expr  */
-#line 1003 "parser.y"
+#line 1029 "parser.y"
                                       {
     Node* n = create_node("AND Expression Rep");
     (yyval.node) = n;
@@ -3506,37 +3532,37 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node)); 
   }
-#line 3510 "parser.cpp"
+#line 3536 "parser.cpp"
     break;
 
   case 140: /* and_expr_rep: BITWISE_AND shift_expr  */
-#line 1012 "parser.y"
+#line 1038 "parser.y"
                          {Node* n = create_node("AND Expression Rep");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node)); }
-#line 3519 "parser.cpp"
+#line 3545 "parser.cpp"
     break;
 
   case 141: /* shift_expr: arith_expr shift_expr_rep  */
-#line 1018 "parser.y"
+#line 1044 "parser.y"
                            {
     Node* n = create_node("Shift Expression");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 3530 "parser.cpp"
+#line 3556 "parser.cpp"
     break;
 
   case 142: /* shift_expr: arith_expr  */
-#line 1024 "parser.y"
+#line 1050 "parser.y"
               {(yyval.node)=(yyvsp[0].node);}
-#line 3536 "parser.cpp"
+#line 3562 "parser.cpp"
     break;
 
   case 143: /* shift_expr_rep: shift_expr_rep shift_expr_rep_c1 arith_expr  */
-#line 1027 "parser.y"
+#line 1053 "parser.y"
                                               {
     Node* n = create_node("Shift Expression Rep");
     (yyval.node) = n;
@@ -3546,34 +3572,34 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 3550 "parser.cpp"
+#line 3576 "parser.cpp"
     break;
 
   case 144: /* shift_expr_rep: shift_expr_rep_c1 arith_expr  */
-#line 1036 "parser.y"
+#line 1062 "parser.y"
                                 {Node* n = create_node("Shift Expression Rep");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));}
-#line 3559 "parser.cpp"
+#line 3585 "parser.cpp"
     break;
 
   case 145: /* shift_expr_rep_c1: SHIFT_LEFT  */
-#line 1042 "parser.y"
+#line 1068 "parser.y"
             {
     (yyval.node) = (yyvsp[0].node);
   }
-#line 3567 "parser.cpp"
+#line 3593 "parser.cpp"
     break;
 
   case 146: /* shift_expr_rep_c1: SHIFT_RIGHT  */
-#line 1045 "parser.y"
+#line 1071 "parser.y"
                 {(yyval.node) = (yyvsp[0].node);}
-#line 3573 "parser.cpp"
+#line 3599 "parser.cpp"
     break;
 
   case 147: /* arith_expr: term arith_expr_rep  */
-#line 1048 "parser.y"
+#line 1074 "parser.y"
                      {
     Node* n = create_node("Arithmetic Expression");
     n->children.push_back((yyvsp[-1].node));
@@ -3591,17 +3617,17 @@ yyreduce:
       (yyval.node)->type = (yyvsp[-1].node)->type;
     // cout<<$$->type<< " "<<$1->line_number<<endl;
   }
-#line 3595 "parser.cpp"
+#line 3621 "parser.cpp"
     break;
 
   case 148: /* arith_expr: term  */
-#line 1065 "parser.y"
+#line 1091 "parser.y"
         { if(yybye) cout<<"term arith_expr: "<<endl;(yyval.node)=(yyvsp[0].node);}
-#line 3601 "parser.cpp"
+#line 3627 "parser.cpp"
     break;
 
   case 149: /* arith_expr_rep: arith_expr_rep arith_expr_rep_c1 term  */
-#line 1068 "parser.y"
+#line 1094 "parser.y"
                                         {
     Node* n = create_node("Arithmetic Expression Rep1");
     (yyval.node) = n;
@@ -3622,34 +3648,34 @@ yyreduce:
     // cout<<$$->type <<" arth rep 1"<<endl;
 
   }
-#line 3626 "parser.cpp"
+#line 3652 "parser.cpp"
     break;
 
   case 150: /* arith_expr_rep: arith_expr_rep_c1 term  */
-#line 1088 "parser.y"
+#line 1114 "parser.y"
                          {Node* n = create_node("Arithmetic Expression Rep2");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
     (yyval.node)->type = (yyvsp[0].node)->type;
     }
-#line 3637 "parser.cpp"
+#line 3663 "parser.cpp"
     break;
 
   case 151: /* arith_expr_rep_c1: PLUS  */
-#line 1096 "parser.y"
+#line 1122 "parser.y"
        { (yyval.node) = (yyvsp[0].node);}
-#line 3643 "parser.cpp"
+#line 3669 "parser.cpp"
     break;
 
   case 152: /* arith_expr_rep_c1: MINUS  */
-#line 1097 "parser.y"
+#line 1123 "parser.y"
           { (yyval.node) = (yyvsp[0].node);}
-#line 3649 "parser.cpp"
+#line 3675 "parser.cpp"
     break;
 
   case 153: /* term: factor term_rep  */
-#line 1100 "parser.y"
+#line 1126 "parser.y"
                  {
     if(yybye) cout<<"term factor term_rep: "<<endl;
     Node* n = create_node("TERM");
@@ -3675,17 +3701,17 @@ yyreduce:
     // }
     // $$->type = $1->type;
   }
-#line 3679 "parser.cpp"
+#line 3705 "parser.cpp"
     break;
 
   case 154: /* term: factor  */
-#line 1125 "parser.y"
+#line 1151 "parser.y"
          {if(yybye) cout<<"factor term: "<<endl;(yyval.node)=(yyvsp[0].node);}
-#line 3685 "parser.cpp"
+#line 3711 "parser.cpp"
     break;
 
   case 155: /* term_rep: term_rep term_rep_c1 factor  */
-#line 1128 "parser.y"
+#line 1154 "parser.y"
                                {
     Node* n = create_node("TERM Rep");
     for(int i=0; i<(yyvsp[-2].node)->children.size(); i++){
@@ -3695,87 +3721,87 @@ yyreduce:
     n->children.push_back((yyvsp[0].node));
     (yyval.node) = n;
   }
-#line 3699 "parser.cpp"
+#line 3725 "parser.cpp"
     break;
 
   case 156: /* term_rep: term_rep_c1 factor  */
-#line 1137 "parser.y"
+#line 1163 "parser.y"
                        { Node* n = create_node("TERM Rep");
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
     (yyval.node) = n;
     (yyval.node)->type = (yyvsp[0].node)->type;
     }
-#line 3710 "parser.cpp"
+#line 3736 "parser.cpp"
     break;
 
   case 157: /* term_rep_c1: TIMES  */
-#line 1144 "parser.y"
+#line 1170 "parser.y"
                     { (yyval.node) =(yyvsp[0].node);}
-#line 3716 "parser.cpp"
+#line 3742 "parser.cpp"
     break;
 
   case 158: /* term_rep_c1: AT  */
-#line 1145 "parser.y"
+#line 1171 "parser.y"
                  { (yyval.node) =(yyvsp[0].node);}
-#line 3722 "parser.cpp"
+#line 3748 "parser.cpp"
     break;
 
   case 159: /* term_rep_c1: DIVIDEDBY  */
-#line 1146 "parser.y"
+#line 1172 "parser.y"
                         { (yyval.node) =(yyvsp[0].node);}
-#line 3728 "parser.cpp"
+#line 3754 "parser.cpp"
     break;
 
   case 160: /* term_rep_c1: MODULO  */
-#line 1147 "parser.y"
+#line 1173 "parser.y"
                      { (yyval.node) =(yyvsp[0].node);}
-#line 3734 "parser.cpp"
+#line 3760 "parser.cpp"
     break;
 
   case 161: /* term_rep_c1: FLOORDIV  */
-#line 1148 "parser.y"
+#line 1174 "parser.y"
                        { (yyval.node) =(yyvsp[0].node);}
-#line 3740 "parser.cpp"
+#line 3766 "parser.cpp"
     break;
 
   case 162: /* factor: factor_c1 factor  */
-#line 1151 "parser.y"
+#line 1177 "parser.y"
                    {
     Node* n = create_node("Factor");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 3751 "parser.cpp"
+#line 3777 "parser.cpp"
     break;
 
   case 163: /* factor: power  */
-#line 1157 "parser.y"
+#line 1183 "parser.y"
           { if(yybye) cout<<"factor power: "<<endl;(yyval.node) = (yyvsp[0].node);}
-#line 3757 "parser.cpp"
+#line 3783 "parser.cpp"
     break;
 
   case 164: /* factor_c1: PLUS  */
-#line 1159 "parser.y"
+#line 1185 "parser.y"
                  { (yyval.node) =(yyvsp[0].node);}
-#line 3763 "parser.cpp"
+#line 3789 "parser.cpp"
     break;
 
   case 165: /* factor_c1: MINUS  */
-#line 1160 "parser.y"
+#line 1186 "parser.y"
                   { (yyval.node) =(yyvsp[0].node);}
-#line 3769 "parser.cpp"
+#line 3795 "parser.cpp"
     break;
 
   case 166: /* factor_c1: BITWISE_NOT  */
-#line 1161 "parser.y"
+#line 1187 "parser.y"
                         { (yyval.node) =(yyvsp[0].node);}
-#line 3775 "parser.cpp"
+#line 3801 "parser.cpp"
     break;
 
   case 167: /* power: atom_expr power_opt  */
-#line 1164 "parser.y"
+#line 1190 "parser.y"
                      {
     Node* n = create_node("Power");
     (yyval.node) = n;
@@ -3785,20 +3811,20 @@ yyreduce:
     (yyval.node)->type = (yyvsp[-1].node)->type;
 
   }
-#line 3789 "parser.cpp"
+#line 3815 "parser.cpp"
     break;
 
   case 168: /* power: atom_expr  */
-#line 1173 "parser.y"
+#line 1199 "parser.y"
              {
     (yyval.node) = (yyvsp[0].node);
     if(yybye) cout<<"atom_expr power: "<<endl;(yyval.node)=(yyvsp[0].node);
   }
-#line 3798 "parser.cpp"
+#line 3824 "parser.cpp"
     break;
 
   case 169: /* power_opt: POWER factor  */
-#line 1179 "parser.y"
+#line 1205 "parser.y"
                {
     Node* n = create_node("Power Opt");
     (yyval.node) = n;
@@ -3806,11 +3832,11 @@ yyreduce:
     n->children.push_back((yyvsp[0].node));
     (yyval.node)->type = (yyvsp[0].node)->type;
   }
-#line 3810 "parser.cpp"
+#line 3836 "parser.cpp"
     break;
 
   case 170: /* atom_expr: await_opt atom trailer_rep  */
-#line 1188 "parser.y"
+#line 1214 "parser.y"
                             {
     Node* n = create_node("Atom Expression1");
     (yyval.node) = n;
@@ -3819,11 +3845,11 @@ yyreduce:
     n->children.push_back((yyvsp[0].node));
     n->type = (yyvsp[-1].node)->type + (yyvsp[0].node)->type;
   }
-#line 3823 "parser.cpp"
+#line 3849 "parser.cpp"
     break;
 
   case 171: /* atom_expr: atom trailer_rep  */
-#line 1196 "parser.y"
+#line 1222 "parser.y"
                    {
     Node* n = create_node("Atom Expression2");
     n->children.push_back((yyvsp[-1].node));
@@ -3871,29 +3897,29 @@ yyreduce:
     
 
   }
-#line 3875 "parser.cpp"
+#line 3901 "parser.cpp"
     break;
 
   case 172: /* atom_expr: atom  */
-#line 1243 "parser.y"
+#line 1269 "parser.y"
        {
     (yyval.node) = (yyvsp[0].node);
     // cout<<"atom " <<$$->type<<endl;
     if(yybye) cout<<"atom_expr atom: "<<endl; 
   }
-#line 3885 "parser.cpp"
+#line 3911 "parser.cpp"
     break;
 
   case 173: /* await_opt: AWAIT  */
-#line 1249 "parser.y"
+#line 1275 "parser.y"
                   {
   (yyval.node) = (yyvsp[0].node);
 }
-#line 3893 "parser.cpp"
+#line 3919 "parser.cpp"
     break;
 
   case 174: /* trailer_rep: trailer_rep trailer  */
-#line 1254 "parser.y"
+#line 1280 "parser.y"
                       {
     if(yybye) cout<<"trailer_rep: "<<endl;
     Node* n = create_node("Trailer Rep");
@@ -3903,19 +3929,19 @@ yyreduce:
     }
     n->children.push_back((yyvsp[0].node));
   }
-#line 3907 "parser.cpp"
+#line 3933 "parser.cpp"
     break;
 
   case 175: /* trailer_rep: trailer  */
-#line 1263 "parser.y"
+#line 1289 "parser.y"
             { 
     (yyval.node) =(yyvsp[0].node);
   }
-#line 3915 "parser.cpp"
+#line 3941 "parser.cpp"
     break;
 
   case 176: /* atom: LPAREN atom_opt1 RPAREN  */
-#line 1267 "parser.y"
+#line 1293 "parser.y"
                                {
         if(yybye) cout<<"atom atom_opt1: "<<endl;
         Node* n = create_node("Atom");
@@ -3925,11 +3951,11 @@ yyreduce:
         n->children.push_back((yyvsp[0].node));
         (yyval.node)->type = "Func";
       }
-#line 3929 "parser.cpp"
+#line 3955 "parser.cpp"
     break;
 
   case 177: /* atom: LBRACKET atom_opt2 RBRACKET  */
-#line 1276 "parser.y"
+#line 1302 "parser.y"
                                     {
         if(yybye) cout<<"atom atom_opt2: "<<endl;
         Node* n = create_node("Atom");
@@ -3941,11 +3967,11 @@ yyreduce:
         // cout<<$$->type<<" "<<yylineno<<endl;
 
       }
-#line 3945 "parser.cpp"
+#line 3971 "parser.cpp"
     break;
 
   case 178: /* atom: LBRACKET RBRACKET  */
-#line 1287 "parser.y"
+#line 1313 "parser.y"
                          { 
         if(yybye) cout<<"atom : "<<endl;
         Node* n = create_node("Atom");
@@ -3953,11 +3979,11 @@ yyreduce:
         n->children.push_back((yyvsp[-1].node));
         n->children.push_back((yyvsp[0].node));
       }
-#line 3957 "parser.cpp"
+#line 3983 "parser.cpp"
     break;
 
   case 179: /* atom: NAME  */
-#line 1294 "parser.y"
+#line 1320 "parser.y"
               { (yyval.node) =(yyvsp[0].node);
                 if(tab->SYMVAL.find((yyvsp[0].node)->label)!=tab->SYMVAL.end())
                 {
@@ -3980,77 +4006,77 @@ yyreduce:
                 }
 
       }
-#line 3984 "parser.cpp"
+#line 4010 "parser.cpp"
     break;
 
   case 180: /* atom: NUMBER  */
-#line 1316 "parser.y"
+#line 1342 "parser.y"
                 { (yyval.node) =(yyvsp[0].node); (yyval.node)->type = "int";}
-#line 3990 "parser.cpp"
+#line 4016 "parser.cpp"
     break;
 
   case 181: /* atom: FLOAT  */
-#line 1317 "parser.y"
+#line 1343 "parser.y"
               {(yyval.node) = (yyvsp[0].node); (yyval.node)->type = "float";}
-#line 3996 "parser.cpp"
+#line 4022 "parser.cpp"
     break;
 
   case 182: /* atom: string_rep  */
-#line 1318 "parser.y"
+#line 1344 "parser.y"
                    { (yyval.node) = (yyvsp[0].node); (yyval.node)->type = "string";}
-#line 4002 "parser.cpp"
+#line 4028 "parser.cpp"
     break;
 
   case 183: /* atom: TRIPLEDOT  */
-#line 1319 "parser.y"
+#line 1345 "parser.y"
                    { (yyval.node) =(yyvsp[0].node);}
-#line 4008 "parser.cpp"
+#line 4034 "parser.cpp"
     break;
 
   case 184: /* atom: NONE  */
-#line 1320 "parser.y"
+#line 1346 "parser.y"
               { (yyval.node) =(yyvsp[0].node);}
-#line 4014 "parser.cpp"
+#line 4040 "parser.cpp"
     break;
 
   case 185: /* atom: TRUE_TOKEN  */
-#line 1321 "parser.y"
+#line 1347 "parser.y"
                     { (yyval.node) =(yyvsp[0].node); (yyval.node)->type = "bool";}
-#line 4020 "parser.cpp"
+#line 4046 "parser.cpp"
     break;
 
   case 186: /* atom: FALSE_TOKEN  */
-#line 1322 "parser.y"
+#line 1348 "parser.y"
                     { (yyval.node) =(yyvsp[0].node); (yyval.node)->type = "bool";}
-#line 4026 "parser.cpp"
+#line 4052 "parser.cpp"
     break;
 
   case 187: /* atom_opt1: yield_expr  */
-#line 1324 "parser.y"
+#line 1350 "parser.y"
                        {(yyval.node) = (yyvsp[0].node);}
-#line 4032 "parser.cpp"
+#line 4058 "parser.cpp"
     break;
 
   case 188: /* atom_opt1: testlist_comp  */
-#line 1325 "parser.y"
+#line 1351 "parser.y"
                          {(yyval.node) = (yyvsp[0].node); if(yybye) cout<<"atom_opt1 testlist_comp: "<<endl;}
-#line 4038 "parser.cpp"
+#line 4064 "parser.cpp"
     break;
 
   case 189: /* atom_opt2: testlist_comp  */
-#line 1327 "parser.y"
+#line 1353 "parser.y"
                          {(yyval.node) =(yyvsp[0].node);}
-#line 4044 "parser.cpp"
+#line 4070 "parser.cpp"
     break;
 
   case 190: /* string_rep: STRING  */
-#line 1330 "parser.y"
+#line 1356 "parser.y"
          { (yyval.node) = (yyvsp[0].node);}
-#line 4050 "parser.cpp"
+#line 4076 "parser.cpp"
     break;
 
   case 191: /* string_rep: string_rep STRING  */
-#line 1331 "parser.y"
+#line 1357 "parser.y"
                       {
     Node* n = create_node("String Rep");
     (yyval.node) = n;
@@ -4059,11 +4085,11 @@ yyreduce:
     }
     n->children.push_back((yyvsp[0].node));    
   }
-#line 4063 "parser.cpp"
+#line 4089 "parser.cpp"
     break;
 
   case 192: /* testlist_comp: testlist_comp_c1 testlist_comp_c2  */
-#line 1341 "parser.y"
+#line 1367 "parser.y"
                                    {
     Node* n = create_node("Testlist comp");
     (yyval.node) = n;
@@ -4073,35 +4099,35 @@ yyreduce:
     (yyval.node)->line_number = (yyvsp[-1].node)->line_number;
     
   }
-#line 4077 "parser.cpp"
+#line 4103 "parser.cpp"
     break;
 
   case 193: /* testlist_comp: testlist_comp_c1  */
-#line 1350 "parser.y"
+#line 1376 "parser.y"
                    {(yyval.node) =(yyvsp[0].node);}
-#line 4083 "parser.cpp"
+#line 4109 "parser.cpp"
     break;
 
   case 194: /* testlist_comp_c1: test  */
-#line 1353 "parser.y"
+#line 1379 "parser.y"
          {(yyval.node) = (yyvsp[0].node);}
-#line 4089 "parser.cpp"
+#line 4115 "parser.cpp"
     break;
 
   case 195: /* testlist_comp_c1: star_expr  */
-#line 1354 "parser.y"
+#line 1380 "parser.y"
               {(yyval.node) = (yyvsp[0].node);}
-#line 4095 "parser.cpp"
+#line 4121 "parser.cpp"
     break;
 
   case 196: /* testlist_comp_c2: comp_for  */
-#line 1357 "parser.y"
+#line 1383 "parser.y"
            {(yyval.node) = (yyvsp[0].node);}
-#line 4101 "parser.cpp"
+#line 4127 "parser.cpp"
     break;
 
   case 197: /* testlist_comp_c2: testlist_comp_c2_rep COMMA  */
-#line 1358 "parser.y"
+#line 1384 "parser.y"
                               {
     Node* n = create_node("Testlist Comp C2");
     (yyval.node) = n;
@@ -4110,23 +4136,23 @@ yyreduce:
     (yyval.node)->type = (yyvsp[-1].node)->type;
     (yyval.node)->line_number = (yyvsp[0].node)->line_number;
   }
-#line 4114 "parser.cpp"
+#line 4140 "parser.cpp"
     break;
 
   case 198: /* testlist_comp_c2: COMMA  */
-#line 1366 "parser.y"
+#line 1392 "parser.y"
          {(yyval.node) =(yyvsp[0].node);}
-#line 4120 "parser.cpp"
+#line 4146 "parser.cpp"
     break;
 
   case 199: /* testlist_comp_c2: testlist_comp_c2_rep  */
-#line 1367 "parser.y"
+#line 1393 "parser.y"
                         {(yyval.node) =(yyvsp[0].node);}
-#line 4126 "parser.cpp"
+#line 4152 "parser.cpp"
     break;
 
   case 200: /* testlist_comp_c2_rep: testlist_comp_c2_rep COMMA test  */
-#line 1371 "parser.y"
+#line 1397 "parser.y"
   {
     Node* n = create_node("Testlist Comp C2 rep");
     (yyval.node) = n;
@@ -4138,11 +4164,11 @@ yyreduce:
     check_type((yyvsp[-2].node)->type , (yyvsp[0].node)->type , (yyvsp[-1].node)->line_number);
     (yyval.node)->type = (yyvsp[-2].node)->type;
   }
-#line 4142 "parser.cpp"
+#line 4168 "parser.cpp"
     break;
 
   case 201: /* testlist_comp_c2_rep: testlist_comp_c2_rep COMMA star_expr  */
-#line 1382 "parser.y"
+#line 1408 "parser.y"
                                         {
     Node* n = create_node("Testlist Comp C2 rep");
     (yyval.node) = n;
@@ -4154,11 +4180,11 @@ yyreduce:
     check_type((yyvsp[-2].node)->type , (yyvsp[-1].node)->type , (yyvsp[-1].node)->line_number);
     (yyval.node)->type = (yyvsp[-2].node)->type;
   }
-#line 4158 "parser.cpp"
+#line 4184 "parser.cpp"
     break;
 
   case 202: /* testlist_comp_c2_rep: COMMA test  */
-#line 1393 "parser.y"
+#line 1419 "parser.y"
              {
     Node* n = create_node("Testlist Comp C2 rep");
     (yyval.node) = n;
@@ -4166,11 +4192,11 @@ yyreduce:
     n->children.push_back((yyvsp[0].node));
     (yyval.node)->type = (yyvsp[0].node)->type;
   }
-#line 4170 "parser.cpp"
+#line 4196 "parser.cpp"
     break;
 
   case 203: /* testlist_comp_c2_rep: COMMA star_expr  */
-#line 1400 "parser.y"
+#line 1426 "parser.y"
                     { 
     Node* n = create_node("Testlist Comp C2 rep");
     (yyval.node) = n;
@@ -4178,11 +4204,11 @@ yyreduce:
     n->children.push_back((yyvsp[0].node));
     (yyval.node)->type = (yyvsp[0].node)->type;
   }
-#line 4182 "parser.cpp"
+#line 4208 "parser.cpp"
     break;
 
   case 204: /* trailer: LPAREN arglist RPAREN  */
-#line 1409 "parser.y"
+#line 1435 "parser.y"
                        {
     if(yybye) cout<<"trailer: "<<endl;
     Node* n = create_node("Trailer");
@@ -4195,11 +4221,11 @@ yyreduce:
     (yyval.node)->p_f = (yyvsp[-1].node)->p_f;
 
   }
-#line 4199 "parser.cpp"
+#line 4225 "parser.cpp"
     break;
 
   case 205: /* trailer: LPAREN RPAREN  */
-#line 1421 "parser.y"
+#line 1447 "parser.y"
                 {
     Node* n = create_node("Trailer");
     (yyval.node) = n;
@@ -4208,11 +4234,11 @@ yyreduce:
     (yyval.node)->line_number = (yyvsp[-1].node)->line_number;
     (yyval.node)->type = "Func";
   }
-#line 4212 "parser.cpp"
+#line 4238 "parser.cpp"
     break;
 
   case 206: /* trailer: LBRACKET subscriptlist RBRACKET  */
-#line 1429 "parser.y"
+#line 1455 "parser.y"
                                     {
     Node* n = create_node("Trailer");
     (yyval.node) = n;
@@ -4222,11 +4248,11 @@ yyreduce:
     (yyval.node)->line_number = (yyvsp[-2].node)->line_number;
     (yyval.node)->type = (yyvsp[-2].node)->type + (yyvsp[-1].node)->type + (yyvsp[0].node)->type;
   }
-#line 4226 "parser.cpp"
+#line 4252 "parser.cpp"
     break;
 
   case 207: /* trailer: LBRACKET RBRACKET  */
-#line 1438 "parser.y"
+#line 1464 "parser.y"
                     { 
     Node* n = create_node("Trailer");
     (yyval.node) = n;
@@ -4234,11 +4260,11 @@ yyreduce:
     n->children.push_back((yyvsp[0].node));
     (yyval.node)->line_number = (yyvsp[-1].node)->line_number;
   }
-#line 4238 "parser.cpp"
+#line 4264 "parser.cpp"
     break;
 
   case 208: /* trailer: DOT NAME  */
-#line 1445 "parser.y"
+#line 1471 "parser.y"
             {
     Node* n = create_node("Trailer");
     (yyval.node) = n;
@@ -4246,11 +4272,11 @@ yyreduce:
     n->children.push_back((yyvsp[0].node));
     (yyval.node)->line_number = (yyvsp[-1].node)->line_number;
   }
-#line 4250 "parser.cpp"
+#line 4276 "parser.cpp"
     break;
 
   case 209: /* subscriptlist: subscript COMMA_subscript_rep COMMA_opt  */
-#line 1454 "parser.y"
+#line 1480 "parser.y"
                                          {
     Node* n = create_node("Subscriptlist");
     (yyval.node) = n;
@@ -4259,45 +4285,45 @@ yyreduce:
     n->children.push_back((yyvsp[0].node));
 
   }
-#line 4263 "parser.cpp"
+#line 4289 "parser.cpp"
     break;
 
   case 210: /* subscriptlist: subscript COMMA_opt  */
-#line 1462 "parser.y"
+#line 1488 "parser.y"
                       {
     Node* n = create_node("Subscriptlist");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 4274 "parser.cpp"
+#line 4300 "parser.cpp"
     break;
 
   case 211: /* subscriptlist: subscript COMMA_subscript_rep  */
-#line 1468 "parser.y"
+#line 1494 "parser.y"
                                 {
     Node* n = create_node("Subscriptlist");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 4285 "parser.cpp"
+#line 4311 "parser.cpp"
     break;
 
   case 212: /* subscriptlist: subscript  */
-#line 1474 "parser.y"
+#line 1500 "parser.y"
              {(yyval.node) =(yyvsp[0].node);}
-#line 4291 "parser.cpp"
+#line 4317 "parser.cpp"
     break;
 
   case 213: /* COMMA_opt: COMMA  */
-#line 1477 "parser.y"
+#line 1503 "parser.y"
         { (yyval.node) = (yyvsp[0].node);}
-#line 4297 "parser.cpp"
+#line 4323 "parser.cpp"
     break;
 
   case 214: /* COMMA_subscript_rep: COMMA_subscript_rep COMMA subscript  */
-#line 1481 "parser.y"
+#line 1507 "parser.y"
                                       {
     Node* n = create_node("Comma Subscript rep");
     (yyval.node) = n;
@@ -4307,28 +4333,28 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 4311 "parser.cpp"
+#line 4337 "parser.cpp"
     break;
 
   case 215: /* COMMA_subscript_rep: COMMA subscript  */
-#line 1490 "parser.y"
+#line 1516 "parser.y"
                    {
     Node* n = create_node("COMMA subscript rep");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 4322 "parser.cpp"
+#line 4348 "parser.cpp"
     break;
 
   case 216: /* subscript: test  */
-#line 1498 "parser.y"
+#line 1524 "parser.y"
        { (yyval.node) = (yyvsp[0].node);}
-#line 4328 "parser.cpp"
+#line 4354 "parser.cpp"
     break;
 
   case 217: /* subscript: test COLON test sliceop  */
-#line 1499 "parser.y"
+#line 1525 "parser.y"
                            {
     Node* n = create_node("Subscript");
     (yyval.node) = n;
@@ -4338,11 +4364,11 @@ yyreduce:
     n->children.push_back((yyvsp[0].node));
 
   }
-#line 4342 "parser.cpp"
+#line 4368 "parser.cpp"
     break;
 
   case 218: /* subscript: COLON test sliceop  */
-#line 1508 "parser.y"
+#line 1534 "parser.y"
                       {
     Node* n = create_node("Subscript");
     (yyval.node) = n;
@@ -4350,11 +4376,11 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 4354 "parser.cpp"
+#line 4380 "parser.cpp"
     break;
 
   case 219: /* subscript: test COLON sliceop  */
-#line 1515 "parser.y"
+#line 1541 "parser.y"
                       {
     Node* n = create_node("Subscript");
     (yyval.node) = n;
@@ -4362,11 +4388,11 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 4366 "parser.cpp"
+#line 4392 "parser.cpp"
     break;
 
   case 220: /* subscript: test COLON test  */
-#line 1522 "parser.y"
+#line 1548 "parser.y"
                    {
     Node* n = create_node("Subscript");
     (yyval.node) = n;
@@ -4374,67 +4400,67 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 4378 "parser.cpp"
+#line 4404 "parser.cpp"
     break;
 
   case 221: /* subscript: COLON sliceop  */
-#line 1529 "parser.y"
+#line 1555 "parser.y"
                  {
     Node* n = create_node("Subscript");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 4389 "parser.cpp"
+#line 4415 "parser.cpp"
     break;
 
   case 222: /* subscript: COLON test  */
-#line 1535 "parser.y"
+#line 1561 "parser.y"
               {
     Node* n = create_node("Subscript");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 4400 "parser.cpp"
+#line 4426 "parser.cpp"
     break;
 
   case 223: /* subscript: test COLON  */
-#line 1541 "parser.y"
+#line 1567 "parser.y"
               {
     Node* n = create_node("Subscript");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 4411 "parser.cpp"
+#line 4437 "parser.cpp"
     break;
 
   case 224: /* subscript: COLON  */
-#line 1547 "parser.y"
+#line 1573 "parser.y"
          {(yyval.node) =(yyvsp[0].node);}
-#line 4417 "parser.cpp"
+#line 4443 "parser.cpp"
     break;
 
   case 225: /* sliceop: COLON test  */
-#line 1549 "parser.y"
+#line 1575 "parser.y"
                     {
     Node* n = create_node("Slice OP");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
 }
-#line 4428 "parser.cpp"
+#line 4454 "parser.cpp"
     break;
 
   case 226: /* sliceop: COLON  */
-#line 1555 "parser.y"
+#line 1581 "parser.y"
        {(yyval.node) = (yyvsp[0].node);}
-#line 4434 "parser.cpp"
+#line 4460 "parser.cpp"
     break;
 
   case 227: /* exprlist: expr_star_expr COMMA_expr_star_expr_rep COMMA  */
-#line 1557 "parser.y"
+#line 1583 "parser.y"
                                                         {
     Node* n = create_node("Expr List");
     (yyval.node) = n;
@@ -4442,51 +4468,51 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
 }
-#line 4446 "parser.cpp"
+#line 4472 "parser.cpp"
     break;
 
   case 228: /* exprlist: expr_star_expr COMMA  */
-#line 1564 "parser.y"
+#line 1590 "parser.y"
                       {
     Node* n = create_node("Expr List");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
 }
-#line 4457 "parser.cpp"
+#line 4483 "parser.cpp"
     break;
 
   case 229: /* exprlist: expr_star_expr COMMA_expr_star_expr_rep  */
-#line 1570 "parser.y"
+#line 1596 "parser.y"
                                          {
     Node* n = create_node("Expr List");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
 }
-#line 4468 "parser.cpp"
+#line 4494 "parser.cpp"
     break;
 
   case 230: /* exprlist: expr_star_expr  */
-#line 1576 "parser.y"
+#line 1602 "parser.y"
                 {(yyval.node) =(yyvsp[0].node);}
-#line 4474 "parser.cpp"
+#line 4500 "parser.cpp"
     break;
 
   case 231: /* expr_star_expr: expr  */
-#line 1578 "parser.y"
+#line 1604 "parser.y"
                       {(yyval.node) = (yyvsp[0].node);}
-#line 4480 "parser.cpp"
+#line 4506 "parser.cpp"
     break;
 
   case 232: /* expr_star_expr: star_expr  */
-#line 1579 "parser.y"
+#line 1605 "parser.y"
                            {(yyval.node) = (yyvsp[0].node);}
-#line 4486 "parser.cpp"
+#line 4512 "parser.cpp"
     break;
 
   case 233: /* COMMA_expr_star_expr_rep: COMMA_expr_star_expr_rep COMMA expr_star_expr  */
-#line 1582 "parser.y"
+#line 1608 "parser.y"
                                                {
     Node* n = create_node("COMMA Expr star expr rep");
     (yyval.node) = n;
@@ -4496,39 +4522,39 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 4500 "parser.cpp"
+#line 4526 "parser.cpp"
     break;
 
   case 234: /* COMMA_expr_star_expr_rep: COMMA expr_star_expr  */
-#line 1591 "parser.y"
+#line 1617 "parser.y"
                        { 
     Node* n = create_node("COMMA Expr star expr rep");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 4511 "parser.cpp"
+#line 4537 "parser.cpp"
     break;
 
   case 235: /* testlist: test COMMA  */
-#line 1606 "parser.y"
+#line 1632 "parser.y"
              {
     Node* n = create_node("Testlist");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 4522 "parser.cpp"
+#line 4548 "parser.cpp"
     break;
 
   case 236: /* testlist: test  */
-#line 1618 "parser.y"
+#line 1644 "parser.y"
         {(yyval.node) =(yyvsp[0].node);}
-#line 4528 "parser.cpp"
+#line 4554 "parser.cpp"
     break;
 
   case 237: /* classdef: CLASS NAME LPAREN arglist RPAREN COLON suite  */
-#line 1634 "parser.y"
+#line 1660 "parser.y"
                                                        {
     Node* n = create_node("Class Def");
     (yyval.node) = n;
@@ -4540,11 +4566,11 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
 }
-#line 4544 "parser.cpp"
+#line 4570 "parser.cpp"
     break;
 
   case 238: /* classdef: CLASS NAME LPAREN RPAREN COLON suite  */
-#line 1645 "parser.y"
+#line 1671 "parser.y"
                                       {
     Node* n = create_node("Class Def");
     (yyval.node) = n;
@@ -4555,11 +4581,11 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
 }
-#line 4559 "parser.cpp"
+#line 4585 "parser.cpp"
     break;
 
   case 239: /* classdef: CLASS NAME COLON suite  */
-#line 1655 "parser.y"
+#line 1681 "parser.y"
                         {
     Node* n = create_node("Class Def");
     (yyval.node) = n;
@@ -4568,11 +4594,11 @@ yyreduce:
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
 }
-#line 4572 "parser.cpp"
+#line 4598 "parser.cpp"
     break;
 
   case 240: /* arglist: argument COMMA_argument_rep COMMA  */
-#line 1665 "parser.y"
+#line 1691 "parser.y"
                                    {
     Node* n = create_node("Arglist");
     (yyval.node) = n;
@@ -4591,11 +4617,11 @@ yyreduce:
     // cout<<endl;
 
   }
-#line 4595 "parser.cpp"
+#line 4621 "parser.cpp"
     break;
 
   case 241: /* arglist: argument COMMA  */
-#line 1683 "parser.y"
+#line 1709 "parser.y"
                   {
     Node* n = create_node("Arglist");
     (yyval.node) = n;
@@ -4606,11 +4632,11 @@ yyreduce:
     temp->par_name=(yyvsp[-1].node)->label;
     (yyval.node)->p_f.push_back(temp);
   }
-#line 4610 "parser.cpp"
+#line 4636 "parser.cpp"
     break;
 
   case 242: /* arglist: argument COMMA_argument_rep  */
-#line 1693 "parser.y"
+#line 1719 "parser.y"
                                {
     Node* n = create_node("Arglist");
     (yyval.node) = n;
@@ -4627,22 +4653,22 @@ yyreduce:
     // }
     // cout<<endl;
   }
-#line 4631 "parser.cpp"
+#line 4657 "parser.cpp"
     break;
 
   case 243: /* arglist: argument  */
-#line 1709 "parser.y"
+#line 1735 "parser.y"
            {(yyval.node) =(yyvsp[0].node);
     Param* temp = new Param();
     temp->par_type=(yyvsp[0].node)->type;
     temp->par_name=(yyvsp[0].node)->label;
     (yyval.node)->p_f.push_back(temp);
   }
-#line 4642 "parser.cpp"
+#line 4668 "parser.cpp"
     break;
 
   case 244: /* COMMA_argument_rep: COMMA_argument_rep COMMA argument  */
-#line 1717 "parser.y"
+#line 1743 "parser.y"
                                     { 
     Node* n = create_node("Comma Argument rep1");
     (yyval.node) = n;
@@ -4659,11 +4685,11 @@ yyreduce:
     (yyval.node)->p_f.insert((yyval.node)->p_f.end(), (yyvsp[-2].node)->p_f.begin(), (yyvsp[-2].node)->p_f.end());
     (yyval.node)->p_f.push_back(temp);
   }
-#line 4663 "parser.cpp"
+#line 4689 "parser.cpp"
     break;
 
   case 245: /* COMMA_argument_rep: COMMA argument  */
-#line 1733 "parser.y"
+#line 1759 "parser.y"
                    {
     Node* n = create_node("Comma Argument rep2");
     (yyval.node) = n;
@@ -4675,73 +4701,73 @@ yyreduce:
     (yyval.node)->p_f.push_back(temp);
 
   }
-#line 4679 "parser.cpp"
+#line 4705 "parser.cpp"
     break;
 
   case 246: /* argument: test comp_for  */
-#line 1746 "parser.y"
+#line 1772 "parser.y"
                {
     Node* n = create_node("Argument");
     (yyval.node) = n;
     n->children.push_back((yyvsp[-1].node));
     n->children.push_back((yyvsp[0].node));
   }
-#line 4690 "parser.cpp"
+#line 4716 "parser.cpp"
     break;
 
   case 247: /* argument: test EQUAL_SIGN test  */
-#line 1752 "parser.y"
+#line 1778 "parser.y"
                          {
      Node* n = create_node("Argument");
      (yyval.node) = n;
      n->children.push_back((yyvsp[-2].node));
      n->children.push_back((yyvsp[-1].node));
   }
-#line 4701 "parser.cpp"
+#line 4727 "parser.cpp"
     break;
 
   case 248: /* argument: POWER test  */
-#line 1758 "parser.y"
+#line 1784 "parser.y"
               {
    Node* n = create_node("Argument");
    (yyval.node) = n;
    n->children.push_back((yyvsp[-1].node));
    n->children.push_back((yyvsp[0].node));      
   }
-#line 4712 "parser.cpp"
+#line 4738 "parser.cpp"
     break;
 
   case 249: /* argument: TIMES test  */
-#line 1764 "parser.y"
+#line 1790 "parser.y"
               {
    Node* n = create_node("Argument");
    (yyval.node) = n;
    n->children.push_back((yyvsp[-1].node));
    n->children.push_back((yyvsp[0].node));    
   }
-#line 4723 "parser.cpp"
+#line 4749 "parser.cpp"
     break;
 
   case 250: /* argument: test  */
-#line 1770 "parser.y"
+#line 1796 "parser.y"
        {(yyval.node) =(yyvsp[0].node);}
-#line 4729 "parser.cpp"
+#line 4755 "parser.cpp"
     break;
 
   case 251: /* comp_iter: comp_for  */
-#line 1772 "parser.y"
+#line 1798 "parser.y"
                      {(yyval.node) = (yyvsp[0].node);}
-#line 4735 "parser.cpp"
+#line 4761 "parser.cpp"
     break;
 
   case 252: /* comp_iter: comp_if  */
-#line 1773 "parser.y"
+#line 1799 "parser.y"
                     {(yyval.node) = (yyvsp[0].node);}
-#line 4741 "parser.cpp"
+#line 4767 "parser.cpp"
     break;
 
   case 253: /* sync_comp_for: FOR exprlist IN or_test comp_iter  */
-#line 1775 "parser.y"
+#line 1801 "parser.y"
                                                  {
           Node* n = create_node("Sync comp for");
           (yyval.node) = n;
@@ -4751,11 +4777,11 @@ yyreduce:
           n->children.push_back((yyvsp[-1].node));   
           n->children.push_back((yyvsp[0].node));   
 }
-#line 4755 "parser.cpp"
+#line 4781 "parser.cpp"
     break;
 
   case 254: /* sync_comp_for: FOR exprlist IN or_test  */
-#line 1784 "parser.y"
+#line 1810 "parser.y"
                                  {
           Node* n = create_node("Sync comp for");
           (yyval.node) = n;
@@ -4764,27 +4790,27 @@ yyreduce:
           n->children.push_back((yyvsp[-1].node));
           n->children.push_back((yyvsp[0].node));
         }
-#line 4768 "parser.cpp"
+#line 4794 "parser.cpp"
     break;
 
   case 255: /* comp_for: ASYNC sync_comp_for  */
-#line 1793 "parser.y"
+#line 1819 "parser.y"
                              { 
           Node* n = create_node("Comp for");
           (yyval.node) = n;
           n->children.push_back((yyvsp[-1].node));
           n->children.push_back((yyvsp[0].node));  }
-#line 4778 "parser.cpp"
+#line 4804 "parser.cpp"
     break;
 
   case 256: /* comp_for: sync_comp_for  */
-#line 1798 "parser.y"
+#line 1824 "parser.y"
                        {(yyval.node)=(yyvsp[0].node);}
-#line 4784 "parser.cpp"
+#line 4810 "parser.cpp"
     break;
 
   case 257: /* comp_if: IF test_nocond comp_iter  */
-#line 1800 "parser.y"
+#line 1826 "parser.y"
                                   {
           Node* n = create_node("Comp if");
           (yyval.node) = n;
@@ -4792,28 +4818,28 @@ yyreduce:
           n->children.push_back((yyvsp[-1].node));
           n->children.push_back((yyvsp[0].node));
 }
-#line 4796 "parser.cpp"
+#line 4822 "parser.cpp"
     break;
 
   case 258: /* comp_if: IF test_nocond  */
-#line 1807 "parser.y"
+#line 1833 "parser.y"
                         {
           Node* n = create_node("Comp if");
           (yyval.node) = n;
           n->children.push_back((yyvsp[-1].node));
           n->children.push_back((yyvsp[0].node));
         }
-#line 4807 "parser.cpp"
+#line 4833 "parser.cpp"
     break;
 
   case 259: /* yield_expr: YIELD  */
-#line 1813 "parser.y"
+#line 1839 "parser.y"
                  {(yyval.node)=(yyvsp[0].node);}
-#line 4813 "parser.cpp"
+#line 4839 "parser.cpp"
     break;
 
 
-#line 4817 "parser.cpp"
+#line 4843 "parser.cpp"
 
       default: break;
     }
@@ -5037,7 +5063,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 1822 "parser.y"
+#line 1848 "parser.y"
 
 
 
