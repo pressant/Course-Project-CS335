@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <regex>
+#include "3ac.cpp"
 #define YYDEBUG 1
 #define YYDEB 0
 using namespace std;
@@ -38,6 +39,20 @@ extern int yylineno;
 extern int yylex();
 void yyerror(const char*);
 int yybye =0;
+string extractSubstring(const std::string& str) {
+    // Find the position of '[' and ']'
+    size_t startPos = str.find('[');
+    size_t endPos = str.find(']');
+
+    // Check if both '[' and ']' are found and if they are in the correct order
+    if (startPos != std::string::npos && endPos != std::string::npos && startPos < endPos) {
+        // Extract the substring between '[' and ']'
+        return str.substr(startPos + 1, endPos - startPos - 1);
+    }
+
+    // Return an empty string if '[' and ']' are not found or in incorrect order
+    return "";
+}
 void diff_data(int x)
 {
   cout<<"Datatype mismatch in line no "<< x<<endl;
@@ -47,9 +62,7 @@ void check_type(string s1,string s2, int x)
 {
     if(s1 != s2)
     {
-      // cout<<s1<<" "<<s2<<endl;
       diff_data(x);
-      exit(1); 
     }
 }
 bool isCompatible(string s1 , string s2,string s3){
@@ -67,6 +80,17 @@ SYMTAB* gt=tab;
 int curr_scope=tab->SYMSCOPE;
 
 std::string* target_program;
+ int get_siz(string type){
+    if(type.substr(0,3)=="int" || type.substr(0,5)=="float") return 4;
+    else if(type.substr(0,4)=="char" ) return 2;
+    else if(type.substr(0,4)=="bool") return 1;
+    else if(type.substr(0,4)=="long" || type.substr(0,6)=="double") return 8;
+    else return 8;
+}
+extern int inst_num;
+vector<tuple<string,string,string,int,int> > arguments;
+vector<int> loop_stack;
+
 %}
 
 
@@ -110,6 +134,7 @@ std::string* target_program;
 %type<node> testlist_comp testlist_comp_c1 testlist_comp_c2 subscriptlist COMMA_subscript_rep subscript test_opt1 sliceop exprlist COMMA_expr_star_expr_rep testlist COMMA_test_rep
 %type<node>  test_star_expr classdef classdef_opt1 arglist COMMA_argument_rep argument comp_for_opt comp_iter sync_comp_for
 %type<node> comp_iter_opt comp_for ASYNC_opt comp_if yield_expr yield_arg async_stmt with_stmt class_name
+%type<node> finalfunc range_func
 
 
 %left OR
@@ -125,20 +150,17 @@ std::string* target_program;
 
 file_input
   : newline_stat_rep ENDMARKER {
-    if(yybye) cout<<"LINE 107";
     $$ = root;
     root->children.push_back($1);
     root->children.push_back($2);
   }
   | ENDMARKER {
-    if(yybye) cout<<"LINE 115";
     $$ = NULL;
     }
 ;
 
 newline_stat_rep 
   : newline_stat_rep NEWLINE {
-    if(yybye) cout<<"LINE 119";
     Node* n = create_node("newline_stat_rep");
     $$ = n;
     for(int i=0; i<$1->children.size(); i++){
@@ -146,7 +168,6 @@ newline_stat_rep
     }
   }
   | newline_stat_rep stmt { 
-    if(yybye) cout<<"LINE 126";
     Node* n = create_node("newline_stat_rep");
     $$ = n;
     for(int i=0; i<$1->children.size(); i++){
@@ -154,8 +175,10 @@ newline_stat_rep
     }
     n->children.push_back($2);
   }
-  | stmt { $$ = $1 ; if(yybye) cout<<"LINE 132"; $$ = $1;}
-  | NEWLINE {  if(yybye) cout<<"LINE 133"; cout<<yylineno<<endl;};
+  | stmt {  $$ = $1;}
+  | NEWLINE {  
+    // cout<<yylineno<<endl;
+  };
 
 funcname : DEF NAME {
             Node* n = create_node($2->label);
@@ -183,21 +206,27 @@ funcname : DEF NAME {
           }
          ;
 
-funcdef :  funcname parameters ARROW test COLON suite {
+funcdef :  funcname parameters {
+             codepush("begin",$1->label,"","",-1);
+          
+        for(int i=0;i<arguments.size();i++) { 
+        string s1 = get<0>(arguments[i]);
+        codepush("","popparam","",tab->SYMVAL[s1].temp_var,-1);
+        codepush("",tab->SYMVAL[s1].temp_var,"",get<0>(arguments[i]),-1);}} ARROW test COLON suite{
              Node* n = create_node("Function");
              n->children.push_back($1);
              n->children.push_back($2);
-             n->children.push_back($3);
              n->children.push_back($4);
              n->children.push_back($5);
              n->children.push_back($6);
+             n->children.push_back($7);
              $$ =n;
              tab=tab->parent;
              if(tab->SYMVAL.find($1->label)!= tab->SYMVAL.end()){
                 tab->SYMVAL[$1->label].identity=FUNC;
                 tab->SYMVAL[$1->label].scope=curr_scope;
                 tab->SYMVAL[$1->label].line_no=$1->line_number;
-                tab->SYMVAL[$1->label].type=$4->type;
+                tab->SYMVAL[$1->label].type=$5->type;
                 tab->SYMVAL[$1->label].name=$1->label;
                 tab->SYMVAL[$1->label].size=$2->count;
                 // tab-SYMVAL[$1->labe].params = 
@@ -213,19 +242,35 @@ funcdef :  funcname parameters ARROW test COLON suite {
              }
 
              else{
-              cout<<"error";
-              exit(0);
+              cout<<"error in inserting function" << endl;
+              exit(1);
              }
-            //  cout<<$1->line_number<<endl;
-             check_type($4->type , $6->type , $1->line_number);
+             
+              if(($5->type == "bool" && $7->type == "int")||($5->type == "float" && $7->type =="int"))
+              {
 
+              }
+              else {
+                if($5->type != $7->type)cout<<"Function return ";
+                check_type($5->type , $7->type , $1->line_number);
+              }
+            //  cout<<$1->line_number<<endl;
+            // check_type($4->type , $5->type , $1->line_number);
+             codepush("","$ra","","goto",-1);
+             arguments.clear();
          }
-       | funcname parameters COLON suite {
+       | funcname parameters{
+             codepush("begin",$1->label,"","",-1);
+          
+        for(int i=0;i<arguments.size();i++) { 
+        string s1 = get<0>(arguments[i]);
+        codepush("","popparam","",tab->SYMVAL[s1].temp_var,-1);
+        codepush("",tab->SYMVAL[s1].temp_var,"",get<0>(arguments[i]),-1);}} COLON suite {
              Node* n = create_node("Function");
              n->children.push_back($1);
              n->children.push_back($2);
-             n->children.push_back($3);
              n->children.push_back($4);
+             n->children.push_back($5);
              $$ =n;
              tab=tab->parent;
              if(tab!=NULL){
@@ -234,37 +279,58 @@ funcdef :  funcname parameters ARROW test COLON suite {
                   tab->SYMVAL[$1->label].identity=FUNC;
                   tab->SYMVAL[$1->label].scope=curr_scope;
                   tab->SYMVAL[$1->label].line_no=$1->line_number;
-                  tab->SYMVAL[$1->label].type="void";
+                  tab->SYMVAL[$1->label].type="None";
                   tab->SYMVAL[$1->label].name=$1->label;
                   tab->SYMVAL[$1->label].size=$2->count;
                   //int g_index;
                   //int reg_name;
-                  for(int i=0;i<$3->children.size();i++){
-                    Node* t=$3->children[i];
+                  for(int i=0;i<$2->children.size();i++){
+                    Node* t=$2->children[i];
                     string temp=t->label;
                      if(temp!="[" && temp!="]"){
-                        tab->SYMVAL[$2->label].params=$3->p_f;
+                        tab->SYMVAL[$1->label].params=$2->p_f;
                      }
                   }
 
                }
                else{
-                cout<<"error";
+                cout<<"error in inserting function "<<endl;
                 exit(0);
                }
-             check_type("void" , $4->type , $1->line_number);
-              if(YYDEB) cout<<$4->label <<" "<<endl;
+              if($5->type != "None")
+              {
+                if($5->type != "None") cout<<"Function return ";
+                check_type($5->type , "None" , $1->line_number);
+              }
+            // check_type("void" , $3->type , $1->line_number);
              }
-             
+             codepush("","$ra","","goto",-1);
+             arguments.clear();
          }
        ;
-
+/* finalfunc : funcdef suite{
+              Node* n = create_node("finalfunc");
+              n->children.push_back($1);
+              n->children.push_back($2);
+              $$ = n;
+              arguments.clear();
+            }
+            | funcdef NEWLINE suite{
+              Node* n = create_node("finalfunc");
+              n->children.push_back($1);
+              n->children.push_back($2);
+               n->children.push_back($3);
+              $$ = n;
+              arguments.clear();
+            }
+          ; */
 parameters : LPAREN typedargslist RPAREN {
                 Node* n = create_node("Parameters");
                 n->children.push_back($1);
                 n->children.push_back($2);
                 n->children.push_back($3);
                 n->count=$2->count;
+                $$->line_number = $1->line_number;
                 n->p_f=$2->p_f;
                 $$=n;
             }
@@ -272,6 +338,7 @@ parameters : LPAREN typedargslist RPAREN {
                 $$ = create_node("Parameters");
                 $$->children.push_back($1);
                 $$->children.push_back($2);
+                $$->line_number = $1->line_number;
             }
            ;
 
@@ -283,6 +350,7 @@ typedargslist : NAME {
                   n->p_f.push_back(temp);
                   n->count=1;
                   $$=n;
+                  arguments.push_back(make_tuple($1->label,"",$1->type,0,0));
                   } 
                  | NAME COLON datatype {
                   if(yybye) cout<<"LINE 188";
@@ -295,20 +363,22 @@ typedargslist : NAME {
                   temp->par_type=$3->label;
                   temp->par_name=$1->label;
                   n->p_f.push_back(temp);
-                if(tab->SYMVAL.find($1->label)!=tab->SYMVAL.end()){
-                  cout<<"Already declared"<<$1->label<<endl;
-                  return 0;
-                }
-                 tab->SYMVAL[$1->label].identity=NORMIE;
+                  if(tab->SYMVAL.find($1->label)!=tab->SYMVAL.end()){
+                  cout<<"Already declared "<<$1->label<<" in line no "<<$1->line_number<<endl;
+                    exit(1);
+                  }
+                  tab->SYMVAL[$1->label].identity=NORMIE;
                   tab->SYMVAL[$1->label].scope=curr_scope;
                   tab->SYMVAL[$1->label].line_no=$1->line_number;
                   tab->SYMVAL[$1->label].type=$3->label;
                   tab->SYMVAL[$1->label].name=$1->label;
                   tab->SYMVAL[$1->label].size=0;
                   $$ = n;
+                  string t = new_temporary();
+                  tab->SYMVAL[$1->label].temp_var = t;
+                  arguments.push_back(make_tuple($1->label,t,$3->type,0,0));
                 }
               | NAME COMMA typedargslist {
-                  if(yybye) cout<<"LINE 196";
                   Node *n = create_node("Typedargslist3");
                   n->children.push_back($1);
                   n->children.push_back($2);
@@ -344,9 +414,9 @@ typedargslist : NAME {
                   n->p_f=t2;
                   $$ = n;
                   if(tab->SYMVAL.find($1->label)!=tab->SYMVAL.end()){
-                  cout<<"Already declared"<<$1->label<<endl;
+                  cout<<"Already declared "<<$1->label<<endl;
                   return 0;
-
+                
                 }
                  tab->SYMVAL[$1->label].identity=NORMIE;
                   tab->SYMVAL[$1->label].scope=curr_scope;
@@ -355,65 +425,67 @@ typedargslist : NAME {
                   tab->SYMVAL[$1->label].name=$1->label;
                   tab->SYMVAL[$1->label].size=0;
                   $$ = n;
+                string t = new_temporary();
+                tab->SYMVAL[$1->label].temp_var = t;
+                arguments.push_back(make_tuple($1->label,t,$3->type,0,0));
                 }
               ;
 
 datatype : NAME {
-              if(yybye) cout<<"LINE 215";
               Node *n = create_node("Datatype");
               n->children.push_back($1);
               n->label=$1->label;
               $$ = n;
             }
          | NAME LBRACKET NAME RBRACKET {
-              if(yybye) cout<<"LINE 222";
               Node *n = create_node("Datatype");
               n->children.push_back($1);
               n->children.push_back($2);
               n->children.push_back($3);
               n->children.push_back($4);
               n->label=$1->label+$2->label+$3->label+$4->label;
+              n->type=$3->type;
               $$ = n;
             }
          ;
 stmt  
-        : simple_stmt { if(yybye) cout<<"LINE 231 \n";$$=$1;}
-        | compound_stmt{if(yybye) cout<<"LINE 232 \n";$$=$1;}
+        : simple_stmt { $$=$1;}
+        | compound_stmt{$$=$1;}
 ;
 
 simple_stmt : small_stmt NEWLINE{
-              if(yybye) cout<<"LINE 235 \n";
                Node* n = create_node("simple_stmt");
                n->children.push_back($1);
                $$=n;
                $$->type = $1->type;
+               $$->line_number = $2->line_number;
             }
             |small_stmt small_stmt_list NEWLINE{
 
-                if(yybye) cout<<"LINE 241 \n";
                 Node* n =create_node("simple_stmt");
                 n->children.push_back($1);
                 n->children.push_back($2);
                 $$=n;
+                $$->line_number = $3->line_number;
               }
             |small_stmt SEMICOLON NEWLINE{
-                if(yybye) cout<<"LINE 242 \n";
                 Node* n =create_node("simple_stmt");
                 n->children.push_back($1);
                 n->children.push_back($2);
                 $$=n;
+                $$->line_number = $2->line_number;
               }
             |small_stmt small_stmt_list SEMICOLON NEWLINE{
-                if(yybye) cout<<"LINE 243 \n";
                 Node* n =create_node("simple_stmt");
                 n->children.push_back($1);
                 n->children.push_back($2);
-                n->children.push_back($3);              
+                n->children.push_back($3);    
+                $$->line_number = $3->line_number; 
+                $$=n;         
               }
 ;
 small_stmt_list : 
                   small_stmt_list SEMICOLON small_stmt{
-                  if(yybye) cout<<"LINE 247 \n";
                   Node* n =create_node("small_stmt_list");
                   for(int i=0; i<$1->children.size(); i++){
                     n->children.push_back($1->children[i]);
@@ -421,22 +493,24 @@ small_stmt_list :
                   n->children.push_back($2);
                   n->children.push_back($3);
                   $$=n;
+                  $$->line_number= $2->line_number;
                 }
                 | SEMICOLON small_stmt{
-                  if(yybye) cout<<"LINE 255 \n";
                   Node* n =create_node("small_stmt_list");
                   n->children.push_back($1);
                   n->children.push_back($2);
                   $$=n;
+                  $$->line_number = $1->line_number;
                 }
 ;
-small_stmt : expr_stmt{if(yybye) cout<<"LINE 262 \n"; $$=$1;}
+small_stmt : expr_stmt{ $$=$1;}
            | del_stmt{$$=$1;}
            | pass_stmt{$$=$1;}
            | flow_stmt{$$=$1;}
             | global_stmt{$$=$1;}
            ;
 expr_stmt : testlist_star_expr expr_stmt_tail{ 
+              
               Node* n =create_node("expr_stmt");
               n->children.push_back($1);
               n->children.push_back($2);
@@ -454,6 +528,7 @@ expr_stmt : testlist_star_expr expr_stmt_tail{
                   tab->SYMVAL[$1->label].type=$2->type;
                   tab->SYMVAL[$1->label].name=$2->label;
                   tab->SYMVAL[$1->label].size=0;
+                  tab->SYMVAL[$1->label].temp_var = $2->temp_var;
               }
               else if($2->label == "expr_stmt_tail")
               {
@@ -475,6 +550,20 @@ expr_stmt : testlist_star_expr expr_stmt_tail{
                 //           exit(1);
                 // }
               }
+              else if($2->label=="annassign_op")
+              {
+                // cout<<$1->label<<endl;
+                if(tab->SYMVAL.find($1->label)==tab->SYMVAL.end())
+                {
+                  if(gt->SYMVAL.find($1->label)==gt->SYMVAL.end())
+                  cout<<"Use of undeclared variable " <<" in line number "<<$2->line_number<<endl;
+                  exit(1);
+                }
+
+
+              }
+            //   cout << $1->temp_var<<"inside expr_stmt"<<endl;
+              codepush("",$2->temp_var,"",$1->temp_var,-1);
                 // cout<<$1->type <<" hii "<<$2->type<<endl;
              }
              |testlist_star_expr { $$ = $1;}
@@ -487,6 +576,7 @@ expr_stmt_tail : COLON decl_type annassign {
                   $$->children.push_back($3);
                   $$->type = $2->type;
                   check_type($2->type, $3->type, $1->line_number);
+                  $$->temp_var = $3->temp_var;
                   }
                | annassign{
                   $$ = $1;
@@ -515,10 +605,15 @@ decl_type: NAME {
                 $$->type = $1->type;
             }
             | NAME LBRACKET NAME RBRACKET {
-                if($1->label != "list"){
+                $$ = create_node("decl_type");
+               if($1->label != "list"){
                   cout << "Invalid datatype at line no: " << $1->line_number << endl;
                   exit(1);
                 }
+                $$->children.push_back($1);
+                $$->children.push_back($2);
+                $$->children.push_back($3);
+                $$->children.push_back($4);
                 $$->type = $1->type + $2->label + $3->type + $4->label;
             }
 
@@ -551,8 +646,15 @@ annassign : EQUAL_SIGN test{
                    n->children.push_back($1);
                    n->children.push_back($2);
                    $$ = n;
+                   $$->line_number= $1->line_number;
+                   if($2->type == $2->label)
+                   {
+                      cout<<"Variable not declared or invalid comparison in line no "<<$1->line_number<<endl;
+                      exit(1);
+                   }
+                   else 
                    $$->type = $2->type;
-                  //  cout<<$$->type <<"HII"<<endl;
+                   $$->temp_var = $2->temp_var;
 }
 ;
 testlist_star_expr : testlist_star_expr_opt1 testlist_star_expr_rep COMMA{
@@ -561,16 +663,23 @@ testlist_star_expr : testlist_star_expr_opt1 testlist_star_expr_rep COMMA{
                      n->children.push_back($2);
                      n->children.push_back($3);
                      $$=n;
+                     $$->line_number = $3->line_number;
+                     $$->temp_var = $1->temp_var + $2->temp_var + ",";
                     }
                     |testlist_star_expr_opt1 testlist_star_expr_rep{ 
                       Node* n =create_node("testlist_star_expr");
                       n->children.push_back($1);
                       n->children.push_back($2);
+                      $$=n;
+                      $$->temp_var = $1->temp_var + $2->temp_var;
+                      $$->line_number = $1->line_number;
                     }
                     |testlist_star_expr_opt1 COMMA{
                      Node* n =create_node("testlist_star_expr");
                      n->children.push_back($1);
                      n->children.push_back($2);
+                     $$=n;
+                     $$->temp_var = $1->temp_var + ",";
                     }
                     |testlist_star_expr_opt1 { $$ = $1;}
 
@@ -588,22 +697,23 @@ testlist_star_expr_rep:
       n->children.push_back($2);
       n->children.push_back($3);
       $$=n;
+      $$->temp_var = $1->temp_var+","+$3->temp_var;
   }
-  | COMMA testlist_star_expr_opt1 {$$ = NULL;}
-;
-augassign : PLUS_EQUAL {$$=$1;}
-          | MINUS_EQUAL {$$=$1;}
-          | TIMES_EQUAL {$$=$1;}
-          | AT_EQUAL {$$=$1;}
-          | DIVIDEDBY_EQUAL {$$=$1;}
-          | MODULO_EQUAL {$$=$1;}
-          | BITWISE_AND_EQUAL {$$=$1;}
-          | BITWISE_OR_EQUAL {$$=$1;}
-          | BITWISE_XOR_EQUAL {$$=$1;}
-          | SHIFT_LEFT_EQUAL {$$=$1;}
-          | SHIFT_RIGHT_EQUAL {$$=$1;}
-          | POWER_EQUAL {$$=$1;}
-          | FLOORDIV_EQUAL {$$=$1;}
+  | COMMA testlist_star_expr_opt1 {$$ = NULL; $$->temp_var = ","+$2->temp_var;}
+
+augassign : PLUS_EQUAL {$$=$1; $$->temp_op = "+=";}
+          | MINUS_EQUAL {$$=$1; $$->temp_op = "-=";}
+          | TIMES_EQUAL {$$=$1; $$->temp_op = "*=";}
+          | AT_EQUAL {$$=$1; $$->temp_op = "@=";}
+          | DIVIDEDBY_EQUAL {$$=$1; $$->temp_op = "/=";}
+          | MODULO_EQUAL {$$=$1; $$->temp_op = "%=";}
+          | BITWISE_AND_EQUAL {$$=$1; $$->temp_op = "&=";}
+          | BITWISE_OR_EQUAL {$$=$1;  $$->temp_op = "|=";}
+          | BITWISE_XOR_EQUAL {$$=$1; $$->temp_op = "^=";}
+          | SHIFT_LEFT_EQUAL {$$=$1; $$->temp_op = "<<=";}
+          | SHIFT_RIGHT_EQUAL {$$=$1; $$->temp_op = ">>=";}
+          | POWER_EQUAL {$$=$1; $$->temp_op = "**=";}
+          | FLOORDIV_EQUAL {$$=$1; $$->temp_op = "//=";}
           ;
 
 del_stmt: DEL exprlist{Node* n =create_node("del_stmt");
@@ -629,8 +739,9 @@ return_stmt: RETURN testlist{
               n->children.push_back($2);      
               $$=n;
               $$->type = $2->type;
+              codepush("",$2->temp_var,"","pushparam",-1);
             }
-            | RETURN { $$ = $1; $$->type = "void";}
+            | RETURN { $$ = $1; $$->type = "None";}
 ;
 yield_stmt: yield_expr{$$=$1;};
 global_stmt: GLOBAL global_name_list{
@@ -652,10 +763,10 @@ global_name_list: global_name_list COMMA NAME {
                 }
                 | NAME { $$ = $1;}
                 ;
-compound_stmt : if_stmt{if(yybye) cout<<"cmpd_stmnt 1 \n"; $$=$1;}
+compound_stmt : if_stmt{ $$=$1;}
               | while_stmt{$$=$1;}
               | for_stmt{$$=$1;}
-              | funcdef{if(yybye) cout<<"cmpd_stmnt \n"; $$=$1;}
+              | funcdef{ $$=$1;}
               | classdef{$$=$1;}
               | async_stmt{$$=$1;}
               ;
@@ -668,7 +779,6 @@ async_stmt_content : funcdef
                    ;
 
 if_stmt : IF test COLON suite elif_stmt_rep ELSE COLON suite{
-    if(yybye) cout<<" if_stmt: \n";
     Node* n=create_node("if_stmt");
     n->children.push_back($1);
     n->children.push_back($2); 
@@ -679,10 +789,10 @@ if_stmt : IF test COLON suite elif_stmt_rep ELSE COLON suite{
     n->children.push_back($7);
     n->children.push_back($8); 
     $$=n;
+    $$->line_number = $1->line_number;
   }
     | IF test COLON suite elif_stmt_rep{
 
-      if(yybye) cout<<"if_stmt 2: \n"; 
       Node* n=create_node("if_stmt");
       n->children.push_back($1);
       n->children.push_back($2); 
@@ -690,6 +800,8 @@ if_stmt : IF test COLON suite elif_stmt_rep ELSE COLON suite{
       n->children.push_back($4); 
       n->children.push_back($5);
       $$=n;
+      $$->line_number = $1->line_number;
+
   }
     | IF test COLON suite ELSE COLON suite{ 
       Node* n=create_node("if_stmt");
@@ -701,6 +813,7 @@ if_stmt : IF test COLON suite elif_stmt_rep ELSE COLON suite{
       n->children.push_back($6); 
       n->children.push_back($7);
       $$=n;
+    $$->line_number = $1->line_number;
     }
     | IF test COLON suite{ 
       Node* n=create_node("if_stmt");
@@ -709,6 +822,7 @@ if_stmt : IF test COLON suite elif_stmt_rep ELSE COLON suite{
       n->children.push_back($3);
       n->children.push_back($4); 
       $$=n;
+      $$->line_number = $1->line_number;
     }
 ;
 elif_stmt_rep : elif_stmt_rep ELIF test COLON suite {
@@ -731,49 +845,89 @@ elif_stmt_rep : elif_stmt_rep ELIF test COLON suite {
       $$=n;
     }
 ;
-while_stmt: WHILE test COLON suite ELSE COLON suite{
+while_stmt:  WHILE test{
+      codepush("","","","loop:",-1);
+        string s2 = $2->temp_var;
+        codepush("if",s2,"true","==",-1);
+        loop_stack.push_back(inst_num-2); 
+} COLON suite { 
       Node* n=create_node("while_stmt");
       n->children.push_back($1);
       n->children.push_back($2); 
-      n->children.push_back($3);
-      n->children.push_back($4); 
-      n->children.push_back($5);
-      n->children.push_back($6);
-      n->children.push_back($7);
-      $$=n; 
-    }
-  | WHILE test COLON suite { 
-      Node* n=create_node("while_stmt");
-      n->children.push_back($1);
-      n->children.push_back($2); 
-      n->children.push_back($3);
+      n->children.push_back($4);
       n->children.push_back($4); 
       $$=n;
+      codepush("",to_string(loop_stack[(loop_stack.size())-1]),"","goto",-1); loop_stack.pop_back();codepush("","","","end loop",-1);
   }
 ;
-for_stmt: FOR exprlist IN testlist COLON suite ELSE COLON suite{
+for_stmt: FOR exprlist IN range_func{
+        codepush("","","","loop:",-1);
+        string s2 = $4->temp_var;
+        codepush("if",$2->label,s2,">",-1);
+        codepush("+",$2->label,"1",$2->label,-1);
+        loop_stack.push_back(inst_num-2);
+         } COLON suite {
       Node* n=create_node("for_stmt");
       n->children.push_back($1);
       n->children.push_back($2); 
       n->children.push_back($3);
       n->children.push_back($4); 
-      n->children.push_back($5);
       n->children.push_back($6);
       n->children.push_back($7);
-      n->children.push_back($8);
-      n->children.push_back($9);
-      $$=n; 
+      if(tab->SYMVAL.find($2->label)!=tab->SYMVAL.end())
+      {
+        // cout<<"Already declared"<<endl;
+        if(tab->SYMVAL[$2->label].type != "int")
+          cout<<" Invalid type iterator in for statement in line no "<< $1->line_number<<endl;
+        // cout<<$$->type<<" Name "<< yylineno << " "<< $$->label<<endl;
+      }
+      else if(gt->SYMVAL.find($2->label)!=gt->SYMVAL.end())
+      {
+        if(gt->SYMVAL[$2->label].type != "int")
+        cout<<" Invalid type iterator in for statement in line no "<< $1->line_number<<endl;
+      }
+      else {
+        cout<<"Undeclared variable used as iterator in for statement in line no "<< $1->line_number<<endl;
+        // exit(1);
+      }
+
+      $$=n;
+      codepush("",to_string(loop_stack[(loop_stack.size())-1]),"","goto",-1); loop_stack.pop_back();codepush("","","","end loop",-1);
     }
-    | FOR exprlist IN testlist COLON suite {
-      Node* n=create_node("while_stmt");
+;
+range_func : NAME LPAREN test RPAREN{
+      Node* n=create_node("range_func");
+      n->children.push_back($1);
+      n->children.push_back($2); 
+      n->children.push_back($3);
+      n->children.push_back($4); 
+      $$->temp_var = $3->temp_var;
+      if($1->label != "range"){
+        cout<<"For loop supports only range function in line no "<<$1->line_number<<endl;
+        // exit(1);
+      }
+
+
+  }
+  | NAME LPAREN test COMMA test RPAREN{
+      Node* n=create_node("range_func");
       n->children.push_back($1);
       n->children.push_back($2); 
       n->children.push_back($3);
       n->children.push_back($4); 
       n->children.push_back($5);
       n->children.push_back($6);
-      $$=n;
-    }
+      $$->temp_var = $3->temp_var;
+      if($1->label != "range"){
+        cout<<"For loop supports only range function"<<endl;
+        // exit(1);
+      }
+      else if(($3->type != "int")&& ($5->type != "int"))
+      {
+        cout<<"Invalid datatype used in range function in line no "<<$1->line_number<<endl;
+        // exit(1);
+      }
+  }
 ;
 suite : simple_stmt {if(yybye) cout<<"LINE 462 \n"; $$ = $1;}
       | NEWLINE INDENT stmt_rep DEDENT{
@@ -784,8 +938,8 @@ suite : simple_stmt {if(yybye) cout<<"LINE 462 \n"; $$ = $1;}
         n->children.push_back($4);
         if($3->type != "")
           $$->type = $3->type;
-        else $$->type = "void";
-        if(YYDEB) cout<<"suite" <<$3->type <<endl;
+        else $$->type = "None";
+        $$->line_number = $2->line_number;
 
       }
 ; 
@@ -822,6 +976,9 @@ or_test :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    string s1=new_temporary();
+    codepush("or",$1->temp_var,$2->temp_var,s1,-1);
+    $$->temp_var = s1;
   }
   |and_test{$$=$1;}
 ;
@@ -834,11 +991,29 @@ or_test_rep :
     }
     n->children.push_back($2);
     n->children.push_back($3);
+    if(($3->type != "bool") && ($3->type != "int") || (($1->type != "bool") && ($1->type != "int") ))
+    {
+      cout<<"Non compatible operand type used for OR operator in line no "<<$1->line_number<<endl;
+      exit(1);
+    }  
+    $$->type = "bool";
+    string s1=new_temporary();
+    codepush("or",$1->temp_var,$3->temp_var,s1,-1);
+    $$->temp_var = s1;
+    $$->temp_op = $1->temp_op;
   }
   | OR and_test{Node* n = create_node("ORTestRep");
     $$ = n;
     n->children.push_back($1);
-    n->children.push_back($2);}
+    n->children.push_back($2);
+    if(($2->type != "bool") && ($2->type != "int"))
+    {
+      cout<<"Non compatible operand type used for OR operator in line no "<<$1->line_number<<endl;
+      exit(1);
+    }  
+    $$->temp_op = "or";
+    $$->temp_var = $2->temp_var;
+    }
 ;
 and_test : 
   not_test and_test_rep{
@@ -846,6 +1021,15 @@ and_test :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    if(($2->type != "bool") && ($2->type != "int") || (($1->type != "bool") && ($1->type != "int") ))
+    {
+      cout<<"Non compatible operand type used for AND    operator in line no "<<$1->line_number<<endl;
+      exit(1);
+    }
+    $$->type ="bool";
+    string s1=new_temporary();
+    codepush("and",$1->temp_var,$2->temp_var,s1,-1);
+    $$->temp_var = s1;
   }
   |not_test{$$=$1;}
 ;
@@ -859,11 +1043,31 @@ and_test_rep :
     }
     n->children.push_back($2);
     n->children.push_back($3);
+    if(($3->type != "bool") && ($3->type != "int") || (($1->type != "bool") && ($1->type != "int") ))
+    {
+      cout<<"Non compatible operand type used for AND hii operator in line no "<<$1->line_number<<endl;
+      exit(1);
+    }  
+    $$->type = "bool";
+    string s1=new_temporary();
+    codepush("and",$1->temp_var,$3->temp_var,s1,-1);
+    $$->temp_var = s1;
+    $$->temp_op = $1->temp_op;
   }
   | AND not_test{Node* n = create_node("AndTestRep");
     $$ = n;
     n->children.push_back($1);
-    n->children.push_back($2);}
+    n->children.push_back($2);
+    if(($2->type != "bool") && ($2->type != "int"))
+    {
+      // cout<<$2->type<<endl;
+      cout<<"Non compatible operand type used for AND  no operator in line no "<<$1->line_number<<endl;
+      exit(1);
+    }
+    $$->type = "bool";
+    $$->temp_var = $2->temp_var;
+    $$->temp_op = $1->temp_op;
+    }
 ;
 
 not_test : 
@@ -873,6 +1077,15 @@ not_test :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    if(($2->type != "bool") && ($2->type != "int"))
+    {
+      cout<<"Non compatible operand type used for NOT operator in line no "<<$1->line_number<<endl;
+      exit(1);
+    }
+        $$->type = "bool";
+    string s1=new_temporary();
+    codepush("not",$2->temp_var,"",s1,-1);
+    $$->temp_var = s1;
   }
   | comparison {
     $$ =$1;
@@ -884,13 +1097,14 @@ comparison :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    if($1->label == "__name__" )
+    $1->type ="bool";
     check_type($1->type , $2->type, $1->line_number);
-    // if($1->type != $2->type){
-    //   diff_data($1->line_no);
-    //           exit(1);
-    // }
-    $$->type = $1->type;
-
+    $$->type = "bool";
+//  doubt in this part 
+    string s1=new_temporary();
+    codepush($2->temp_op,$1->temp_var,$2->temp_var,s1,-1);
+    $$->temp_var = s1;
   }
   |expr{$$=$1;}
 ;
@@ -904,22 +1118,34 @@ comparison_rep :
     }
     n->children.push_back($2);
     n->children.push_back($3);
+    string s1=new_temporary();
+    codepush($2->temp_op,$1->temp_var,$3->temp_var,s1,-1);
+    $$->temp_var = s1;
+    $$->temp_op = $1->temp_op;
+
   }
  | comp_op expr {
    Node* n = create_node("Comparison Rep");
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    if($2->label == "\"__main__\"")
+    {
+      $2->type = "bool";
+    }
+
     $$->type = $2->type;
+    $$->temp_var = $2->temp_var;
+    $$->temp_op = $1->temp_op;
  }
 ;
-comp_op : LESS_THAN{$$ =$1;}
-        |GREATER_THAN {$$ =$1;}
-        |EQUAL {$$ =$1;}
-        |GREATER_THAN_OR_EQUAL {$$ =$1;}
-        |LESS_THAN_OR_EQUAL {$$ =$1;}
-        |NOT_EQUAL {$$ =$1;}
-        |IN {$$ =$1;}
+comp_op : LESS_THAN{$$ =$1;$$->temp_op = "<";}
+        |GREATER_THAN {$$ =$1;$$->temp_op = ">";}
+        |EQUAL {$$ =$1;$$->temp_op = "==";}
+        |GREATER_THAN_OR_EQUAL {$$ =$1;$$->temp_op = ">=";}
+        |LESS_THAN_OR_EQUAL {$$ =$1;$$->temp_op = "<=";}
+        |NOT_EQUAL {$$ =$1;$$->temp_op = "!=";}
+        |IN {$$ =$1;$$->temp_op = "in";}
         |NOT IN {
           Node* n = create_node("Comparison Operator");
           $$ = n;
@@ -940,6 +1166,7 @@ star_expr :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    $$->temp_var="*"+$2->temp_var;
   }
 ;
 expr:
@@ -948,6 +1175,9 @@ expr:
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    string s1=new_temporary();
+    codepush($2->temp_op,$1->temp_var,$2->temp_var,s1,-1);
+    $$->temp_var = s1;
   }
   | xor_expr{$$=$1;}
 ;
@@ -960,11 +1190,19 @@ expr_rep :
     }
     n->children.push_back($2);
     n->children.push_back($3);
+    $2->temp_op = "|";
+    string s1=new_temporary();
+    codepush($2->temp_op,$1->temp_var,$3->temp_var,s1,-1);
+    $$->temp_var = s1;
+    $$->temp_op = $1->temp_op;
   }
   | BITWISE_OR xor_expr{Node* n = create_node("Expression Rep");
     $$ = n;
     n->children.push_back($1);
-    n->children.push_back($2);} 
+    n->children.push_back($2);
+    $$->temp_op = "|";
+    $$->temp_var = $2->temp_var;
+    } 
 ;
 xor_expr: 
   and_expr xor_expr_rep{
@@ -972,6 +1210,9 @@ xor_expr:
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    string s1=new_temporary();
+    codepush($2->temp_op,$1->temp_var,$2->temp_var,s1,-1);
+    $$->temp_var = s1;
   }
   | and_expr{
     $$=$1;
@@ -986,11 +1227,19 @@ xor_expr_rep :
     }
     n->children.push_back($2);
     n->children.push_back($3);
+    $2->temp_op = "^";
+    string s1=new_temporary();
+    codepush($2->temp_op,$1->temp_var,$3->temp_var,s1,-1);
+    $$->temp_var = s1;
+    $$->temp_op = $1->temp_op;
   }
  | BITWISE_XOR and_expr{Node* n = create_node("XOR Expression Rep");
     $$ = n;
     n->children.push_back($1);
-    n->children.push_back($2);} 
+    n->children.push_back($2);
+    $$->temp_op = "^";
+    $$->temp_var = $2->temp_var;
+    } 
 ;
 and_expr: 
   shift_expr and_expr_rep{
@@ -998,6 +1247,9 @@ and_expr:
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    string s1=new_temporary();
+    codepush($2->temp_op,$1->temp_var,$2->temp_var,s1,-1);
+    $$->temp_var = s1;
   }
   | shift_expr{$$=$1;}
 ;
@@ -1010,11 +1262,20 @@ and_expr_rep :
     }
     n->children.push_back($2);
     n->children.push_back($3); 
+    $2->temp_op = "&";
+    string s1=new_temporary();
+    codepush($2->temp_op,$1->temp_var,$3->temp_var,s1,-1);
+    $$->temp_var = s1;
+    $$->temp_op = $1->temp_op;
   }
   |BITWISE_AND shift_expr{Node* n = create_node("AND Expression Rep");
     $$ = n;
     n->children.push_back($1);
-    n->children.push_back($2); }
+    n->children.push_back($2); 
+    $$->temp_op = "&";
+    $$->temp_var = $2->temp_var;
+
+    }
 ;
 shift_expr :
   arith_expr shift_expr_rep{
@@ -1022,6 +1283,9 @@ shift_expr :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    string s1=new_temporary();
+    codepush($2->temp_op,$1->temp_var,$2->temp_var,s1,-1);
+    $$->temp_var = s1;
   }
   | arith_expr{$$=$1;}
 ;
@@ -1034,17 +1298,28 @@ shift_expr_rep :
     }
     n->children.push_back($2);
     n->children.push_back($3);
+    string s1=new_temporary();
+    codepush($2->temp_op,$1->temp_var,$3->temp_var,s1,-1);
+    $$->temp_var = s1;
+    $$->temp_op = $1->temp_op;
   }
   | shift_expr_rep_c1 arith_expr{Node* n = create_node("Shift Expression Rep");
     $$ = n;
     n->children.push_back($1);
-    n->children.push_back($2);}
+    n->children.push_back($2);
+    
+    $$->temp_op = $1->temp_op;
+    $$->temp_var = $2->temp_var;
+    }
 ;
 shift_expr_rep_c1 : 
   SHIFT_LEFT{
     $$ = $1;
+    $$->temp_op = "<<";
   }
-  | SHIFT_RIGHT {$$ = $1;}
+  | SHIFT_RIGHT {$$ = $1;
+    $$->temp_op = ">>";
+  }
 ;
 arith_expr : 
   term arith_expr_rep{
@@ -1062,9 +1337,12 @@ arith_expr :
     }
     else 
       $$->type = $1->type;
+    string s1=new_temporary();
+    codepush($2->temp_op,$1->temp_var,$2->temp_var,s1,-1);
+    $$->temp_var = s1;
     // cout<<$$->type<< " "<<$1->line_number<<endl;
   }
-  |term { if(yybye) cout<<"term arith_expr: "<<endl;$$=$1;}
+  |term { $$=$1;}
 ;
 arith_expr_rep : 
   arith_expr_rep arith_expr_rep_c1 term {
@@ -1084,6 +1362,11 @@ arith_expr_rep :
     }
     else 
       $$->type = $3->type;
+
+    string s1=new_temporary();
+    codepush($2->temp_op,$1->temp_var,$3->temp_var,s1,-1);
+    $$->temp_var = s1;
+    $$->temp_op = $1->temp_op;
     // cout<<$$->type <<" arth rep 1"<<endl;
 
   }
@@ -1092,11 +1375,14 @@ arith_expr_rep :
     n->children.push_back($1);
     n->children.push_back($2);
     $$->type = $2->type;
+    $$->temp_var = $2->temp_var;
+    $$->temp_op = $1->temp_op;
+    // cout<<"Arith2 "<<$$->temp_var <<" " <<$$->temp_op<<endl;
     }
 ;
 arith_expr_rep_c1 : 
-  PLUS { $$ = $1;}
-  | MINUS { $$ = $1;}
+  PLUS { $$ = $1;$$->temp_op = "+";}
+  | MINUS { $$ = $1;$$ ->temp_op = "-";}
 ;
 term : 
   factor term_rep{
@@ -1116,15 +1402,12 @@ term :
     }
     else 
       $$->type = $2->type;
-    // check_type($1->type , $2->type, $1->line_number);
-    // if($1->type != $2->type)
-    // {
-    //   diff_data($1->line_no);
-    //           exit(1);
-    // }
-    // $$->type = $1->type;
+
+    string s1=new_temporary();
+    codepush($2->temp_op,$1->temp_var,$2->temp_var,s1,-1);
+    $$->temp_var = s1; 
   }
-  |factor{if(yybye) cout<<"factor term: "<<endl;$$=$1;}
+  |factor{$$=$1;}
 ;
 term_rep : 
    term_rep term_rep_c1 factor {
@@ -1135,19 +1418,25 @@ term_rep :
     n->children.push_back($2);
     n->children.push_back($3);
     $$ = n;
+    string s1=new_temporary();
+    codepush($2->temp_op,$1->temp_var,$3->temp_var,s1,-1);
+    $$->temp_var = s1;
+    $$->temp_op = $1->temp_op;
   }
   | term_rep_c1 factor { Node* n = create_node("TERM Rep");
     n->children.push_back($1);
     n->children.push_back($2);
     $$ = n;
     $$->type = $2->type;
+    $$->temp_var = $2->temp_var;
+    $$->temp_op = $1->temp_op;
     }
 ;
-term_rep_c1 : TIMES { $$ =$1;}
-            | AT { $$ =$1;}
-            | DIVIDEDBY { $$ =$1;}
-            | MODULO { $$ =$1;}
-            | FLOORDIV { $$ =$1;}
+term_rep_c1 : TIMES { $$ =$1; $$->temp_op = "*";}
+            | AT { $$ =$1;$$->temp_op = "@";}
+            | DIVIDEDBY { $$ =$1; $$->temp_op = "/"; }
+            | MODULO { $$ =$1;   $$->temp_op = "%";}
+            | FLOORDIV { $$ =$1;    $$->temp_op = "//";}
 ;
 factor : 
   factor_c1 factor {
@@ -1155,12 +1444,14 @@ factor :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    $$->temp_op=$1->temp_op;
+    $$->temp_var=$2->temp_var;
   }
   | power { if(yybye) cout<<"factor power: "<<endl;$$ = $1;}
 ;
-factor_c1 : PLUS { $$ =$1;} 
-          | MINUS { $$ =$1;}
-          | BITWISE_NOT { $$ =$1;}
+factor_c1 : PLUS { $$ =$1; $$->temp_op = "+";} 
+          | MINUS { $$ =$1; $$->temp_op = "-"; }
+          | BITWISE_NOT { $$ =$1; $$->temp_op = "~";}
           ;
 power : 
   atom_expr power_opt{
@@ -1170,7 +1461,9 @@ power :
     n->children.push_back($2);
     check_type($1->type , $2->type , $1->line_number);
     $$->type = $1->type;
-
+    string s1 = new_temporary();
+    codepush($2->temp_op,$1->temp_var,$2->temp_var,s1,-1);
+    $$->temp_var = s1;
   }
   | atom_expr{
     $$ = $1;
@@ -1184,6 +1477,8 @@ power_opt :
     n->children.push_back($1);
     n->children.push_back($2);
     $$->type = $2->type;
+    $$->temp_var = $2->temp_var;
+    $$->temp_op = "**";
   }
 ;
 atom_expr : 
@@ -1194,24 +1489,39 @@ atom_expr :
     n->children.push_back($2);
     n->children.push_back($3);
     n->type = $2->type + $3->type;
+    $$->temp_var = $2->temp_var;
   }
   |atom trailer_rep{
     Node* n = create_node("Atom Expression2");
+    $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
-    n->type = $1->type + $2->type;
-    if((gt->SYMVAL.find($1->label) != tab->SYMVAL.end()) && $2->category == "Func")
+
+    if($2->type == "list")
+    {
+      // done to check cases list x = arr[1]
+      if(tab->SYMVAL.find($1->label) != tab->SYMVAL.end())
+      {
+        $$->type = extractSubstring(tab->SYMVAL[$1->label].type);
+      }
+      else if (gt->SYMVAL.find($1->label) != gt->SYMVAL.end())
+      {
+        $$->type = extractSubstring(gt->SYMVAL[$1->label].type);
+      }
+    }
+    if((gt->SYMVAL.find($1->label) != gt->SYMVAL.end()) && $2->category == "Func")
     {
       vector<Param*> p = gt->SYMVAL[$1->label].params;
+      
       if(p.size() > $2->p_f.size())
       {
         cout<<"Lesser number of arguments for function call "<< $1->label <<" in line number "<< $1->line_number<<endl;
-                exit(1);
+                // //exit(1);
       }
       else if(p.size() < $2->p_f.size())
       {
         cout<<"Greater number of arguments for function call "<< $1->label <<" in line number "<< $1->line_number<<endl;
-                exit(1);
+                //exit(1);
       }
       else {
         for(int i=0;i<p.size();i++)
@@ -1225,34 +1535,78 @@ atom_expr :
             }
             else{
               cout<<" Type mismatch for argument "<<i<<" in function call "<< $1->label <<" in line number "<<$1->line_number<<endl;
-                      exit(1);
+                      //exit(1);
             }
           }
         }
       }
+      $$->type = gt->SYMVAL[$1->label].type ;
+
       
     }
     else if($2->category == "Func")
     {
-      if($1->label == "len" || $1->label == "print"){
+      if($1->label == "len"){
         std::regex pattern("list\\[\\w+\\]");
-
+        // cout<<$2->type<<endl;
         if (std::regex_match($2->type, pattern)) {
-            std::cout << "String matches the pattern.\n";
+
         } else {
-            std::cout << "String does not match the pattern.\n";
-            exit(1);
+            cout<<$2->type <<endl;
+            std::cout <<" Invalid datatype use for len function in line no : "<<$1->line_number<<"\n";
+            //exit(1);
+        }
+        $$->type ="int";
+      }
+      else if( $1->label == "print")
+      {
+        for(int i = 0;i<$2->p_f.size() ; i++)
+        {
+          if($2->p_f[i]->par_type == "string"){}
+          else{
+                if(tab->SYMVAL.find($2->p_f[i]->par_name)==tab->SYMVAL.end())
+                {
+                  if(gt->SYMVAL.find(($2->p_f[i]->par_name))==gt->SYMVAL.end())
+                  cout<<"Use of undeclared variable inside print function " <<" in line number "<<$2->line_number<<endl;
+                  //exit(1);
+                }
+          }
+
         }
       }
       else{
         cout<<"Undeclared Function in line no : "<< $1->line_number<<endl;
-        exit(1);
+        //exit(1);
       }
     }
-    $$ = n;
-    if(yybye) cout<<"atom trailer_rep atom_expr: "<<endl;
-    
+    else if($2->label == "Trailer5")
+    {
+      //  to check class datatypes
+      if(gt->childs[$1->type]->SYMVAL.find($2->type) == gt->childs[$1->type]->SYMVAL.end()) 
+      {
+        cout<<"yes"<<endl;
+        cout<<"Undefined property "<<$2->type<<" for class "<<$1->type<<" used by object "<<$1->label<<"in line no "<<$1->line_number<<endl;
+      }
+      $$->type = gt->childs[$1->type]->SYMVAL[$2->type].type;
+      cout<<$$->type<<endl;
 
+
+    }
+    
+    $$->temp_var = $1->temp_var;
+        for(int i=0;i<arguments.size();i++) { 
+        string s1 = get<0>(arguments[i]);
+        if(tab->SYMVAL.find(s1)!=tab->SYMVAL.end()){
+        codepush("",tab->SYMVAL[s1].temp_var,"","pushparam",-1);
+        
+        } 
+        else{
+            codepush("",get<1>(arguments[i]),"","pushparam",-1);
+        } }
+       
+        codepush("call",$1->label,"","",-1);
+        
+        arguments.clear();
   }
   |atom{
     $$ = $1;
@@ -1287,6 +1641,8 @@ atom : LPAREN atom_opt1 RPAREN {
         n->children.push_back($3);
         $$->category = "Func";
         $$->type = $2->type;
+        $$->line_number = $1->line_number;
+        $$->temp_var = $2->temp_var;
       }
       | LBRACKET atom_opt2 RBRACKET {
         if(yybye) cout<<"atom atom_opt2: "<<endl;
@@ -1296,7 +1652,9 @@ atom : LPAREN atom_opt1 RPAREN {
         n->children.push_back($2);
         n->children.push_back($3);
         $$->type = "list" + $1->type + $2->type +$3->type;
+        $$->line_number = $1->line_number;
         // cout<<$$->type<<" "<<yylineno<<endl;
+        $$->temp_var = $2->temp_var;
 
       }
       |LBRACKET RBRACKET { 
@@ -1305,13 +1663,21 @@ atom : LPAREN atom_opt1 RPAREN {
         $$ = n;
         n->children.push_back($1);
         n->children.push_back($2);
+        $$->line_number = $1->line_number;
+
       }
       | NAME  { $$ =$1;
                 if(tab->SYMVAL.find($1->label)!=tab->SYMVAL.end())
                 {
                   // cout<<"Already declared"<<endl;
                   $$->type = tab->SYMVAL[$1->label].type;
+                  $$->temp_var = tab->SYMVAL[$1->label].temp_var;
                   // cout<<$$->type<<" Name "<< yylineno << " "<< $$->label<<endl;
+                }
+                else if(gt->SYMVAL.find($1->label)!=gt->SYMVAL.end())
+                {
+                  // cout<<$$->type << " "<<$$->label<<endl;
+                  $$->type = gt->SYMVAL[$1->label].type;
                 }
                 else{
 
@@ -1325,16 +1691,31 @@ atom : LPAREN atom_opt1 RPAREN {
                   $$->type = "bool";
                 else if($1->label == "len")
                   $$->type = "int";
+                string t = new_temporary();
+                $$->temp_var = t;
+                // cout << t;
+                codepush("",t,"",$1->label,-1);  
                 }
+              
 
       }
-      | NUMBER  { $$ =$1; $$->type = "int";}
-      | FLOAT {$$ = $1; $$->type = "float";}
-      | string_rep { $$ = $1; $$->type = "string";} 
+      | NUMBER  { $$ =$1; $$->type = "int";
+                  $$->temp_var= new_temporary();
+                  codepush("",$1->label,"",$$->temp_var,-1);  }
+      | FLOAT {$$ = $1; $$->type = "float";
+                $$->temp_var= new_temporary();
+                codepush("",$1->label,"",$$->temp_var,-1);}
+      | string_rep { $$ = $1; $$->type = "string";
+                      $$->temp_var= new_temporary();
+                      codepush("",$1->label,"",$$->temp_var,-1);}
       | TRIPLEDOT  { $$ =$1;}
-      | NONE  { $$ =$1;}
-      | TRUE_TOKEN  { $$ =$1; $$->type = "bool";}
-      | FALSE_TOKEN { $$ =$1; $$->type = "bool";}
+      | NONE  { $$ =$1; $$->type = "None";}
+      | TRUE_TOKEN  { $$ =$1; $$->type = "bool";
+                      $$->temp_var= new_temporary();
+                      codepush("",$1->label,"",$$->temp_var,-1);}
+      | FALSE_TOKEN { $$ =$1; $$->type = "bool";
+                      $$->temp_var= new_temporary();
+                      codepush("",$1->label,"",$$->temp_var,-1);}
       ;
 atom_opt1 : yield_expr {$$ = $1;}
           | testlist_comp{$$ = $1; if(yybye) cout<<"atom_opt1 testlist_comp: "<<endl;}
@@ -1350,6 +1731,7 @@ string_rep :
       n->children.push_back($1->children[i]);
     }
     n->children.push_back($2);    
+    $$->line_number= $1->line_number;
   }
 ;
 testlist_comp :
@@ -1423,42 +1805,46 @@ testlist_comp_c2_rep :
 trailer :
   LPAREN arglist RPAREN{
     if(yybye) cout<<"trailer: "<<endl;
-    Node* n = create_node("Trailer");
+    Node* n = create_node("Trailer1");
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
     n->children.push_back($3);
-    $$->type = "Func";
+    $$->category = "Func";
+    $$->type = $2->type;
     $$->line_number = $1->line_number;
     $$->p_f = $2->p_f;
 
   }
   |LPAREN RPAREN{
-    Node* n = create_node("Trailer");
+    Node* n = create_node("Trailer2");
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
     $$->line_number = $1->line_number;
-    $$->type = "Func";
+    $$->category = "Func";
   }
   | LBRACKET subscriptlist RBRACKET {
-    Node* n = create_node("Trailer");
+    Node* n = create_node("Trailer3");
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
     n->children.push_back($3);
     $$->line_number = $1->line_number;
-    $$->type = $1->type + $2->type + $3->type;
+    if(($2->type == "int") && ($2->label != "int"))
+      $$->type = "list";
+    else
+      $$->type = $1->type + $2->type + $3->type;
   }
   |LBRACKET RBRACKET{ 
-    Node* n = create_node("Trailer");
+    Node* n = create_node("Trailer4");
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
     $$->line_number = $1->line_number;
   }
   | DOT NAME{
-    Node* n = create_node("Trailer");
+    Node* n = create_node("Trailer5");
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
@@ -1788,6 +2174,7 @@ arglist :
     //     std::cout << *it << " ";
     // }
     // cout<<endl;
+    arguments.push_back(make_tuple($1->label,$1->temp_var, $1->type,0,0));
 
   }
   | argument COMMA{
@@ -1799,6 +2186,7 @@ arglist :
     temp->par_type=$1->type;
     temp->par_name=$1->label;
     $$->p_f.push_back(temp);
+    arguments.push_back(make_tuple($1->label,$1->temp_var, $1->type,0,0));
   }
   | argument COMMA_argument_rep{
     Node* n = create_node("Arglist");
@@ -1815,12 +2203,14 @@ arglist :
     //   std::cout << *it << " ";
     // }
     // cout<<endl;
+    arguments.push_back(make_tuple($1->label,$1->temp_var, $1->type,0,0));
   };
   |argument{$$ =$1;
     Param* temp = new Param();
     temp->par_type=$1->type;
     temp->par_name=$1->label;
     $$->p_f.push_back(temp);
+    arguments.push_back(make_tuple($1->label,$1->temp_var, $1->type,0,0));
   }
 ;
 COMMA_argument_rep : 
@@ -1839,6 +2229,7 @@ COMMA_argument_rep :
     temp->par_name=$3->label;
     $$->p_f.insert($$->p_f.end(), $1->p_f.begin(), $1->p_f.end());
     $$->p_f.push_back(temp);
+    arguments.push_back(make_tuple($3->label,$2->temp_var, $3->type,0,0));
   }
   | COMMA argument {
     Node* n = create_node("Comma Argument rep2");
@@ -1849,7 +2240,7 @@ COMMA_argument_rep :
     temp->par_type=$2->type;
     temp->par_name=$2->label;
     $$->p_f.push_back(temp);
-
+    arguments.push_back(make_tuple($2->label,$2->temp_var, $2->type,0,0));
   }
 ;
 argument : 
@@ -1864,6 +2255,8 @@ argument :
      $$ = n;
      n->children.push_back($1);
      n->children.push_back($2);
+     codepush("", $3->temp_var, "", $1->temp_var, -1);
+     $$->temp_var = $1->temp_var;
   }
   | POWER test{
    Node* n = create_node("Argument");
@@ -1980,7 +2373,8 @@ int main(int argc, char* argv[]) {
     }
     yyparse();
     cout<<endl;
-    gt->PrintSYMTAB();
+    gt->WriteAllSYMTABsToCSV("symtabs.csv", gt);
+    print3ac();
     fclose(yyin);
     simplify(root);
     printDot(root, output_filename);

@@ -51,7 +51,7 @@ struct MAPVAL {
     string type;
     string name;
     int size;
-
+    string temp_var;
     // register stuff
     int g_index;
     int reg_name;
@@ -84,6 +84,7 @@ public:
     void PrintSYMTAB() {
         printf("SYMBOL TABLE\n");
         printf("Scope : %d\n", SYMSCOPE);
+        if(parent!=nullptr) cout<<"scope of parent"<<parent->SYMSCOPE;
         cout<< "Entries in table :"<<SYMVAL.size() << endl;
     for (auto it = SYMVAL.begin(); it != SYMVAL.end(); ++it) {
         cout << "Label : "<<it->first << ", Type :"<<it->second.type <<endl;
@@ -95,6 +96,7 @@ public:
                 cout<< it->second.params[i]->par_type<<" "<<it->second.params[i]->par_name<<endl;
             }
         }
+
     }
     cout<<endl;
     for (auto& ti : childs) {
@@ -102,6 +104,35 @@ public:
         ti.second->PrintSYMTAB();
     }
 }
+     void WriteSYMTABToCSV(ofstream& file, SYMTAB* symtab) {
+    if(symtab->parent!=nullptr) file<<"Parent's SCOPE"<<symtab->parent->SYMSCOPE<<endl;
+    else file<<"Global SCOPE"<<endl;
+    file<<"My SCOPE = "<<symtab->SYMSCOPE<<endl;
+    
+    file << "Name,identity,scope,Line Number,Type,Size\n";
+
+    for (const auto& entry : symtab->SYMVAL) {
+        int x=entry.second.identity==FUNC;
+        file << entry.first << "," << x << "," << symtab->SYMSCOPE << "," << entry.second.line_no << "," << entry.second.type << "," << entry.second.size<<endl;
+    }
+    file<<endl;
+    for (const auto& child : symtab->childs) {
+        WriteSYMTABToCSV(file, child.second);
+    }
+    }
+
+    void WriteAllSYMTABsToCSV(const string& filename, SYMTAB* rootSymtab) {
+    ofstream file(filename);
+
+    if (!file.is_open()) {
+        cerr << "Error opening file: " << filename << endl;
+        return;
+    }
+
+    WriteSYMTABToCSV(file, rootSymtab);
+
+    file.close();
+    }
 
 };
 

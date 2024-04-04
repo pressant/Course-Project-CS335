@@ -1,0 +1,14 @@
+Global SCOPE
+My SCOPE = 0
+Name,identity,scope,Line Number,Type,Size
+bett,0,0,6,string,0
+edd,1,0,3,string,2
+z,0,0,2,list[int],0
+count,0,0,1,int,0
+
+Parent's SCOPE0
+My SCOPE = 1
+Name,identity,scope,Line Number,Type,Size
+a,0,1,3,string,0
+b,0,1,3,string,0
+

@@ -19,6 +19,7 @@ struct Node {
   int line_number;
   vector<string> parameters;
   string temp_var;
+  string temp_op;
   int i_number;
   vector<int>true_list;
     vector<int>false_list;

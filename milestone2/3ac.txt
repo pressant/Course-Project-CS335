@@ -1,0 +1,51 @@
+0:    count = t_0
+1:    t_1 = 0
+2:    t_0 = t_1
+3:    z = t_2
+4:    t_3 = 1
+5:    t_4 = 2
+6:    t_5 = 3
+7:    t_6 = 4
+8:    t_7 = 5
+9:    t_2 = 
+10: BeginFunc edd
+11:    t_8 = popparam
+12:    b = t_8
+13:    t_9 = popparam
+14:    a = t_9
+15:    string = t_10
+16:    t_11 = t_9 + t_8
+17:    pushparam = t_11
+18:    goto $ra
+19:    bett = t_12
+20:    t_13 = "bye"
+21:    t_12 = t_13
+22:    t_14 = 5
+23:    t_15 = t_1 < t_14
+24:    loop: = 
+25:    if t_15 == true
+26:    print = t_16
+27:    t_17 = "Count:"
+28:    pushparam = t_1
+29:    pushparam = t_17
+30:     = print call 
+31:    t_18 = 1
+32:    t_19 = t_1 + t_18
+33:    t_1 = t_19
+34:    goto 24
+35:    end loop = 
+36:    t_20 = 5
+37:    loop: = 
+38:    if count > t_20
+39:    count = count + 1
+40:    print = t_21
+41:    t_22 = "Coun:"
+42:    pushparam = t_1
+43:    pushparam = t_22
+44:     = print call 
+45:    goto 38
+46:    end loop = 
+47:    print = t_23
+48:    t_24 = "Loop finished"
+49:    pushparam = t_24
+50:     = print call 
