@@ -555,9 +555,9 @@ expr_stmt : testlist_star_expr expr_stmt_tail{
                 // cout<<$1->label<<endl;
                 if(tab->SYMVAL.find($1->label)==tab->SYMVAL.end())
                 {
-                  if(gt->SYMVAL.find($1->label)==gt->SYMVAL.end())
+                  if(gt->SYMVAL.find($1->label)==gt->SYMVAL.end()){
                   cout<<"Use of undeclared variable " <<" in line number "<<$2->line_number<<endl;
-                  exit(1);
+                  exit(1);}
                 }
 
 
