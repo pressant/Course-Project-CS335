@@ -888,7 +888,7 @@ for_stmt: FOR exprlist IN range_func{
       }
       else {
         cout<<"Undeclared variable used as iterator in for statement in line no "<< $1->line_number<<endl;
-        // exit(1);
+         exit(1);
       }
 
       $$=n;
@@ -904,7 +904,7 @@ range_func : NAME LPAREN test RPAREN{
       $$->temp_var = $3->temp_var;
       if($1->label != "range"){
         cout<<"For loop supports only range function in line no "<<$1->line_number<<endl;
-        // exit(1);
+        exit(1);
       }
 
 
@@ -920,12 +920,12 @@ range_func : NAME LPAREN test RPAREN{
       $$->temp_var = $3->temp_var;
       if($1->label != "range"){
         cout<<"For loop supports only range function"<<endl;
-        // exit(1);
+         exit(1);
       }
       else if(($3->type != "int")&& ($5->type != "int"))
       {
         cout<<"Invalid datatype used in range function in line no "<<$1->line_number<<endl;
-        // exit(1);
+        exit(1);
       }
   }
 ;
@@ -1516,12 +1516,12 @@ atom_expr :
       if(p.size() > $2->p_f.size())
       {
         cout<<"Lesser number of arguments for function call "<< $1->label <<" in line number "<< $1->line_number<<endl;
-                // //exit(1);
+                exit(1);
       }
       else if(p.size() < $2->p_f.size())
       {
         cout<<"Greater number of arguments for function call "<< $1->label <<" in line number "<< $1->line_number<<endl;
-                //exit(1);
+                exit(1);
       }
       else {
         for(int i=0;i<p.size();i++)
@@ -1535,7 +1535,7 @@ atom_expr :
             }
             else{
               cout<<" Type mismatch for argument "<<i<<" in function call "<< $1->label <<" in line number "<<$1->line_number<<endl;
-                      //exit(1);
+                      exit(1);
             }
           }
         }
@@ -1554,7 +1554,7 @@ atom_expr :
         } else {
             cout<<$2->type <<endl;
             std::cout <<" Invalid datatype use for len function in line no : "<<$1->line_number<<"\n";
-            //exit(1);
+            exit(1);
         }
         $$->type ="int";
       }
@@ -1566,9 +1566,9 @@ atom_expr :
           else{
                 if(tab->SYMVAL.find($2->p_f[i]->par_name)==tab->SYMVAL.end())
                 {
-                  if(gt->SYMVAL.find(($2->p_f[i]->par_name))==gt->SYMVAL.end())
+                  if(gt->SYMVAL.find(($2->p_f[i]->par_name))==gt->SYMVAL.end()){
                   cout<<"Use of undeclared variable inside print function " <<" in line number "<<$2->line_number<<endl;
-                  //exit(1);
+                  exit(1);}
                 }
           }
 
@@ -1576,7 +1576,7 @@ atom_expr :
       }
       else{
         cout<<"Undeclared Function in line no : "<< $1->line_number<<endl;
-        //exit(1);
+        exit(1);
       }
     }
     else if($2->label == "Trailer5")
