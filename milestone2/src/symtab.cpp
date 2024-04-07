@@ -33,7 +33,7 @@ using namespace std;
 #define FUNC 2
 #define CLS 3
 
-union Value {
+struct Value {
     string val;
 };
 
