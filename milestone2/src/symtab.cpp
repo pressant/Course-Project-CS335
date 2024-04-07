@@ -33,7 +33,7 @@ using namespace std;
 #define FUNC 2
 #define CLS 3
 
-struct Value {
+union Value {
     string val;
 };
 
@@ -69,7 +69,9 @@ struct MAPVAL {
 
 class SYMTAB {
 public:
+    string tag;
     unordered_map<string, MAPVAL> SYMVAL;
+    unordered_map<string,void*> *freepointers;
     int SYMSCOPE;
     // vector<SYMTAB*> childs;
     unordered_map<string,SYMTAB*> childs;
@@ -104,7 +106,15 @@ public:
         ti.second->PrintSYMTAB();
     }
 }
-     void WriteSYMTABToCSV(ofstream& file, SYMTAB* symtab) {
+    SYMTAB* findmytab(string target,SYMTAB* tab){
+        SYMTAB* temp=tab;
+         while(!temp){
+            if(temp->SYMVAL.find(target)==temp->SYMVAL.end()) temp=temp->parent;
+            else return temp;
+         }
+         return temp;
+    }
+    void WriteSYMTABToCSV(ofstream& file, SYMTAB* symtab) {
     if(symtab->parent!=nullptr) file<<"Parent's SCOPE"<<symtab->parent->SYMSCOPE<<endl;
     else file<<"Global SCOPE"<<endl;
     file<<"My SCOPE = "<<symtab->SYMSCOPE<<endl;
@@ -135,11 +145,3 @@ public:
     }
 
 };
-
-
-
-
-
-
-
-
