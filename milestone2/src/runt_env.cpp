@@ -51,6 +51,7 @@ public:
       controlLink(control), freevars(nonLocals){}
 };
 
+stack<ActivationRecord*> Display;
 SYMTAB* g_symtab;
 ActivationRecord* curr_ar;
 quadruple* curri;
