@@ -38,7 +38,7 @@ struct Value {
 };
 
 struct Param {
-    string par_type;
+    std::string par_type;
     string par_name;
     Value par_val;
 };

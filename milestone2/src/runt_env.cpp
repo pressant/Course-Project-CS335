@@ -37,48 +37,89 @@ public:
     ActivationRecord* controlLink;
     unordered_map<string, MAPVAL*> &localdecs;
     unordered_map<string, MAPVAL*>& freevars;
-    unordered_map<string, MAPVAL*>& tempo;
+    unordered_map<string, MAPVAL*> tempo;
     void *returnAddress;
 
    ActivationRecord(vector<Param*>& params,
-                 unordered_map<string, MAPVAL*>& locals,
-                 void *retAddr,
-                 ActivationRecord* access,
-                 ActivationRecord* control,
-                 unordered_map<string, MAPVAL*>& nonLocals)
+                    ActivationRecord* access,
+                    ActivationRecord* control,
+                    unordered_map<string, MAPVAL*>& locals,
+                    unordered_map<string, MAPVAL*>& nonLocals,
+                    void *retAddr)
     : parameters(params), localdecs(locals),
       returnAddress(retAddr), accessLink(access),
-      controlLink(control), freevars(nonLocals) {}
+      controlLink(control), freevars(nonLocals){}
 };
 
 SYMTAB* g_symtab;
 ActivationRecord* curr_ar;
+quadruple* curri;
 
-void execute_assignment(string src, string dst) {
-    MAPVAL* d=NULL;
-    MAPVAL* s=NULL;
-
-    if (curr_ar->localdecs.find(src) != curr_ar->localdecs.end()){
-        s=curr_ar->localdecs[src];
-    } else if (curr_ar->freevars.find(src) != curr_ar->freevars.end()) {
-        s=curr_ar->localdecs[src];
-    } else if (curr_ar->tempo.find(src) != curr_ar->tempo.end()){
-        s=curr_ar->tempo[src];
-    }
-
-    if (curr_ar->localdecs.find(dst) != curr_ar->localdecs.end()){
-        d=curr_ar->localdecs[dst];
-    } else if (curr_ar->freevars.find(dst) != curr_ar->freevars.end()) {
-        d=curr_ar->localdecs[dst];
-    } else if (curr_ar->tempo.find(src) != curr_ar->tempo.end()){
-        d=curr_ar->tempo[dst];
-    }
-    else {
-        d=(MAPVAL*)malloc(sizeof(MAPVAL));
-        d->
-        curr_ar->tempo[dst]
-    }
+MAPVAL* myval(string s){
+   if (curr_ar->localdecs.find(s) != curr_ar->localdecs.end()){
+        return curr_ar->localdecs[s];
+    } else if (curr_ar->freevars.find(s) != curr_ar->freevars.end()) {
+        return curr_ar->localdecs[s];
+    } else if (curr_ar->tempo.find(s) != curr_ar->tempo.end()){
+        return curr_ar->tempo[s];
+    } 
+    return NULL;
 }
+void exec_3ac(quadruple& i){
+
+    string arg1=i.arg1;
+    string arg2=i.arg2;
+    string result=i.result;
+    string op=i.op;
+
+    string type;
+
+    MAPVAL* a1=myval(arg1);
+    MAPVAL* a2=myval(arg2);
+    MAPVAL* r=myval(result);
+
+    if(a1) type=a1->type;
+    else if(a2) type=a2->type;
+    else if(r)  type=r->type;
+    else throw runtime_error("vague instruct");
+
+    if(!r){
+        r=(MAPVAL*)malloc(sizeof(MAPVAL));
+        r->name=result;
+        r->type=type;
+        curr_ar->tempo[result]=r;
+    }
+
+    if(type=="int"){
+        int val1,val2;
+        if(a1) val1=stoi(a1->val.val);
+        else val1=stoi(arg1);
+        if(a2) val2=stoi(a2->val.val);
+        else val2=stoi(arg2);
+        
+
+        if(op=="+"){r->val.val=to_string(val1+val2);}
+        else if(op=="-"){r->val.val=to_string(val1-val2);}
+        else if(op=="*"){r->val.val=to_string(val1*val2);}
+        else if(op=="/"){r->val.val=to_string(val1/val2);}
+        else if(op=="="){r->val.val=to_string(val1);}
+    }
+    else if(type=="float"){
+        float val1,val2;
+        if(a1) val1=stof(a1->val.val);
+        else val1=stof(arg1);
+        if(a2) val2=stof(a2->val.val);
+        else val2=stof(arg2);
+
+        if(op=="+"){r->val.val=to_string(val1+val2);}
+        else if(op=="-"){r->val.val=to_string(val1-val2);}
+        else if(op=="*"){r->val.val=to_string(val1*val2);}
+        else if(op=="/"){r->val.val=to_string(val1/val2);}
+        else if(op=="="){r->val.val=to_string(val1);}
+    }    
+}
+
+
 
     void execute_function_body(string function_name) {
         SYMTAB* function_def = global_symbol_table->findmytab(function_name, global_symbol_table);
@@ -108,67 +149,42 @@ void execute_assignment(string src, string dst) {
     }
 
 
-    
+// void execute_3ac(quadruple& instruction) {
 
-    void execute_addition(string op1, string op2, string result) {
-        int value1 = get_variable_value(op1);
-        int value2 = get_variable_value(op2);
-        set_variable_value(result, value1 + value2);
-    }
-
-
-
-    int get_variable_value(string var_name) {
-        if (current_activation_record->localdecs.find(var_name) != current_activation_record->localdecs.end()) {
-            return stoi(current_activation_record->localdecs[var_name].value.val);
-        } else {
-            return stoi(current_activation_record->freevar_Offsets[var_name]->val);
-        }
-    }
-
-    void set_variable_value(string var_name, int value) {
-        if (current_activation_record->localdecs.find(var_name) != current_activation_record->localdecs.end()) {
-            current_activation_record->localdecs[var_name].value.val = to_string(value);
-        } else {
-            current_activation_record->freevar_Offsets[var_name]->val = to_string(value);
-        }
-    }
-
-void execute_3ac(quadruple& instruction) {
-    if (instruction.op == "=") {
-        execute_assignment(instruction.arg1, instruction.result);
-    } else if (instruction.op == "+") {
-        execute_addition(instruction.arg1, instruction.arg2, instruction.result);
-    } else if (instruction.op == "-") {
-        execute_subtraction(instruction.arg1, instruction.arg2, instruction.result);
-    } else if (instruction.op == "*") {
-        execute_multiplication(instruction.arg1, instruction.arg2, instruction.result);
-    } else if (instruction.op == "/") {
-        execute_division(instruction.arg1, instruction.arg2, instruction.result);
-    } else if (instruction.op == "if") {
-        execute_conditional_jump(instruction.arg1, instruction.result, instruction.arg2, instruction.index);
-    } else if (instruction.op == "goto") {
-        execute_unconditional_jump(instruction.arg1);
-    } else if (instruction.op == "begin") {
-        execute_function_begin(instruction.arg1);
-    } else if (instruction.op == "end") {
-        execute_function_end();
-    } else if (instruction.op == "param") {
-        execute_parameter_passing(instruction.arg1);
-    } else if (instruction.op == "pushparam") {
-        execute_parameter_push(instruction.arg1);
-    } else if (instruction.op == "call") {
-        execute_function_call(instruction.arg1);
-    } else if (instruction.op == "return") {
-        execute_function_return();
-    } else if (instruction.op == "cast") {
-        execute_type_cast(instruction.arg1, instruction.arg2, instruction.result);
-    } else if (instruction.op == "string") {
-        execute_string_assignment(instruction.arg1, instruction.result);
-    } else {
-        throw runtime_error("Unsupported 3AC instruction: " + instruction.op);
-    }
-}
+//     if (instruction.op == "=") {
+//         execute_assignment(instruction.arg1, instruction.result);
+//     } else if (instruction.op == "+") {
+//         execute_addition(instruction.arg1, instruction.arg2, instruction.result);
+//     } else if (instruction.op == "-") {
+//         execute_subtraction(instruction.arg1, instruction.arg2, instruction.result);
+//     } else if (instruction.op == "*") {
+//         execute_multiplication(instruction.arg1, instruction.arg2, instruction.result);
+//     } else if (instruction.op == "/") {
+//         execute_division(instruction.arg1, instruction.arg2, instruction.result);
+//     } else if (instruction.op == "if") {
+//         execute_conditional_jump(instruction.arg1, instruction.result, instruction.arg2, instruction.index);
+//     } else if (instruction.op == "goto") {
+//         execute_unconditional_jump(instruction.arg1);
+//     } else if (instruction.op == "begin") {
+//         execute_function_begin(instruction.arg1);
+//     } else if (instruction.op == "end") {
+//         execute_function_end();
+//     } else if (instruction.op == "param") {
+//         execute_parameter_passing(instruction.arg1);
+//     } else if (instruction.op == "pushparam") {
+//         execute_parameter_push(instruction.arg1);
+//     } else if (instruction.op == "call") {
+//         execute_function_call(instruction.arg1);
+//     } else if (instruction.op == "return") {
+//         execute_function_return();
+//     } else if (instruction.op == "cast") {
+//         execute_type_cast(instruction.arg1, instruction.arg2, instruction.result);
+//     } else if (instruction.op == "string") {
+//         execute_string_assignment(instruction.arg1, instruction.result);
+//     } else {
+//         throw runtime_error("Unsupported 3AC instruction: " + instruction.op);
+//     }
+// }
 
 
 
