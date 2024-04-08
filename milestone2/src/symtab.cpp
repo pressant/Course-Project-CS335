@@ -1,3 +1,5 @@
+#ifndef symm
+#define symm
 #include <iostream>
 #include <vector>
 #include <variant>
@@ -44,7 +46,7 @@ struct Param {
 };
 
 struct MAPVAL {
-
+    string tag;
     int identity;
     int scope;
     int line_no;
@@ -71,7 +73,7 @@ class SYMTAB {
 public:
     string tag;
     unordered_map<string, MAPVAL> SYMVAL;
-    unordered_map<string,void*> *freepointers;
+    unordered_map<string,MAPVAL*> freepointers;
     int SYMSCOPE;
     // vector<SYMTAB*> childs;
     unordered_map<string,SYMTAB*> childs;
@@ -81,6 +83,19 @@ public:
     SYMTAB() {
         SYMSCOPE = 0;
         parent = nullptr;
+    }
+
+        SYMTAB* findmytab(string target, SYMTAB* tab) {
+        SYMTAB* temp = tab;
+        if(!temp || (temp->SYMVAL.find(target) != temp->SYMVAL.end())){
+            return temp;
+        }
+           for(auto&it:temp->childs){
+            SYMTAB* s=findmytab(target,it.second);
+            if(s) return s;
+           }
+           return NULL;
+
     }
 
     void PrintSYMTAB() {
@@ -106,14 +121,6 @@ public:
         ti.second->PrintSYMTAB();
     }
 }
-    SYMTAB* findmytab(string target,SYMTAB* tab){
-        SYMTAB* temp=tab;
-         while(!temp){
-            if(temp->SYMVAL.find(target)==temp->SYMVAL.end()) temp=temp->parent;
-            else return temp;
-         }
-         return temp;
-    }
     void WriteSYMTABToCSV(ofstream& file, SYMTAB* symtab) {
     if(symtab->parent!=nullptr) file<<"Parent's SCOPE"<<symtab->parent->SYMSCOPE<<endl;
     else file<<"Global SCOPE"<<endl;
@@ -145,3 +152,7 @@ public:
     }
 
 };
+
+
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef ast
+#define ast
+
 #include <iostream>
 #include <algorithm>
 #include <stdio.h>
@@ -67,3 +70,5 @@ void simplify(Node* node) {
         simplify(child);
     }
 }
+
+#endif

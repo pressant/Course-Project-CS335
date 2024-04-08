@@ -1,3 +1,6 @@
+#ifndef ac
+#define ac
+
 #include <iostream>
 #include <vector>
 #include <map>
@@ -99,4 +102,6 @@ string new_temporary(){
     var_num++;
     return temp_var;
 }
+
+#endif
 

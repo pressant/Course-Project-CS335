@@ -76,8 +76,10 @@ bool isCompatible(string s1 , string s2,string s3){
 }
 Node *root = create_node("File_input");
 SYMTAB* tab=new SYMTAB();
+
 SYMTAB* gt=tab;
 int curr_scope=tab->SYMSCOPE;
+unordered_map<int,SYMTAB*> tablist;
 
 std::string* target_program;
  int get_siz(string type){
@@ -192,11 +194,14 @@ funcname : DEF NAME {
                 tab->SYMVAL[$2->label].line_no=$1->line_number;
               //  cout<<tab->SYMVAL[$2->label].name<<endl;
                SYMTAB* newtab=new SYMTAB();
+               
+               newtab->tag=$2->label;
                newtab->SYMSCOPE=++curr_scope;
                newtab->parent=tab;
               //  tab->childs.push_back(newtab);
                tab->childs[$2->label] = newtab;
                tab=newtab;
+               tablist[curr_scope]=tab;
              }
              else {
               cout<<"Function redeclared in line no "<< $2->line_number<<endl;
@@ -1492,6 +1497,8 @@ atom_expr :
     $$->temp_var = $2->temp_var;
   }
   |atom trailer_rep{
+
+   
     Node* n = create_node("Atom Expression2");
     $$ = n;
     n->children.push_back($1);
@@ -1510,7 +1517,8 @@ atom_expr :
       }
     }
     if((gt->SYMVAL.find($1->label) != gt->SYMVAL.end()) && $2->category == "Func")
-    {
+    { 
+
       vector<Param*> p = gt->SYMVAL[$1->label].params;
       
       if(p.size() > $2->p_f.size())
@@ -1541,7 +1549,6 @@ atom_expr :
         }
       }
       $$->type = gt->SYMVAL[$1->label].type ;
-
       
     }
     else if($2->category == "Func")
@@ -2050,6 +2057,8 @@ class_name :CLASS NAME{
               //  tab->childs.push_back(newtab);
                tab->childs[$2->label] = newtab;
                tab=newtab;
+
+               tablist[curr_scope]=tab;
              }
              else {
               cout<<"Class redeclared in line no "<< $2->line_number<<endl;

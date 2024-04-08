@@ -1,3 +1,6 @@
+#ifndef asth
+#define asth
+
 #include <algorithm>
 #include <iostream>
 #include <stdio.h>
@@ -35,3 +38,5 @@ void printDot(Node* root, const std::string& filename);
 Node *create_node(std::string label);
 Node *create_node(std::string label, std::string val);
 void simplify(Node* node);
+
+#endif
