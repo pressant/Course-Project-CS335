@@ -73,5 +73,3 @@ void execute_function_call(string name,vector<void*>& p, void* r) {
     execute_function_body(name, Display.top());
     Display.pop();
 }
-
-#endif
