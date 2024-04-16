@@ -6,6 +6,5 @@ fibonacci,1,0,1,int,1
 fibonacci Table : Parent's SCOPE 0
 My SCOPE = 1
 Name,identity,scope,Line Number,Type,Size
-fibonacci,0,1,0,int,0
 n,0,1,1,int,0
 

@@ -234,7 +234,7 @@ funcdef :  funcname parameters {
                 newt->SYMVAL[$1->label].scope=curr_scope;
                 newt->SYMVAL[$1->label].line_no=$1->line_number;
                 newt->SYMVAL[$1->label].name=$1->label;
-                tab->SYMVAL[$1->label].type=$5->type;
+                newt->SYMVAL[$1->label].type=$5->type;
                 newt->SYMVAL[$1->label].size=$2->count;
                 newt->SYMVAL[$1->label].params=$2->p_f;
             }
@@ -262,7 +262,6 @@ funcdef :  funcname parameters {
               cout<<"error in inserting function" << endl;
               //exit(1);;
              }
-            //  cout<<$8->type <<"hiisnfisd "<<endl;
               if(($5->type == "bool" && $8->type == "int")||($5->type == "float" && $8->type =="int"))
               {
 
@@ -271,8 +270,6 @@ funcdef :  funcname parameters {
                 if($5->type != $8->type)cout<<"Function return ";
                 check_type($5->type , $8->type , $1->line_number);
               }
-            //  cout<<$1->line_number<<endl;
-            // check_type($4->type , $5->type , $1->line_number);
              codepush("","$ra","","goto",-1);
              arguments.clear();
          }
@@ -592,7 +589,6 @@ expr_stmt : testlist_star_expr expr_stmt_tail{
 
 
                 //this part to check expression like self.x
-                cout<<$1->label<< " unfdins "<<endl;
                 if(($1->label == "self") && (tab->parent->tab_type == CLS) &&($1->p_f.size() ==1))
                 {
                   // cout<<$1->p_f.size()<<" expr_stmt "<<endl;
@@ -1599,7 +1595,6 @@ atom_expr :
     if((gt->SYMVAL.find($1->label) != gt->SYMVAL.end()) && ($2->category == "Func") && (gt->childs[$1->label]->tab_type != CLS))
     {
       vector<Param*> p = gt->SYMVAL[$1->label].params;
-
       if(p.size() > $2->p_f.size())
       {
         cout<<p.size()<<" "<<$2->p_f.size()<<endl;
@@ -1836,11 +1831,9 @@ atom : LPAREN atom_opt1 RPAREN {
                   // cout<<"Already declared"<<endl;
                   $$->type = tab->SYMVAL[$1->label].type;
                   $$->temp_var = tab->SYMVAL[$1->label].temp_var;
-                  // cout<<$$->type<<" Name "<< yylineno << " "<< $$->label<<endl;
                 }
                 else if(gt->SYMVAL.find($1->label)!=gt->SYMVAL.end())
                 {
-                  // cout<<$$->type << " "<<$$->label<<endl;
                   $$->type = gt->SYMVAL[$1->label].type;
                 }
                 else{
@@ -1982,7 +1975,6 @@ trailer :
     $$->type = $2->type;
     $$->line_number = $1->line_number;
     $$->p_f = $2->p_f;
-    // cout<<$$->p_f.size()<<"hiii "<<endl;
 
   }
   |LPAREN RPAREN{
