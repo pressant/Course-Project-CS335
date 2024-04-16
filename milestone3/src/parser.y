@@ -56,7 +56,7 @@ string extractSubstring(const std::string& str) {
 void diff_data(int x)
 {
   cout<<"Datatype mismatch in line no "<< x <<endl;
- 
+  //exit(1);;
 }
 void check_type(string s1,string s2, int x)
 {
@@ -135,7 +135,7 @@ vector<int> loop_stack;
 %type<node>  test_star_expr classdef classdef_opt1 arglist COMMA_argument_rep argument comp_for_opt comp_iter sync_comp_for
 %type<node> comp_iter_opt comp_for ASYNC_opt comp_if yield_expr yield_arg async_stmt with_stmt class_name
 %type<node> finalfunc range_func
-%type<node> ifkeyword
+
 
 %left OR
 %left AND
@@ -201,14 +201,14 @@ funcname : DEF NAME {
              }
              else {
               cout<<"Function redeclared in line no "<< $2->line_number<<endl;
-                      //exit(1);
+                      //exit(1);;
              }
             // cout<<"funcname "<<$1->line_number<<endl;
           }
          ;
 
 funcdef :  funcname parameters {
-             codepush("begin",$1->label,"","",-1);
+            codepush("begin",$1->label,"","",-1);
             SYMTAB* newt = new SYMTAB();
             newt = tab->parent;
             if(newt->SYMVAL.find($1->label)!= newt->SYMVAL.end())
@@ -221,18 +221,31 @@ funcdef :  funcname parameters {
                 newt->SYMVAL[$1->label].params=$2->p_f;
             }
             for(int i=0;i<arguments.size();i++) { 
-            string s1 = get<0>(arguments[i]);
-            codepush("","popparam","",tab->SYMVAL[s1].temp_var,-1);
-            codepush("",tab->SYMVAL[s1].temp_var,"",get<0>(arguments[i]),-1);}
+              string s1 = get<0>(arguments[i]);
+              codepush("","popparam","",tab->SYMVAL[s1].temp_var,-1);
+              codepush("",tab->SYMVAL[s1].temp_var,"",get<0>(arguments[i]),-1);}
             } 
-            ARROW test COLON suite{
+            ARROW test {
+            SYMTAB* newt = new SYMTAB();
+            newt = tab->parent;
+            if(newt->SYMVAL.find($1->label)!= newt->SYMVAL.end())
+            {
+                newt->SYMVAL[$1->label].identity=FUNC;
+                newt->SYMVAL[$1->label].scope=curr_scope;
+                newt->SYMVAL[$1->label].line_no=$1->line_number;
+                newt->SYMVAL[$1->label].name=$1->label;
+                tab->SYMVAL[$1->label].type=$5->type;
+                newt->SYMVAL[$1->label].size=$2->count;
+                newt->SYMVAL[$1->label].params=$2->p_f;
+            }
+            }COLON suite{
              Node* n = create_node("Function");
              n->children.push_back($1);
              n->children.push_back($2);
              n->children.push_back($4);
              n->children.push_back($5);
-             n->children.push_back($6);
              n->children.push_back($7);
+             n->children.push_back($8);
              $$ =n;
              tab=tab->parent;
              if(tab->SYMVAL.find($1->label)!= tab->SYMVAL.end()){
@@ -247,16 +260,16 @@ funcdef :  funcname parameters {
 
              else{
               cout<<"error in inserting function" << endl;
-              //exit(1);
+              //exit(1);;
              }
-             
-              if(($5->type == "bool" && $7->type == "int")||($5->type == "float" && $7->type =="int"))
+            //  cout<<$8->type <<"hiisnfisd "<<endl;
+              if(($5->type == "bool" && $8->type == "int")||($5->type == "float" && $8->type =="int"))
               {
 
               }
               else {
-                if($5->type != $7->type)cout<<"Function return ";
-                check_type($5->type , $7->type , $1->line_number);
+                if($5->type != $8->type)cout<<"Function return ";
+                check_type($5->type , $8->type , $1->line_number);
               }
             //  cout<<$1->line_number<<endl;
             // check_type($4->type , $5->type , $1->line_number);
@@ -300,6 +313,7 @@ funcdef :  funcname parameters {
                }
                else{
                 cout<<"error in inserting function "<<endl;
+                exit(0);
                }
               if($5->type != "None")
               {
@@ -375,7 +389,7 @@ typedargslist : NAME {
                   n->p_f.push_back(temp);
                   if(tab->SYMVAL.find($1->label)!=tab->SYMVAL.end()){
                   cout<<"Already declared "<<$1->label<<" in line no "<<$1->line_number<<endl;
-                    //exit(1);
+                    //exit(1);;
                   }
                   tab->SYMVAL[$1->label].identity=NORMIE;
                   tab->SYMVAL[$1->label].scope=curr_scope;
@@ -540,7 +554,7 @@ expr_stmt : testlist_star_expr expr_stmt_tail{
                 if(tab->SYMVAL.find($1->label)!=tab->SYMVAL.end()){
                   cout<<"Already declared "<<$1->label<<endl;
                   cout<<endl;
-                          //exit(1);
+                          //exit(1);;
                 }
                   tab->SYMVAL[$1->label].identity=NORMIE;
                   tab->SYMVAL[$1->label].scope=curr_scope;
@@ -569,7 +583,7 @@ expr_stmt : testlist_star_expr expr_stmt_tail{
                 // if($1->type != $2->type)
                 // {
                 //   cout<<"Different datatypes compared in line no "<<$1->line_no<<endl;
-                //           //exit(1);
+                //           //exit(1);;
                 // }
               }
               else if($2->label=="annassign_op")
@@ -585,7 +599,7 @@ expr_stmt : testlist_star_expr expr_stmt_tail{
                   if( tab->parent->SYMVAL.find($1->p_f[0]->par_name)==tab->SYMVAL.end())
                   {
                     cout<<"Use of undeclared attribute for class "<< endl;
-                    //exit(1);
+                    //exit(1);;
                   }
                   else {
 
@@ -596,14 +610,14 @@ expr_stmt : testlist_star_expr expr_stmt_tail{
                 {
                   if(gt->SYMVAL.find($1->label)==gt->SYMVAL.end()){
                   cout<<"Use of undeclared variable " << $1->label <<" in line number "<<$2->line_number<<endl;
-                  //exit(1);
+                  //exit(1);;
                   }
                   
                 }
 
 
               }
-            //   cout << $1->temp_var<<"inside expr_stmt"<<endl;
+              // cout << $1->temp_var<<"inside expr_stmt "<<yylineno<<endl;
               codepush("",$2->temp_var,"",$1->temp_var,-1);
              }
              |testlist_star_expr { $$ = $1;}
@@ -650,7 +664,7 @@ decl_type: NAME {
                 $$ = create_node("decl_type");
                if($1->label != "list"){
                   cout << "Invalid datatype at line no: " << $1->line_number << endl;
-                  //exit(1);
+                  //exit(1);;
                 }
                 $$->children.push_back($1);
                 $$->children.push_back($2);
@@ -692,7 +706,7 @@ annassign : EQUAL_SIGN test{
                    if($2->type == $2->label)
                    {
                       cout<<"Variable not declared or invalid comparison in line no "<<$1->line_number<<endl;
-                      //exit(1);
+                      //exit(1);;
                    }
                    else 
                    $$->type = $2->type;
@@ -820,16 +834,8 @@ async_stmt : ASYNC async_stmt_content
 async_stmt_content : funcdef
                    | for_stmt
                    ;
-ifkeyword : IF test{ Node* n = create_node("ifkeyword");
-                    n->children.push_back($1);
-                    n->children.push_back($2);
-                    codepush("if",$2->temp_var,"0",">",-1);
-                    $$->i_number = inst_num-1;
-                    $$=n;
-                    $$->line_number = $1->line_number;
-                  }
-          
-if_stmt : ifkeyword  COLON suite elif_stmt_rep ELSE COLON suite{
+
+if_stmt : IF test COLON suite elif_stmt_rep ELSE COLON suite{
     Node* n=create_node("if_stmt");
     n->children.push_back($1);
     n->children.push_back($2); 
@@ -838,43 +844,42 @@ if_stmt : ifkeyword  COLON suite elif_stmt_rep ELSE COLON suite{
     n->children.push_back($5);
     n->children.push_back($6); 
     n->children.push_back($7);
+    n->children.push_back($8); 
     $$=n;
     $$->line_number = $1->line_number;
-    codepush("","","","end else",-1);
   }
-    |ifkeyword  COLON suite elif_stmt_rep{
+    | IF test COLON suite elif_stmt_rep{
 
       Node* n=create_node("if_stmt");
       n->children.push_back($1);
       n->children.push_back($2); 
       n->children.push_back($3);
       n->children.push_back($4); 
+      n->children.push_back($5);
       $$=n;
       $$->line_number = $1->line_number;
-      
+
   }
-    | ifkeyword  COLON suite ELSE{codepush("","","","else",-1);
-    code[$1->i_number].index = inst_num;} COLON suite{ 
+    | IF test COLON suite ELSE COLON suite{ 
       Node* n=create_node("if_stmt");
       n->children.push_back($1);
       n->children.push_back($2); 
       n->children.push_back($3);
       n->children.push_back($4); 
-      n->children.push_back($7);
+      n->children.push_back($5);
       n->children.push_back($6); 
+      n->children.push_back($7);
       $$=n;
     $$->line_number = $1->line_number;
-      codepush("","","","end else",-1);
     }
-    | ifkeyword  COLON suite{ 
+    | IF test COLON suite{ 
       Node* n=create_node("if_stmt");
       n->children.push_back($1);
       n->children.push_back($2); 
       n->children.push_back($3);
+      n->children.push_back($4); 
       $$=n;
       $$->line_number = $1->line_number;
-      codepush("","","","end if",-1);
-      code[$1->i_number].index = inst_num;
     }
 ;
 elif_stmt_rep : elif_stmt_rep ELIF test COLON suite {
@@ -916,7 +921,6 @@ for_stmt: FOR exprlist IN range_func{
         codepush("","","","loop:",-1);
         string s2 = $4->temp_var;
         codepush("if",$2->label,s2,">",-1);
-        $1->i_number = inst_num-1;
         codepush("+",$2->label,"1",$2->label,-1);
         loop_stack.push_back(inst_num-2);
          } COLON suite {
@@ -941,12 +945,11 @@ for_stmt: FOR exprlist IN range_func{
       }
       else {
         cout<<"Undeclared variable used as iterator in for statement in line no "<< $1->line_number<<endl;
-         //exit(1);
+         //exit(1);;
       }
 
       $$=n;
       codepush("",to_string(loop_stack[(loop_stack.size())-1]),"","goto",-1); loop_stack.pop_back();codepush("","","","end loop",-1);
-      code[$1->i_number].index = inst_num;
     }
 ;
 range_func : NAME LPAREN test RPAREN{
@@ -958,7 +961,7 @@ range_func : NAME LPAREN test RPAREN{
       $$->temp_var = $3->temp_var;
       if($1->label != "range"){
         cout<<"For loop supports only range function in line no "<<$1->line_number<<endl;
-        //exit(1);
+        //exit(1);;
       }
 
 
@@ -974,12 +977,12 @@ range_func : NAME LPAREN test RPAREN{
       $$->temp_var = $3->temp_var;
       if($1->label != "range"){
         cout<<"For loop supports only range function"<<endl;
-         //exit(1);
+         //exit(1);;
       }
       else if(($3->type != "int")&& ($5->type != "int"))
       {
         cout<<"Invalid datatype used in range function in line no "<<$1->line_number<<endl;
-        //exit(1);
+        //exit(1);;
       }
   }
 ;
@@ -1048,7 +1051,7 @@ or_test_rep :
     if(($3->type != "bool") && ($3->type != "int") || (($1->type != "bool") && ($1->type != "int") ))
     {
       cout<<"Non compatible operand type used for OR operator in line no "<<$1->line_number<<endl;
-      //exit(1);
+      //exit(1);;
     }  
     $$->type = "bool";
     string s1=new_temporary();
@@ -1063,7 +1066,7 @@ or_test_rep :
     if(($2->type != "bool") && ($2->type != "int"))
     {
       cout<<"Non compatible operand type used for OR operator in line no "<<$1->line_number<<endl;
-      //exit(1);
+      //exit(1);;
     }  
     $$->temp_op = "or";
     $$->temp_var = $2->temp_var;
@@ -1078,7 +1081,7 @@ and_test :
     if(($2->type != "bool") && ($2->type != "int") || (($1->type != "bool") && ($1->type != "int") ))
     {
       cout<<"Non compatible operand type used for AND    operator in line no "<<$1->line_number<<endl;
-      //exit(1);
+      //exit(1);;
     }
     $$->type ="bool";
     string s1=new_temporary();
@@ -1100,7 +1103,7 @@ and_test_rep :
     if(($3->type != "bool") && ($3->type != "int") || (($1->type != "bool") && ($1->type != "int") ))
     {
       cout<<"Non compatible operand type used for AND operator in line no "<<$1->line_number<<endl;
-      //exit(1);
+      //exit(1);;
     }  
     $$->type = "bool";
     string s1=new_temporary();
@@ -1116,7 +1119,7 @@ and_test_rep :
     {
       // cout<<$2->type<<endl;
       cout<<"Non compatible operand type used for AND  no operator in line no "<<$1->line_number<<endl;
-      //exit(1);
+      //exit(1);;
     }
     $$->type = "bool";
     $$->temp_var = $2->temp_var;
@@ -1134,7 +1137,7 @@ not_test :
     if(($2->type != "bool") && ($2->type != "int"))
     {
       cout<<"Non compatible operand type used for NOT operator in line no "<<$1->line_number<<endl;
-      //exit(1);
+      //exit(1);;
     }
         $$->type = "bool";
     string s1=new_temporary();
@@ -1476,7 +1479,7 @@ term_rep :
     if((($1->type != "int")&&($1->type != "float"))&&(($2->type != "float")&&($2->type != "int")))
     {
       cout<<"Invalid datatype "<< $1->type << " and "<<$3->type <<" used for operator "<<$2->label<<endl;
-      //exit(1);
+      //exit(1);;
       
     }
     if($3->type != $1->type)
@@ -1505,7 +1508,7 @@ term_rep :
     if(($2->type != "bool")&&($2->type != "float")&&($2->type != "int"))
     {
       cout<<"Invalid datatype used for operator "<<$1->label<<" in line no "<<$1->line_number<<endl;
-      // exit(1);
+      // //exit(1);;
     }
     $$->temp_var = $2->temp_var;
     $$->temp_op = $1->temp_op;
@@ -1524,6 +1527,7 @@ factor :
     n->children.push_back($1);
     n->children.push_back($2);
     $$->line_number = $2->line_number;
+    $$->type = $2->type;
     $$->temp_op=$1->temp_op;
     $$->temp_var=$2->temp_var;
   }
@@ -1598,15 +1602,15 @@ atom_expr :
 
       if(p.size() > $2->p_f.size())
       {
-
+        cout<<p.size()<<" "<<$2->p_f.size()<<endl;
         cout<<"Lesser number of arguments for function call "<< $1->label <<" in line number "<< $1->line_number<<endl;
 
-        //exit(1);
+        //exit(1);;
       }
       else if(p.size() < $2->p_f.size())
       {
         cout<<"Greater number of arguments for function call "<< $1->label <<" in line number "<< $1->line_number<<endl;
-                //exit(1);
+                //exit(1);;
       }
       else {
         for(int i=0;i<p.size();i++)
@@ -1619,13 +1623,12 @@ atom_expr :
             }
             else{
               cout<<" Type mismatch for argument "<<i<<" in function call "<< $1->label <<" in line number "<<$1->line_number<<endl;
-                      //exit(1);
+                      //exit(1);;
             }
           }
         }
       }
       $$->type = gt->SYMVAL[$1->label].type ;
-
       
     }
     else if((gt->SYMVAL.find($1->label) != gt->SYMVAL.end()) && ($2->category == "Func") && (gt->childs[$1->label]->tab_type == CLS))
@@ -1641,12 +1644,12 @@ atom_expr :
         {
          cout<<"Lesser number of arguments for constructor call "<< $1->label <<" in line number "<< $1->line_number<<endl;
 
-         //exit(1);
+         //exit(1);;
         }
         else if(p.size() < $2->p_f.size())
         {
           cout<<"Greater number of arguments for constructor call "<< $1->label <<" in line number "<< $1->line_number<<endl;
-                //exit(1);
+                //exit(1);;
         }
         else {
         for(int i=0;i<p.size();i++)
@@ -1660,7 +1663,7 @@ atom_expr :
             }
             else{
               cout<<" Type mismatch for argument "<<i<<" in function call "<< $1->label <<" in line number "<<$1->line_number<<endl;
-                      //exit(1);
+                      //exit(1);;
             }
           }
         }
@@ -1681,7 +1684,7 @@ atom_expr :
             // cout<<$2->type <<endl;
 
             std::cout <<" Invalid datatype use for len function in line no : "<<$1->line_number<<"\n";
-            //exit(1);
+            //exit(1);;
         }
         $$->type ="int";
       }
@@ -1695,7 +1698,7 @@ atom_expr :
                 if($2->p_f[i]->par_type == $2->p_f[i]->par_name)
                 {
                   cout<<"Use of undeclared variable inside print function " <<" in line number "<<$2->line_number<<endl;
-                  //exit(1);
+                  //exit(1);;
                 }
           }
 
@@ -1705,7 +1708,7 @@ atom_expr :
       else{
 
         cout<<"Undeclared Function in line no : "<< $1->line_number<<endl;
-        //exit(1);
+        //exit(1);;
       }
     }
     else if($2->label == "Trailer5")
@@ -1717,7 +1720,7 @@ atom_expr :
         if(tab->parent->SYMVAL.find($2->type) == tab->parent->SYMVAL.end()) 
         {
           cout<<"Undefined property "<<$2->type<<" for class "<<$1->type<<" used by object "<<$1->label<<" in line no "<<$1->line_number<<endl;
-          //exit(1);
+          //exit(1);;
         }
         $$->type = tab->parent->SYMVAL[$2->type].type;
       }
@@ -1727,7 +1730,7 @@ atom_expr :
         if(gt->childs[$1->type]->SYMVAL.find($2->type) == gt->childs[$1->type]->SYMVAL.end()) 
         {
           cout<<"Undefined property "<<$2->type<<" for class "<<$1->type<<" used by object "<<$1->label<<"in line no "<<$1->line_number<<endl;
-          //exit(1);
+          //exit(1);;
         }
         $$->type = gt->childs[$1->type]->SYMVAL[$2->type].type;
       }
@@ -1751,21 +1754,21 @@ atom_expr :
 
     }
     $$->temp_var = $1->temp_var;
-        for(int i=0;i<arguments.size();i++) { 
-        string s1 = get<0>(arguments[i]);
-        if(tab->SYMVAL.find(s1)!=tab->SYMVAL.end()){
-        codepush("",tab->SYMVAL[s1].temp_var,"","pushparam",-1);
-        
-        } 
-        else{
-            codepush("",get<1>(arguments[i]),"","pushparam",-1);
-        } }
-        if($1->type=="None")
-        codepush("call",$1->label,"","",-1);
-        else{
-          codepush(" ","call",$1->label,"",-1);
-        }
-        arguments.clear();
+    for(int i=0;i<arguments.size();i++) { 
+      string s1 = get<0>(arguments[i]);
+      if(tab->SYMVAL.find(s1)!=tab->SYMVAL.end()){
+      codepush("",tab->SYMVAL[s1].temp_var,"","pushparam",-1);
+      } 
+      else{
+        codepush("",get<1>(arguments[i]),"","pushparam",-1);
+      } 
+    }
+    if($1->type=="None")
+    codepush("call",$1->label,"","",-1);
+    else{
+      codepush(" ","call",$1->label,"",-1);
+    }
+    arguments.clear();
   }
   |atom{
     $$ = $1;
@@ -1787,7 +1790,7 @@ trailer_rep :
     }
     n->children.push_back($2);
     cout<<" Datatypes like in line number "<<$2->line_number <<" not supported for now "<<endl;
-    exit(1);
+    //exit(1);;
 
   }
   | trailer { 
@@ -1979,6 +1982,7 @@ trailer :
     $$->type = $2->type;
     $$->line_number = $1->line_number;
     $$->p_f = $2->p_f;
+    // cout<<$$->p_f.size()<<"hiii "<<endl;
 
   }
   |LPAREN RPAREN{
@@ -2225,7 +2229,7 @@ class_name :CLASS NAME{
              }
              else {
               cout<<"Class redeclared in line no "<< $2->line_number<<endl;
-                      //exit(1);
+                      //exit(1);;
              }
 };
 classdef : class_name LPAREN arglist RPAREN COLON suite{
@@ -2370,7 +2374,10 @@ arglist :
     arguments.push_back(make_tuple($1->label,$1->temp_var, $1->type,0,0));
   };
   |argument{$$ =$1;
-
+    Param* temp = new Param();
+    temp->par_type=$1->type;
+    temp->par_name=$1->label;
+        $$->p_f.push_back(temp);
     arguments.push_back(make_tuple($1->label,$1->temp_var, $1->type,0,0));
   }
 ;
@@ -2530,7 +2537,7 @@ int main(int argc, char* argv[]) {
     yyin = fopen(input_filename, "r");
     if(yyin == NULL) {
         cerr << ": Error: Input file " << input_filename << " not found.\n";
-        //exit(1); 
+        //exit(1);; 
     }
     yyparse();
     cout<<endl;

@@ -90,9 +90,8 @@ public:
             SYMTAB* s=findmytab(target,it.second);
             if(s) return s;
            }
-           return NULL;
-
-    }
+           return NULL;
+        }
     void PrintSYMTAB() {
         printf("SYMBOL TABLE\n");
         printf("Scope : %d\n", SYMSCOPE);
