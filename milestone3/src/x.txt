@@ -1,0 +1,202 @@
+name
+name
+colon
+tfpdef1
+enter_symbol5
+tfpdef test type:int
+entered enter_symbol
+array
+offset:       4,0
+array
+int
+comma_brack1
+typedargslist4
+parameters1
+atom5
+colon
+power1
+factor4
+term1
+arith_expr1
+shift_arith1
+and_expr1
+xor_expr1
+expr1
+g1
+comparison2
+not_test2
+f1
+and_test1
+e1
+or_test1
+test2
+def1
+enter_symbol1
+entered enter_symbol
+bubbleSort
+offset:       12,4
+bubbleSort
+None Type
+symbol_table1
+created table in func_table_lookup
+token in symbol tablebubbleSort
+it->children...bubbleSort
+
+
+
+0array
+fejiefjif
+n1
+name
+colon
+equal_to
+atom1
+atom
+assignment_stmt3
+enter_symbol10
+entered enter_symbol
+x
+offset:       16,12
+x
+int
+$1->typeint$5->typeint
+
+
+12x
+fejiefjif
+compound_stmt8
+statement1
+statements1
+n1
+statement3
+statements2
+name
+atom6
+entered
+entered
+power1
+factor4
+term1
+arith_expr1
+shift_arith1
+and_expr1
+xor_expr1
+expr1
+g1
+comparison2
+not_test2
+f1
+and_test1
+e1
+or_test1
+test2
+argument5
+comma_brack1
+arglist1
+print_stmt1
+compound_stmt7
+statement1
+statements2
+n1
+statement3
+statements2
+n1
+statement3
+statements2
+n1
+statement3
+statements2
+n1
+statement3
+statements2
+suite2
+symbol_table5
+compound_stmt5
+statement1
+statements1
+name
+parameters2
+colon
+def2
+enter_symbol2
+entered enter_symbol
+main
+offset:       24,16
+main
+function
+symbol_table2
+created table in func_table_lookup
+token in symbol tablemain
+it->children...main
+def done
+n1
+name
+colon
+equal_to
+atom1
+atom
+assignment_stmt3
+enter_symbol10
+entered enter_symbol
+data
+offset:       28,24
+data
+int
+$1->typeint$5->typeint
+
+
+24data
+fejiefjif
+compound_stmt8
+statement1
+statements1
+n1
+statement3
+statements2
+name
+name
+tfpdef2
+comma_brack1
+typedargslist4
+parameters1
+v1
+atom79
+
+
+
+24datat_2
+fejiefjif
+epfeifef
+entered
+power1
+factor4
+term1
+arith_expr1
+shift_arith1
+and_expr1
+xor_expr1
+expr1
+g1
+comparison2
+not_test2
+f1
+and_test1
+e1
+or_test1
+test2
+test_or_starexp1
+comma_brack1
+testlist_star_expr2
+expr_stmt3
+small_stmt1
+n1
+simple_stmt2
+statement2
+statements2
+suite2
+symbol_table5
+compound_stmt5
+statement1
+statements2
+no children
+no children

@@ -1,57 +1,26 @@
-#include <iostream>
-#include <vector>
-#include <variant>
-#include <map>
-#include <string>
-#include <algorithm>
-#include <fstream>
-#include <sstream>
-#include <queue>
-#include <stack>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
-#include <tuple>
-#include <bitset>
-#include <array>
-#include <deque>
-#include <list>
-#include <functional>
-#include <iterator>
-#include <iomanip>
-#include <memory>
-#include <numeric>
-#include <stdexcept>
-#include <utility>
-#include <forward_list>
-#include <variant>
+#include<bits/stdc++.h>
 using namespace std;
 ifstream f_in;
 ofstream f_out;
-map<string,string> t; //map for variables and stored registers
-map<string,string> r; //whether a register is empty or being used
-map<string,string> s;
+map<string,string> reg_map; // t map for variables and stored registers
+map<string,string> temp_reg; // r whether a register is empty or being used
+map<string,string> init_reg; // s reg and initialised value is stored
 vector<vector<string> >lines;//tokens for every line
 vector<string> curr_func;
 
 void printfunc(string a, string b, string c){
-    f_out << "\t" << a << " "  << b << " " << c << endl;
-    // if(b=="")f_out<<endl;
-    // else{
-    //     if(b.size()>3 && b.substr(0,3)=="rbp"){
-    //         string p = b.substr(4,b.size()-5);
-    //         f_out<<"\t"<<p<<"(%rbp)";
-    //     }else if(b[0]=='r') f_out<<"\t\%"<<b;
-    //     else f_out<<"\t"<<b;
-    //     if(c=="") f_out<<endl;
-    //     else{
-    //         if(c.size()>3 && c.substr(0,3)=="rbp"){
-    //             string p = c.substr(4,c.size()-5);
-    //             f_out<<", "<<p<<"(%rbp)"<<endl;
-    //         }else if(c[0]=='r') f_out<<", \%"<<c<<endl;
-    //         else f_out<<", "<<c<<endl;
-    //     }
-    // }
+     try {
+        int value = std::stoi(b);
+        if (value >= 0 && value <= 9) {
+            b = '$' + b;
+        }
+    } catch (const std::invalid_argument& e) {
+        std::cerr << "Invalid argument: " << e.what() << std::endl;
+    }
+    if(c != "") {
+        f_out << "\t" << a << " "  << b << ", " << c << endl;
+    }
+    else f_out << "\t" << a << " "  << b << endl;
 }
 
 int get_size(ifstream& file){
@@ -106,38 +75,17 @@ int var_size(string str, ifstream& file) {
     return lVar_size;
 }
 
-// string get_empty_reg(string reg = ""){
-//     if(r.empty()) return "r8";
-//     for(int l=8;l<16;l++){
-//         if(r.find("r"+to_string(l))==r.end()) return "r"+to_string(l);
-//     }
-//     if(reg != "r8") reg = "r8";
-//     else reg = "r9";
-//     print("pushq",reg,"");
-//     k-=8;
-//     t.erase(r[reg]);
-//     s[r[reg]] = "rbp["+to_string(k)+"]";
-//     r.erase(reg);
-//     return reg;
-// }
-
-
 string getreg(string temp_var){
-    if(r.size() == 0){ 
-        string reg = "rsi" ;
-        r.insert({temp_var,reg});
-        return reg;
-    } else if(r.size() == 1){
-        string reg = "rdi";
-        r.insert({temp_var,reg});
+     if(temp_reg.size() == 0){
+        string reg = "%rdi";
+        temp_reg.insert({temp_var,reg});
         return reg;
     } else {
-        string reg = "r" + to_string(r.size() + 6);
-        r.insert({temp_var,reg});
+        string reg = "%r" + to_string(reg_map.size() + 7);
+        temp_reg.insert({temp_var,reg});
         return reg;
     }
 }
-
 
 int main(int argc, char**argv){
     string input,output;
@@ -201,15 +149,10 @@ while(getline(f_in,str)){
     }
     if(token.size()!=0)tokens.push_back(token);
     if(tokens.size())lines.push_back(tokens);
-}  f_out<<"\t.section .data"<<endl;
-//<<".LC0:"<<endl<<"\t.string \"\%ld\\n\"\n\t.text"<<endl;
-/*
-if(lines[0][0]!=".globl"){
-    cout<<"main function not called"<<endl;
-    exit(1);
-}
-*/
+}  f_out<<"\t.text"<<endl;
+f_out<<"\t.section .rodata"<<endl<<".LC0:"<<endl<<"\t.string \"\%ld\\n\"\n\t.text"<<endl;
 int k = 0;
+int local_variable = 0;
 for(int i=0;i<lines.size();i++){
     string reg1,reg2;
     if(lines[i][0] == "BeginFunc"){
@@ -217,8 +160,8 @@ for(int i=0;i<lines.size();i++){
         f_out<<"\t.globl "<<lines[i][1]<<endl;
         f_out<<"\t.type "<<lines[i][1]<<"@function"<<endl;
         f_out << lines[i][1]<<":"<<endl;   
-        printfunc("pushq","rbp","");
-        printfunc("movq","rsp","rbp");
+        printfunc("pushq","%rbp","");
+        printfunc("movq","%rsp","%rbp");
 
         string filename = lines[i][1] + ".csv";
         ifstream file(filename);
@@ -228,19 +171,78 @@ for(int i=0;i<lines.size();i++){
         }
         int local_var_size = get_size(file);
         file.close();
-        f_out <<"\t" <<"sub " << "$" << local_var_size << " %rsp" << endl;
+        f_out <<"\t" <<"subq " << "$" << local_var_size << ", %rsp" << endl;
     }   
-    else if(lines[i][0].substr(0,2) == ".L"){
+      else if(lines[i][0] == "EndFunc"){
+        cout << "endfunc1" << endl;
+        for(auto it = temp_reg.begin(); it != temp_reg.end(); it++){
+            cout << it->first << " " << it->second << endl;
+            f_out << "\tpop\t" << it->second << endl;
+        }
+        //printfunc("movq","%rbp","%rsp");
+        //f_out << "\tpopq\t"<<"%rbp"<<endl;
+        f_out << "\tleave" << endl;
+        f_out << "\tret" << endl;
+        f_out << "\n" << "\n" << endl;
+        temp_reg.clear();
+        reg_map.clear();
+        init_reg.clear();
+
+    }
+     else if(lines[i][0].substr(0,2) == ".L" || lines[i][0].substr(0,3)=="end"){
         f_out << "   " << lines[i][0] <<":" << endl;
+    }
+    else if(lines[i][0] == "print"){
+       string temp=lines[i][1];
+       cout<<"print"<<endl;
+       if(reg_map.find(temp)==reg_map.end()){cout<<"hi"<<endl;printfunc("movq",init_reg[temp],"%rsi");cout<<"bye"<<endl;}
+       else{
+        printfunc("movq",reg_map[temp],"%rsi");
+    
+        reg_map.erase(temp);
+       }
+        printfunc("leaq",".LC0(%rip)","%rdi");
+        printfunc("movq","$0","%rax");
+        printfunc("call","printf@PLT","");
+    }
+   
+    // else if(lines[i][3]=="array" && lines[i].size()==4){
+    //     printfunc("pushq",t[lines[i][2]],"");
+    //     k-=8;
+    //     s[lines[i][1]]=""
+
+    // }
+   else if(lines[i][0] == "goto") {
+        f_out <<"\t" <<"jmp " << lines[i][1] << endl;
     }
     else if(lines[i][2] == "popparam"){
         reg1 = getreg(lines[i][0]);
-        t.insert({lines[i][0],reg1});
+        reg_map.insert({lines[i][0],reg1});
     }
-    else if(lines[i][0].substr(0,2) == "t_" && lines[i].size() == 3){
-        s.insert({lines[i][0],lines[i][2]});
+   
+    else if(lines[i][2]=="pushparam"){cout<<"ooo"<<endl;continue;}
+    else if(lines[i][0].substr(0,2)!="t_" && lines[i][2].substr(0,2) == "t_" && lines[i].size() == 3 && lines[i-1][2] == "pushparam"){
+        cout<<"pushed"<<endl;
+       if(reg_map.find(lines[i][0])==reg_map.end()){
+             reg1=getreg(lines[i][0]);
+             string s4 = init_reg[lines[i][2]];
+             printfunc("movq",reg_map[lines[i][2]],reg1);
+             cout<<"pushed1"<<endl;
+       }
+       else reg1=reg_map[lines[i][0]];
+       reg_map.erase(lines[i][0]);
+       printfunc("pushq",reg1,"");
+       temp_reg.erase(lines[i][0]);
+       cout<<"pushed2"<<endl;
     }
-    else if(lines[i][2][0] == 't' && lines[i].size() == 3) {
+   
+    else if(lines[i][0].substr(0,2) == "t_" && lines[i].size() == 3 && lines[i][2][0] != 't'){
+        // f_out<<"imm1"<<endl;
+        init_reg.insert({lines[i][0],lines[i][2]});
+        cout<<"lines[0][2]"<<lines[i][2]<<endl;
+        // f_out<<"imm2"<<endl;
+    }
+    else if(lines[i][2].substr(0,2) == "t_" && lines[i].size() == 3) {
         string filename = curr_func[curr_func.size()-1] + ".csv";
         ifstream file(filename);
         if (!file.is_open()) {
@@ -253,34 +255,34 @@ for(int i=0;i<lines.size();i++){
         if(local_var_size < 8){
         k = k - local_var_size;
         string s1 = to_string(k) + "(%rsp)";
-        t.insert({lines[i][2],s1});
-        f_out << "\tmovq " << "$" << s[lines[i][2]] <<" " << s1 << endl;
+        reg_map.insert({lines[i][2],s1});
+        f_out << "\tmovq " << "$" << init_reg[lines[i][2]] <<", " << s1 << endl;
         // curr_func[curr_func.size()-1];
         // lines[i][0] 
         }
     }
    
-    else if(lines[i][0] == "goto") {
-        f_out <<"\t" <<"jmp " << lines[i][1] << endl;
-    } else if(lines[i][0].substr(0, 4) == "call") {
+     else if(lines[i][0].substr(0, 4) == "call") {
         f_out <<"\t" <<"call " << lines[i][0].substr(4) << endl;
-    } else if(lines[i][0].size()>=5 && lines[i][0].substr(0,5)=="print"){
-       string temp=lines[i][1];
-       if(t.find(temp)==t.end())printfunc("movq",t[temp],"rsi");
-       else{
-        printfunc("movq",t[temp],"rsi");
-        r.erase(t[temp]);
-        t.erase(temp);
-       }
-        printfunc("leaq",".LC0(%rip)","rdi");
-        printfunc("movq","$0","rax");
-        printfunc("call","printf@PLT","");
-    } else if(lines[i][0] == "if") {
+       
+    }  else if(lines[i][0] == "if") {
         string reg_l, reg_r;
         if(lines[i].size() == 6) {
-            reg_l = t[lines[i][1]];
-            reg_r = t[lines[i][3]];
-            printfunc("cmpq", reg_l, reg_r);
+            if(reg_map.find(lines[i][1])!=reg_map.end()){
+            reg_l = reg_map[lines[i][1]];
+        }
+        else if(init_reg.find(lines[i][1])!=init_reg.end()){
+            reg_l="$" + init_reg[lines[i][1]]; 
+        }
+        if(reg_map.find(lines[i][3])!=reg_map.end()){
+            reg_r = reg_map[lines[i][3]];
+        }
+        else if(init_reg.find(lines[i][3])!=init_reg.end()){
+            reg_r="$" + init_reg[lines[i][3]]; 
+        } 
+        if(lines[i].size() == 6) {
+            
+            printfunc("cmpq", reg_r, reg_l);
             if(lines[i][2] == "<") printfunc("jl",lines[i][5],"");
             if(lines[i][2] == ">") printfunc("jg",lines[i][5],"");
             if(lines[i][2] == ">=") printfunc("jge",lines[i][5],"");
@@ -289,51 +291,61 @@ for(int i=0;i<lines.size();i++){
             if(lines[i][2] == "!=") printfunc("jne",lines[i][5],"");
         } else if(lines[i].size() == 4) {
             if(lines[i][1][0] == '!') {
-                string reg_str = lines[i][0].substr(1);
-                reg_l = t[str];
+                string reg_str = lines[i][1].substr(1,lines[i][1].size());
+                f_out<<"\t"<<reg_str<<endl;
+                reg_l = reg_map[str];
                 printfunc("cmpq", reg_l, "$0");
                 printfunc("jz", lines[i][3], "");
             } else if (lines[i][1][0] != '!') {
-                reg_l = t[lines[i][1]];
+                reg_l = reg_map[lines[i][1]];
                 printfunc("cmpq", reg_l, "$0");
                 printfunc("jnz", lines[i][3], "");
             }
         }
-    } else{
 
-        if(t.find(lines[i][2])==t.end()){
-            reg1=getreg(lines[i][0]);
-            printfunc("movq",lines[i][2],reg1);
-            t[lines[i][2]] = reg1;
-        }else{
-            reg1=t[lines[i][2]];
+    } else if(lines[i].size() == 5){
+        cout<<"entered size 5 "<<endl;
+        if(reg_map.find(lines[i][0])==reg_map.end()){
+            reg2=getreg(lines[i][0]);
+            reg_map.insert({lines[i][0],reg2});
         }
-        t.erase(lines[i][2]);
-        if(s.find(lines[i][4])==s.end()){
-            reg2=getreg(lines[i][4]);
-            printfunc("movq",lines[i][4],reg2);
-            s[lines[i][2]] = reg1;
-        } 
-        else{
-            reg2="$" + s[lines[i][4]];
+        else {
+            reg2 = reg_map[lines[i][0]];
         }
-        t.erase(lines[i][4]);
-            if(lines[i][3]=="+")printfunc("addq",reg2,reg1);
-            else if(lines[i][3]=="-")printfunc("subq",reg2,reg1);
-            else if(lines[i][3]=="*")printfunc("imulq",reg2,reg1);
+        if(reg_map.find(lines[i][2])!=reg_map.end() && lines[i][0] != lines[i][2]){
+            reg1 = reg_map[lines[i][2]];
+            printfunc("movq",reg1,reg2);
+        }else if(init_reg.find(lines[i][2]) != init_reg.end()){
+           reg1 = "$" + init_reg[lines[i][2]];
+           printfunc("movq",reg1,reg2);
+        }
+        
+        if(reg_map.find(lines[i][4])!=reg_map.end()){
+            reg1 = reg_map[lines[i][4]];
+            
+        }else if(init_reg.find(lines[i][4]) != init_reg.end()){
+           reg1 = "$" + init_reg[lines[i][4]];
+        }
+        else if(lines[i][4] == "1"){
+            reg1 = "$1";
+        }
+        reg_map.erase(lines[i][4]);
+            if(lines[i][3]=="+")printfunc("addq",reg1,reg2);
+            else if(lines[i][3]=="-")printfunc("subq",reg1,reg2);
+            else if(lines[i][3]=="*")printfunc("imulq",reg1,reg2);
             else if(lines[i][3]=="/"|| lines[i][3]=="%"){
                 printfunc("movq",reg1,"rax");//doubt
-            }else if(lines[i][3]=="&")printfunc("andq",reg2,reg1);
-            else if(lines[i][3]=="|")printfunc("orq",reg2,reg1);
-            else if(lines[i][3]=="^")printfunc("xorq",reg2,reg1);
-            r[reg1]=lines[i][0];
-            r.erase(reg2);
-            t[lines[i][0]]=reg1;//reg1=reg1+reg2
+            }else if(lines[i][3]=="&")printfunc("andq",reg1,reg2);
+            else if(lines[i][3]=="|")printfunc("orq",reg1,reg2);
+            else if(lines[i][3]=="^")printfunc("xorq",reg1,reg2);
+            
+            cout<<"exit 5"<<endl;
 
     }
     
+cout<<"i:"<<i<<endl; 
 }
-  
+}
 }
 //sub13 ,rbp
 

@@ -1770,6 +1770,7 @@ atom_expr :
 
     }
     $$->temp_var = $1->temp_var;
+    cout<<arguments.size()<<" \n";
     for(int i=0;i<arguments.size();i++) { 
       string s1 = get<0>(arguments[i]);
       if(tab->SYMVAL.find(s1)!=tab->SYMVAL.end()){
@@ -2554,7 +2555,7 @@ int main(int argc, char* argv[]) {
     }
     yyparse();
     cout<<endl;
-    gt->WriteAllSYMTABsToCSV("symtabs.csv", gt);
+    gt->WriteAllSYMTABsToCSV("global.csv", gt);
     print3ac();
     fclose(yyin);
     simplify(root);

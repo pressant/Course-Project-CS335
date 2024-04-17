@@ -91,7 +91,8 @@ public:
             if(s) return s;
            }
            return NULL;
-        }
+
+    }
     void PrintSYMTAB() {
         printf("SYMBOL TABLE\n");
         printf("Scope : %d\n", SYMSCOPE);
@@ -115,21 +116,19 @@ public:
         ti.second->PrintSYMTAB();
     }
 }
-     void WriteSYMTABToCSV(ofstream& file, SYMTAB* symtab) {
-    if(symtab->parent!=nullptr) file<<"Parent's SCOPE "<<symtab->parent->SYMSCOPE<<endl;
-    else file<<"Global SCOPE"<<endl;
-    file<<"My SCOPE = "<<symtab->SYMSCOPE<<endl;
+     void WriteSYMTABToCSV(const string& filename, SYMTAB* symtab) {
+    ofstream file(filename);
     
-    file << "Name,identity,scope,Line Number,Type,Size\n";
+    file << "Name,type,Line Number,scope,identity,Size\n";
 
     for (const auto& entry : symtab->SYMVAL) {
         int x=entry.second.identity==FUNC;
-        file << entry.first << "," << x << "," << symtab->SYMSCOPE << "," << entry.second.line_no << "," << entry.second.type << "," << entry.second.size<<endl;
+        file << entry.first << "," << entry.second.type << "," << entry.second.line_no << "," << symtab->SYMSCOPE << "," << x << "," << entry.second.size<<endl;
     }
     file<<endl;
     for (const auto& child : symtab->childs) {
-        file<< child.first <<" Table : ";
-        WriteSYMTABToCSV(file, child.second);
+        string filenam=child.first+".csv";
+        WriteSYMTABToCSV(filenam, child.second);
     }
     }
 
@@ -141,17 +140,9 @@ public:
         return;
     }
 
-    WriteSYMTABToCSV(file, rootSymtab);
+    WriteSYMTABToCSV(filename, rootSymtab);
 
     file.close();
     }
 
 };
-
-
-
-
-
-
-
-
