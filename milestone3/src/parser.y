@@ -134,7 +134,7 @@ vector<int> loop_stack;
 %type<node> testlist_comp testlist_comp_c1 testlist_comp_c2 subscriptlist COMMA_subscript_rep subscript test_opt1 sliceop exprlist COMMA_expr_star_expr_rep testlist COMMA_test_rep
 %type<node>  test_star_expr classdef classdef_opt1 arglist COMMA_argument_rep argument comp_for_opt comp_iter sync_comp_for
 %type<node> comp_iter_opt comp_for ASYNC_opt comp_if yield_expr yield_arg async_stmt with_stmt class_name
-%type<node> finalfunc range_func
+%type<node> finalfunc range_func ifkeyword 
 
 
 %left OR
@@ -834,8 +834,16 @@ async_stmt : ASYNC async_stmt_content
 async_stmt_content : funcdef
                    | for_stmt
                    ;
-
-if_stmt : IF test COLON suite elif_stmt_rep ELSE COLON suite{
+ifkeyword : IF test{ Node* n = create_node("ifkeyword");
+                    n->children.push_back($1);
+                    n->children.push_back($2);
+                    codepush("if",$2->temp_var,"0",">",-1);
+                    $$->i_number = inst_num-1;
+                    $$=n;
+                    $$->line_number = $1->line_number;
+                  }
+          
+if_stmt : ifkeyword  COLON suite elif_stmt_rep ELSE COLON suite{
     Node* n=create_node("if_stmt");
     n->children.push_back($1);
     n->children.push_back($2); 
@@ -844,42 +852,43 @@ if_stmt : IF test COLON suite elif_stmt_rep ELSE COLON suite{
     n->children.push_back($5);
     n->children.push_back($6); 
     n->children.push_back($7);
-    n->children.push_back($8); 
     $$=n;
     $$->line_number = $1->line_number;
+    codepush("","","","end else",-1);
   }
-    | IF test COLON suite elif_stmt_rep{
+    |ifkeyword  COLON suite elif_stmt_rep{
 
       Node* n=create_node("if_stmt");
       n->children.push_back($1);
       n->children.push_back($2); 
       n->children.push_back($3);
       n->children.push_back($4); 
-      n->children.push_back($5);
       $$=n;
       $$->line_number = $1->line_number;
-
+      
   }
-    | IF test COLON suite ELSE COLON suite{ 
+    | ifkeyword  COLON suite ELSE{codepush("","","","else",-1);
+    code[$1->i_number].index = inst_num;} COLON suite{ 
       Node* n=create_node("if_stmt");
       n->children.push_back($1);
       n->children.push_back($2); 
       n->children.push_back($3);
       n->children.push_back($4); 
-      n->children.push_back($5);
-      n->children.push_back($6); 
       n->children.push_back($7);
+      n->children.push_back($6); 
       $$=n;
     $$->line_number = $1->line_number;
+      codepush("","","","end else",-1);
     }
-    | IF test COLON suite{ 
+    | ifkeyword  COLON suite{ 
       Node* n=create_node("if_stmt");
       n->children.push_back($1);
       n->children.push_back($2); 
       n->children.push_back($3);
-      n->children.push_back($4); 
       $$=n;
       $$->line_number = $1->line_number;
+      codepush("","","","end if",-1);
+      code[$1->i_number].index = inst_num;
     }
 ;
 elif_stmt_rep : elif_stmt_rep ELIF test COLON suite {
@@ -921,6 +930,7 @@ for_stmt: FOR exprlist IN range_func{
         codepush("","","","loop:",-1);
         string s2 = $4->temp_var;
         codepush("if",$2->label,s2,">",-1);
+        $1->i_number = inst_num-1;
         codepush("+",$2->label,"1",$2->label,-1);
         loop_stack.push_back(inst_num-2);
          } COLON suite {
@@ -945,11 +955,12 @@ for_stmt: FOR exprlist IN range_func{
       }
       else {
         cout<<"Undeclared variable used as iterator in for statement in line no "<< $1->line_number<<endl;
-         //exit(1);;
+         //exit(1);
       }
 
       $$=n;
       codepush("",to_string(loop_stack[(loop_stack.size())-1]),"","goto",-1); loop_stack.pop_back();codepush("","","","end loop",-1);
+      code[$1->i_number].index = inst_num;
     }
 ;
 range_func : NAME LPAREN test RPAREN{
@@ -1690,6 +1701,11 @@ atom_expr :
       }
       else if( $1->label == "print")
       {
+        if($2->p_f.size() >1)
+        {
+          cout<<"More than one argument given in print in line number "<<$2->line_number <<endl;
+          //exit(1);
+        }
         for(int i = 0;i<$2->p_f.size() ; i++)
         {
           // cout<<$2->p_f[i]->par_type<<" "<<endl;

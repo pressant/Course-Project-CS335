@@ -1,6 +1,5 @@
 #include <iostream>
 #include "parser.hpp"
-#include "x86.cpp"
 using namespace std;
 
 extern int yydebug;
