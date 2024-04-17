@@ -1,9 +1,7 @@
-def bubbleSort(array:int) -> None:
-    x:int = 5
-    print(array)
+def sum(x:int , y:int)->int:
+    z:int = x + y
+    return z
 
-
-
-def main():
-  data: int = 2
-  bubbleSort(data)
+x:int = 1
+y:int =5
+print(sum(x,y))
