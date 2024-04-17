@@ -1,4 +1,5 @@
-def fibonacci(n: int) -> int:
-  return fibonacci(n - 1) 
-#   return 1
-  
+# Python code
+x :int = 5
+y :int = 10
+z :int = x + y
+print(z)

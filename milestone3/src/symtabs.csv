@@ -1,10 +1,29 @@
 Global SCOPE
 My SCOPE = 0
 Name,identity,scope,Line Number,Type,Size
-fibonacci,1,0,1,int,1
+main,1,0,20,None,0
+compute_avg,1,0,11,float,1
+compute_min,1,0,5,float,0
+min_value,0,0,3,float,0
+data,0,0,1,list[float],0
 
-fibonacci Table : Parent's SCOPE 0
+main Table : Parent's SCOPE 0
+My SCOPE = 3
+Name,identity,scope,Line Number,Type,Size
+b,0,3,22,float,0
+a,0,3,21,list[float],0
+
+compute_avg Table : Parent's SCOPE 0
+My SCOPE = 2
+Name,identity,scope,Line Number,Type,Size
+i,0,2,14,int,0
+sum,0,2,13,float,0
+avg_value,0,2,12,float,0
+data,0,2,11,list[float],0
+
+compute_min Table : Parent's SCOPE 0
 My SCOPE = 1
 Name,identity,scope,Line Number,Type,Size
-n,0,1,1,int,0
+a,0,1,7,float,0
+min_value,0,1,6,float,0
 

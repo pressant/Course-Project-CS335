@@ -192,6 +192,7 @@ funcname : DEF NAME {
                 tab->SYMVAL[$2->label].line_no=$1->line_number;
               //  cout<<tab->SYMVAL[$2->label].name<<endl;
                SYMTAB* newtab=new SYMTAB();
+               newtab->SYMTAB_NAME = $2->label;
                newtab->SYMSCOPE=++curr_scope;
                newtab->parent=tab;
                newtab->tab_type = FUNC;
@@ -210,6 +211,7 @@ funcname : DEF NAME {
 funcdef :  funcname parameters {
             codepush("begin",$1->label,"","",-1);
             SYMTAB* newt = new SYMTAB();
+
             newt = tab->parent;
             if(newt->SYMVAL.find($1->label)!= newt->SYMVAL.end())
             {
@@ -426,7 +428,6 @@ typedargslist : NAME {
                   n->p_f=t2;
                 }
               | NAME COLON datatype COMMA typedargslist {
-                  if(yybye) cout<<"LINE 203";
                   Node *n = create_node("Typedargslist4");
                   n->children.push_back($1);
                   n->children.push_back($2);
@@ -792,6 +793,9 @@ return_stmt: RETURN testlist{
               n->children.push_back($2);      
               $$=n;
               $$->type = $2->type;
+              // cout<<gt->SYMVAL[tab->SYMTAB_NAME].type <<"hii"<<endl;
+              // cout<<$2->type<<endl;
+              check_type($$->type , gt->SYMVAL[tab->SYMTAB_NAME].type,$1->line_number);
               codepush("",$2->temp_var,"","pushparam",-1);
             }
             | RETURN { $$ = $1; $$->type = "None";}
@@ -1506,6 +1510,8 @@ term_rep :
       cout<<"Invalid datatype used for operator "<<$1->label<<" in line no "<<$1->line_number<<endl;
       // //exit(1);;
     }
+    if($1->type == "/")
+     $$->type = "float";
     $$->temp_var = $2->temp_var;
     $$->temp_op = $1->temp_op;
     }
@@ -1597,7 +1603,6 @@ atom_expr :
       vector<Param*> p = gt->SYMVAL[$1->label].params;
       if(p.size() > $2->p_f.size())
       {
-        cout<<p.size()<<" "<<$2->p_f.size()<<endl;
         cout<<"Lesser number of arguments for function call "<< $1->label <<" in line number "<< $1->line_number<<endl;
 
         //exit(1);;
@@ -2209,8 +2214,8 @@ class_name :CLASS NAME{
                 tab->SYMVAL[$2->label].identity=CLS;
                 tab->SYMVAL[$2->label].scope=curr_scope;
                 tab->SYMVAL[$2->label].line_no=$1->line_number;
-               cout<<tab->SYMVAL[$2->label].name<<endl;
                SYMTAB* newtab=new SYMTAB();
+               newtab->SYMTAB_NAME = $2->label;
                newtab->SYMSCOPE=++curr_scope;
                newtab->parent=tab;
                newtab->tab_type = 3;

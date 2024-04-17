@@ -9,7 +9,7 @@ def multiply(x:int, y:int)->int:
 
 def divide(x:int, y:int)->float:
     if y == 0:
-        return "Cannot divide by zero!"
+        return 1.1
     return x / y
 
 def power(x:int, y:int)->int:

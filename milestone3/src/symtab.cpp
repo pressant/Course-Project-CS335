@@ -75,7 +75,7 @@ public:
     unordered_map<string,SYMTAB*> childs;
     SYMTAB* parent;
     int tab_type;
-
+    string SYMTAB_NAME;
     // Constructor
     SYMTAB() {
         SYMSCOPE = 0;
