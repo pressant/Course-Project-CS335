@@ -1,21 +1,5 @@
-BeginFunc sum
-t_0 = popparam
-x = t_0
-t_1 = popparam
-y = t_1
-z = t_0
-pushparam = t_0
-EndFunc
 BeginFunc main
-t_2 = 1
-t_3 = 2
-callsum
-t_4 = returnpop
-print t_4
+t_0 = 5
+x = t_0
+print t_0
 EndFunc
-t_5 = '__main__'
-.L1
-if  != t_5  goto end.L1
-callmain
-t_7 = returnpop
-end.L1

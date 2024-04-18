@@ -80,7 +80,7 @@ void print3ac(){
             tac_file<<i<<":  EndFunc"<<endl<<endl;
         }
         else if(code[i].op == "if"){
-            tac_file<<i<<":  if "<<code[i].arg1<<" "<<code[i].result<<" "<<code[i].arg2<<" goto" <<"if_loop" +code[i].index<<"\n";
+            tac_file<<i<<":  if "<<code[i].arg1<<" "<<code[i].result<<" "<<code[i].arg2<<" goto" << code[i].index<<"\n";
         }
         else if(code[i].result=="goto"){
             tac_file<<i<<":  goto "<<code[i].arg1<<endl;

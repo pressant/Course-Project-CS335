@@ -321,7 +321,7 @@ funcdef :  funcname parameters {
               }
             // check_type("void" , $3->type , $1->line_number);
              }
-             codepush("","EndFunc","","goto",-1);
+             codepush("","$ra","","goto",-1);
              arguments.clear();
          }
        ;

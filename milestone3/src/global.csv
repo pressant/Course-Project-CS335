@@ -1,2 +1,2 @@
 token,type,line no,scope
-x,int,3,main
+main,None Type,1,global

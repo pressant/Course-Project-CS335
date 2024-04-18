@@ -1,7 +1,5 @@
-def sum(x:int , y:int)->int:
-    z:int = x + y
-    return z
+def main()->None:
+    x:int = 5
+    print(x)
 
-x:int = 1
-y:int =5
-print(sum(x,y))
+    

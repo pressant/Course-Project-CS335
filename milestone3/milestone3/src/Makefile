@@ -3,43 +3,6 @@ all: parser.cpp scanner.cpp
 	bison -d -Wcounterexamples -o parser.cpp parser.y 2> /dev/null
 	flex -o scanner.cpp lexer.l
 	g++ -w parser.cpp scanner.cpp ast.cpp -o parse -std=c++11
-	make clean2
-	./parser test.py > /dev/null
-	./x86_gen --input=3ac.txt --output=5.s >/dev/null 2>/dev/null
 
 clean:
-	rm -f *.csv 5.s 3ac.txt chd
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- clean2:
-	rm parse
+	rm -f *.csv

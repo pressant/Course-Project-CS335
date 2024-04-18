@@ -1,32 +1,45 @@
-#include<bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <variant>
+#include <map>
+#include <string>
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <queue>
+#include <stack>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+#include <bitset>
+#include <array>
+#include <deque>
+#include <list>
+#include <functional>
+#include <iterator>
+#include <iomanip>
+#include <memory>
+#include <numeric>
+#include <stdexcept>
+#include <utility>
+#include <forward_list>
+#include <variant>
+#include <cstring>
 using namespace std;
-ifstream f_in;
-ofstream f_out;
-map<string,string> reg_map; // t map for variables and stored registers
-map<string,string> temp_reg; // r whether a register is empty or being used
-map<string,string> init_reg; // s reg and initialised value is stored
-vector<vector<string> >lines;//tokens for every line
-vector<string> curr_func;
 
-void printfunc(string a, string b, string c){
-     try {
-        int value = std::stoi(b);
-        if (value >= 0 && value <= 9) {
-            b = '$' + b;
-        }
-    } catch (const std::invalid_argument& e) {
-        std::cerr << "Invalid argument: " << e.what() << std::endl;
-    }
-    if(c != "") {
-        f_out << "\t" << a << " "  << b << ", " << c << endl;
-    }
-    else f_out << "\t" << a << " "  << b << endl;
-}
 
-int get_size(ifstream& file){
+map<string, string> register_mapping; // Map for variables and stored registers
+map<string, string> temp_reg; // Map for checking whether a register is empty or being used
+map<string, string> initialized_registers; // Map for registers and their initialized values
+vector<vector<string>> code_lines; // Tokens for every line
+vector<string> current_function; // Stores information about the current function being processed
+
+
+int get_variable_size(ifstream& input_file) {
     vector<string> type_column;
     string line;
-    while (getline(file, line)) {
+    while (getline(input_file, line)) {
         stringstream ss(line);
         string cell;
         int column = 0;
@@ -37,106 +50,119 @@ int get_size(ifstream& file){
             column++;
         }
     }
-    int lVar_size = 0;
+    int variable_size = 0;
     auto element = type_column.begin();
     ++element;
     for (; element != type_column.end(); ++element) {
-        if(*element =="int" || *element =="float") lVar_size += 4;
-        else if(*element =="char" ) lVar_size += 2;
-        else if(*element =="bool") lVar_size += 1;
-        else if(*element =="long" || *element =="double") lVar_size += 8;
-        else lVar_size += 8;
+        if (*element == "int" || *element == "float") {
+            variable_size += 4;
+        } else if (*element == "char") {
+            variable_size += 2;
+        } else if (*element == "bool") {
+            variable_size += 1;
+        } else if (*element == "long" || *element == "double") {
+            variable_size += 8;
+        } else {
+            variable_size += 8; // Default size for unknown types
+        }
     }
-    return lVar_size;
+    return variable_size;
 }
 
-int var_size(string str, ifstream& file) {
+
+int get_variable(const string& variable_name, ifstream& input_file) {
     vector<string> token_row;
     string line;
     string type;
-    while (getline(file, line)) {
+    while (getline(input_file, line)) {
         stringstream ss(line);
         string cell;
         int column = 0;
         while (getline(ss, cell, ',')) {
-            if (column == 0 && cell == str) {
+            if (column == 0 && cell == variable_name) {
                 getline(ss, type, ',');
             }
             column++;
         }
     }
 
-    int lVar_size = 0;
-    if(type =="int" || type =="float") lVar_size = 4;
-    else if(type =="char" ) lVar_size = 2;
-    else if(type =="bool") lVar_size = 1;
-    else if(type =="long" || type =="double") lVar_size = 8;
-    else lVar_size = 8;
-    return lVar_size;
+    int variable_size = 0;
+    if (type == "int" || type == "float") {
+        variable_size = 4;
+    } else if (type == "char") {
+        variable_size = 2;
+    } else if (type == "bool") {
+        variable_size = 1;
+    } else if (type == "long" || type == "double") {
+        variable_size = 8;
+    } else {
+        variable_size = 8; // Default size for unknown types
+    }
+    return variable_size;
 }
 
-string getreg(string temp_var){
-     if(temp_reg.size() == 0){
-        string reg = "%rdi";
-        temp_reg.insert({temp_var,reg});
-        return reg;
+void print_function(string op_code, string operand1, string operand2) {
+    if (operand2 != "") {
+        output_file << "\t" << op_code << " "  << operand1 << ", " << operand2 << endl;
     } else {
-        string reg = "%r" + to_string(reg_map.size() + 7);
-        temp_reg.insert({temp_var,reg});
-        return reg;
+        output_file << "\t" << op_code << " "  << operand1 << endl;
     }
 }
+
+string get_register(string temporary_variable) {
+    if (temp_reg.empty()) {
+        string register_name = "%rdi";
+        temp_reg.insert({temporary_variable, register_name});
+        return register_name;
+    } else {
+        string register_name = "%r" + to_string(register_mapping.size() + 7);
+        temp_reg.insert({temporary_variable, register_name});
+        return register_name;
+    }
+}
+
+ifstream input_file;
+ofstream output_file;
 
 int main(int argc, char**argv){
-    string input,output;
-    if(argc<2){
-        cout<<"No Actions Provided"<<endl;
-        exit(1);
+    //string input,output;
+    if (argc < 2) {
+        cout << "Usage: " << argv[0] << " " << endl;
+        return 1;
     }
-    bool k_1;
-    for(int i=1;i<argc;i++){
-        string k = argv[i];
-        if(k.size()<6){
-            cout<<k<<" is not a valid option."<<endl;
-            exit(1);
+    char *input_filename = argv[1], *output_filename = argv[2];
+    int input =0;
+    int output=0;
+    for (int i = 1; i < argc; ++i)     
+    {
+        if (std::strcmp(argv[i], "-input") == 0 && i + 1 < argc) {
+            input =1;
+            input_filename = argv[i + 1];
+            if(output==0){
+                output_filename = argv[i + 2];
+            }
+            i++;
         }
-        if(k=="--help"){
-            cout<<"Available Options:"<<endl<<endl;
-            cout<<"--help     :  Opens this menu"<<endl;
-            cout<<"--input    :  To enter input file destination from the build folder"<<endl;
-            cout<<"--output   :  To enter output file destination from the build folder"<<endl;
-            exit(1);
-        }
-        else if(k.size()<8){
-            cout<<k<<" is not a valid option."<<endl;
-            exit(1);
-        }
-        else if(k.substr(0,8)=="--input=") input = k.substr(8,k.size()-8);
-        else if(k.size()<9){
-            cout<<k<<" is not a valid option."<<endl;
-            exit(1);
-        }
-        else if(k.size()<9){
-            cout<<k<<" is not a valid option."<<endl;
-            exit(1);
-        }
-        else if(k.substr(0,9)=="--output=") output = k.substr(9,k.size()-9);
-        else{
-            cout<<k<<" is not a valid option."<<endl;
-            exit(1);
+        else if (strcmp(argv[i], "-output") == 0 && i + 1 < argc) {
+            output =1;
+            output_filename = argv[i + 1];
+            if(input==0){
+                input_filename = argv[i + 2];
+            }
+            i++;
+        } 
+        else if(  strcmp(argv[i],"-help")==0 ){
+            cout<<"To create the executable parse run the command make in the directory and make sure you have flex bison and g++ installed "<<endl;
+            cout<<"To execute the file use ./parse followed by optional input tag(-input) to specify input and optional outptut tag(-output) to specify output, If you want to turn on the verbose mode do -verbose,Note:input and output file need to mentioned"<<endl;
+            cout<<"To make pdf from .dot file generated use the command dot - Tpdf graph . dot -o graph . pdf"<<endl;
+            exit(0);
         }
     }
-    if(input.size()==0){
-        cout<<"No input file provided"<<endl;
-        exit(1);
-    }
-    if(output.size()==0){
-        output = input.substr(0,input.size()-3)+"s";
-    }
-f_in.open(input);
-f_out.open(output);
+        if(input_filename==NULL){input_filename=argv[1];}
+        if(output_filename==NULL){output_filename=argv[1];}
+    
 string str;
-while(getline(f_in,str)){
+while(getline(input_file,str)){
     vector<string>tokens;
     string token;int p=0;//not in brac
     for(int i=0;i<str.size();i++){
@@ -148,62 +174,62 @@ while(getline(f_in,str)){
      }else token.push_back(str[i]);
     }
     if(token.size()!=0)tokens.push_back(token);
-    if(tokens.size())lines.push_back(tokens);
-}  f_out<<"\t.text"<<endl;
-f_out<<"\t.section .rodata"<<endl<<".LC0:"<<endl<<"\t.string \"\%ld\\n\"\n\t.text"<<endl;
+    if(tokens.size())code_lines.push_back(tokens);
+}  output_file<<"\t.text"<<endl;
+output_file<<"\t.section .rodata"<<endl<<".LC0:"<<endl<<"\t.string \"\%ld\\n\"\n\t.text"<<endl;
 int k = 0;
 int local_variable = 0;
-for(int i=0;i<lines.size();i++){
+for(int i=0;i<code_lines.size();i++){
     string reg1,reg2;
-    if(lines[i][0] == "BeginFunc"){
-        curr_func.push_back(lines[i][1]);
-        f_out<<"\t.globl "<<lines[i][1]<<endl;
-        f_out<<"\t.type "<<lines[i][1]<<"@function"<<endl;
-        f_out << lines[i][1]<<":"<<endl;   
-        printfunc("pushq","%rbp","");
-        printfunc("movq","%rsp","%rbp");
+    if(code_lines[i][0] == "BeginFunc"){
+        current_function.push_back(code_lines[i][1]);
+        output_file<<"\t.globl "<<code_lines[i][1]<<endl;
+        output_file<<"\t.type "<<code_lines[i][1]<<"@function"<<endl;
+        output_file << code_lines[i][1]<<":"<<endl;   
+        print_function("pushq","%rbp","");
+        print_function("movq","%rsp","%rbp");
 
-        string filename = lines[i][1] + ".csv";
+        string filename = code_lines[i][1] + ".csv";
         ifstream file(filename);
         if (!file.is_open()) {
             cerr << "Error opening file." << endl;
             return 1;
         }
-        int local_var_size = get_size(file);
+        int local_var_size = get_variable_size(file);
         file.close();
-        f_out <<"\t" <<"subq " << "$" << local_var_size << ", %rsp" << endl;
+        output_file <<"\t" <<"subq " << "$" << local_var_size << ", %rsp" << endl;
     }   
-      else if(lines[i][0] == "EndFunc"){
+      else if(code_lines[i][0] == "EndFunc"){
         cout << "endfunc1" << endl;
         for(auto it = temp_reg.begin(); it != temp_reg.end(); it++){
             cout << it->first << " " << it->second << endl;
-            f_out << "\tpop\t" << it->second << endl;
+            output_file << "\tpop\t" << it->second << endl;
         }
         //printfunc("movq","%rbp","%rsp");
         //f_out << "\tpopq\t"<<"%rbp"<<endl;
-        f_out << "\tleave" << endl;
-        f_out << "\tret" << endl;
-        f_out << "\n" << "\n" << endl;
+        output_file << "\tleave" << endl;
+        output_file << "\tret" << endl;
+        output_file << "\n" << "\n" << endl;
         temp_reg.clear();
-        reg_map.clear();
-        init_reg.clear();
+        register_mapping.clear();
+        initialized_registers.clear();
 
     }
-     else if(lines[i][0].substr(0,2) == ".L" || lines[i][0].substr(0,3)=="end"){
-        f_out << "   " << lines[i][0] <<":" << endl;
+     else if(code_lines[i][0].substr(0,2) == ".ifloop" || code_lines[i][0].substr(0,3)=="end"){
+        output_file << "   " << code_lines[i][0] <<":" << endl;
     }
-    else if(lines[i][0] == "print"){
-       string temp=lines[i][1];
+    else if(code_lines[i][0] == "print"){
+       string temp=code_lines[i][1];
        cout<<"print"<<endl;
-       if(reg_map.find(temp)==reg_map.end()){cout<<"hi"<<endl;printfunc("movq",init_reg[temp],"%rsi");cout<<"bye"<<endl;}
+       if(register_mapping.find(temp)==register_mapping.end()){cout<<"hi"<<endl;print_function("movq",initialized_registers[temp],"%rsi");cout<<"bye"<<endl;}
        else{
-        printfunc("movq",reg_map[temp],"%rsi");
+        print_function("movq",register_mapping[temp],"%rsi");
     
-        reg_map.erase(temp);
+        register_mapping.erase(temp);
        }
-        printfunc("leaq",".LC0(%rip)","%rdi");
-        printfunc("movq","$0","%rax");
-        printfunc("call","printf@PLT","");
+        print_function("leaq",".LC0(%rip)","%rdi");
+        print_function("movq","$0","%rax");
+        print_function("call","printf@PLT","");
     }
    
     // else if(lines[i][3]=="array" && lines[i].size()==4){
@@ -212,134 +238,134 @@ for(int i=0;i<lines.size();i++){
     //     s[lines[i][1]]=""
 
     // }
-   else if(lines[i][0] == "goto") {
-        f_out <<"\t" <<"jmp " << lines[i][1] << endl;
+   else if(code_lines[i][0] == "goto") {
+        output_file <<"\t" <<"jmp " << code_lines[i][1] << endl;
     }
-    else if(lines[i][2] == "popparam"){
-        reg1 = getreg(lines[i][0]);
-        reg_map.insert({lines[i][0],reg1});
+    else if(code_lines[i][2] == "popparam"){
+        reg1 = get_register(code_lines[i][0]);
+        register_mapping.insert({code_lines[i][0],reg1});
     }
    
-    else if(lines[i][2]=="pushparam"){cout<<"ooo"<<endl;continue;}
-    else if(lines[i][0].substr(0,2)!="t_" && lines[i][2].substr(0,2) == "t_" && lines[i].size() == 3 && lines[i-1][2] == "pushparam"){
+    else if(code_lines[i][2]=="pushparam"){cout<<"ooo"<<endl;continue;}
+    else if(code_lines[i][0].substr(0,2)!="t_" && code_lines[i][2].substr(0,2) == "t_" && code_lines[i].size() == 3 && code_lines[i-1][2] == "pushparam"){
         cout<<"pushed"<<endl;
-       if(reg_map.find(lines[i][0])==reg_map.end()){
-             reg1=getreg(lines[i][0]);
-             string s4 = init_reg[lines[i][2]];
-             printfunc("movq",reg_map[lines[i][2]],reg1);
+       if(register_mapping.find(code_lines[i][0])==register_mapping.end()){
+             reg1=get_register(code_lines[i][0]);
+             string s4 = initialized_registers[code_lines[i][2]];
+             print_function("movq",register_mapping[code_lines[i][2]],reg1);
              cout<<"pushed1"<<endl;
        }
-       else reg1=reg_map[lines[i][0]];
-       reg_map.erase(lines[i][0]);
-       printfunc("pushq",reg1,"");
-       temp_reg.erase(lines[i][0]);
+       else reg1=register_mapping[code_lines[i][0]];
+       register_mapping.erase(code_lines[i][0]);
+       print_function("pushq",reg1,"");
+       temp_reg.erase(code_lines[i][0]);
        cout<<"pushed2"<<endl;
     }
    
-    else if(lines[i][0].substr(0,2) == "t_" && lines[i].size() == 3 && lines[i][2][0] != 't'){
+    else if(code_lines[i][0].substr(0,2) == "t_" && code_lines[i].size() == 3 && code_lines[i][2][0] != 't'){
         // f_out<<"imm1"<<endl;
-        init_reg.insert({lines[i][0],lines[i][2]});
-        cout<<"lines[0][2]"<<lines[i][2]<<endl;
+        initialized_registers.insert({code_lines[i][0],code_lines[i][2]});
+        cout<<"lines[0][2]"<<code_lines[i][2]<<endl;
         // f_out<<"imm2"<<endl;
     }
-    else if(lines[i][2].substr(0,2) == "t_" && lines[i].size() == 3) {
-        string filename = curr_func[curr_func.size()-1] + ".csv";
+    else if(code_lines[i][2].substr(0,2) == "t_" && code_lines[i].size() == 3) {
+        string filename = current_function[current_function.size()-1] + ".csv";
         ifstream file(filename);
         if (!file.is_open()) {
             cerr << "Error opening file." << endl;
             return 1;
         }
-        int local_var_size = var_size(lines[i][0], file);
+        int local_var_size = get_variable(code_lines[i][0], file);
         
         file.close();
         if(local_var_size < 8){
         k = k - local_var_size;
         string s1 = to_string(k) + "(%rsp)";
-        reg_map.insert({lines[i][2],s1});
-        f_out << "\tmovq " << "$" << init_reg[lines[i][2]] <<", " << s1 << endl;
+        register_mapping.insert({code_lines[i][2],s1});
+        output_file << "\tmovq " << "$" << initialized_registers[code_lines[i][2]] <<", " << s1 << endl;
         // curr_func[curr_func.size()-1];
         // lines[i][0] 
         }
     }
    
-     else if(lines[i][0].substr(0, 4) == "call") {
-        f_out <<"\t" <<"call " << lines[i][0].substr(4) << endl;
+     else if(code_lines[i][0].substr(0, 4) == "call") {
+        output_file <<"\t" <<"call " << code_lines[i][0].substr(4) << endl;
        
-    }  else if(lines[i][0] == "if") {
+    }  else if(code_lines[i][0] == "if") {
         string reg_l, reg_r;
-        if(lines[i].size() == 6) {
-            if(reg_map.find(lines[i][1])!=reg_map.end()){
-            reg_l = reg_map[lines[i][1]];
+        if(code_lines[i].size() == 6) {
+            if(register_mapping.find(code_lines[i][1])!=register_mapping.end()){
+            reg_l = register_mapping[code_lines[i][1]];
         }
-        else if(init_reg.find(lines[i][1])!=init_reg.end()){
-            reg_l="$" + init_reg[lines[i][1]]; 
+        else if(initialized_registers.find(code_lines[i][1])!=initialized_registers.end()){
+            reg_l="$" + initialized_registers[code_lines[i][1]]; 
         }
-        if(reg_map.find(lines[i][3])!=reg_map.end()){
-            reg_r = reg_map[lines[i][3]];
+        if(register_mapping.find(code_lines[i][3])!=register_mapping.end()){
+            reg_r = register_mapping[code_lines[i][3]];
         }
-        else if(init_reg.find(lines[i][3])!=init_reg.end()){
-            reg_r="$" + init_reg[lines[i][3]]; 
+        else if(initialized_registers.find(code_lines[i][3])!=initialized_registers.end()){
+            reg_r="$" + initialized_registers[code_lines[i][3]]; 
         } 
-        if(lines[i].size() == 6) {
+        if(code_lines[i].size() == 6) {
             
-            printfunc("cmpq", reg_r, reg_l);
-            if(lines[i][2] == "<") printfunc("jl",lines[i][5],"");
-            if(lines[i][2] == ">") printfunc("jg",lines[i][5],"");
-            if(lines[i][2] == ">=") printfunc("jge",lines[i][5],"");
-            if(lines[i][2] == "<=") printfunc("jle",lines[i][5],"");
-            if(lines[i][2] == "==") printfunc("je",lines[i][5],"");
-            if(lines[i][2] == "!=") printfunc("jne",lines[i][5],"");
-        } else if(lines[i].size() == 4) {
-            if(lines[i][1][0] == '!') {
-                string reg_str = lines[i][1].substr(1,lines[i][1].size());
-                f_out<<"\t"<<reg_str<<endl;
-                reg_l = reg_map[str];
-                printfunc("cmpq", reg_l, "$0");
-                printfunc("jz", lines[i][3], "");
-            } else if (lines[i][1][0] != '!') {
-                reg_l = reg_map[lines[i][1]];
-                printfunc("cmpq", reg_l, "$0");
-                printfunc("jnz", lines[i][3], "");
+            print_function("cmpq", reg_r, reg_l);
+            if(code_lines[i][2] == "<") print_function("jl",code_lines[i][5],"");
+            if(code_lines[i][2] == ">") print_function("jg",code_lines[i][5],"");
+            if(code_lines[i][2] == ">=") print_function("jge",code_lines[i][5],"");
+            if(code_lines[i][2] == "<=") print_function("jle",code_lines[i][5],"");
+            if(code_lines[i][2] == "==") print_function("je",code_lines[i][5],"");
+            if(code_lines[i][2] == "!=") print_function("jne",code_lines[i][5],"");
+        } else if(code_lines[i].size() == 4) {
+            if(code_lines[i][1][0] == '!') {
+                string reg_str = code_lines[i][1].substr(1,code_lines[i][1].size());
+                output_file<<"\t"<<reg_str<<endl;
+                reg_l = register_mapping[str];
+                print_function("cmpq", reg_l, "$0");
+                print_function("jz", code_lines[i][3], "");
+            } else if (code_lines[i][1][0] != '!') {
+                reg_l = register_mapping[code_lines[i][1]];
+                print_function("cmpq", reg_l, "$0");
+                print_function("jnz", code_lines[i][3], "");
             }
         }
 
-    } else if(lines[i].size() == 5){
+    } else if(code_lines[i].size() == 5){
         cout<<"entered size 5 "<<endl;
-        if(reg_map.find(lines[i][0])==reg_map.end()){
-            reg2=getreg(lines[i][0]);
-            reg_map.insert({lines[i][0],reg2});
+        if(register_mapping.find(code_lines[i][0])==register_mapping.end()){
+            reg2=get_register(code_lines[i][0]);
+            register_mapping.insert({code_lines[i][0],reg2});
         }
         else {
-            reg2 = reg_map[lines[i][0]];
+            reg2 = register_mapping[code_lines[i][0]];
         }
-        if(reg_map.find(lines[i][2])!=reg_map.end() && lines[i][0] != lines[i][2]){
-            reg1 = reg_map[lines[i][2]];
-            printfunc("movq",reg1,reg2);
-        }else if(init_reg.find(lines[i][2]) != init_reg.end()){
-           reg1 = "$" + init_reg[lines[i][2]];
-           printfunc("movq",reg1,reg2);
+        if(register_mapping.find(code_lines[i][2])!=register_mapping.end() && code_lines[i][0] != code_lines[i][2]){
+            reg1 = register_mapping[code_lines[i][2]];
+            print_function("movq",reg1,reg2);
+        }else if(initialized_registers.find(code_lines[i][2]) != initialized_registers.end()){
+           reg1 = "$" + initialized_registers[code_lines[i][2]];
+           print_function("movq",reg1,reg2);
         }
         
-        if(reg_map.find(lines[i][4])!=reg_map.end()){
-            reg1 = reg_map[lines[i][4]];
+        if(register_mapping.find(code_lines[i][4])!=register_mapping.end()){
+            reg1 = register_mapping[code_lines[i][4]];
             
-        }else if(init_reg.find(lines[i][4]) != init_reg.end()){
-           reg1 = "$" + init_reg[lines[i][4]];
+        }else if(initialized_registers.find(code_lines[i][4]) != initialized_registers.end()){
+           reg1 = "$" + initialized_registers[code_lines[i][4]];
         }
-        else if(lines[i][4] == "1"){
+        else if(code_lines[i][4] == "1"){
             reg1 = "$1";
         }
-        reg_map.erase(lines[i][4]);
-            if(lines[i][3]=="+")printfunc("addq",reg1,reg2);
-            else if(lines[i][3]=="-")printfunc("subq",reg1,reg2);
-            else if(lines[i][3]=="*")printfunc("imulq",reg1,reg2);
-            else if(lines[i][3]=="/"|| lines[i][3]=="%"){
-                printfunc("movq",reg1,"rax");//doubt
-            }else if(lines[i][3]=="&")printfunc("andq",reg1,reg2);
-            else if(lines[i][3]=="|")printfunc("orq",reg1,reg2);
-            else if(lines[i][3]=="^")printfunc("xorq",reg1,reg2);
+        register_mapping.erase(code_lines[i][4]);
+            if(code_lines[i][3]=="+")print_function("addq",reg1,reg2);
+            else if(code_lines[i][3]=="-")print_function("subq",reg1,reg2);
+            else if(code_lines[i][3]=="*")print_function("imulq",reg1,reg2);
+            else if(code_lines[i][3]=="/"|| code_lines[i][3]=="%"){
+                print_function("movq",reg1,"rax");//doubt
+            }else if(code_lines[i][3]=="&")print_function("andq",reg1,reg2);
+            else if(code_lines[i][3]=="|")print_function("orq",reg1,reg2);
+            else if(code_lines[i][3]=="^")print_function("xorq",reg1,reg2);
             
-            cout<<"exit 5"<<endl;
+          
 
     }
     
