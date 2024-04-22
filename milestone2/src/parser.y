@@ -55,8 +55,8 @@ string extractSubstring(const std::string& str) {
 }
 void diff_data(int x)
 {
-  cout<<"Datatype mismatch in line no "<< x<<endl;
-  exit(1);
+  cout<<"Datatype mismatch in line no "<< x <<endl;
+  //exit(1);;
 }
 void check_type(string s1,string s2, int x)
 {
@@ -76,10 +76,8 @@ bool isCompatible(string s1 , string s2,string s3){
 }
 Node *root = create_node("File_input");
 SYMTAB* tab=new SYMTAB();
-
 SYMTAB* gt=tab;
 int curr_scope=tab->SYMSCOPE;
-unordered_map<int,SYMTAB*> tablist;
 
 std::string* target_program;
  int get_siz(string type){
@@ -136,7 +134,7 @@ vector<int> loop_stack;
 %type<node> testlist_comp testlist_comp_c1 testlist_comp_c2 subscriptlist COMMA_subscript_rep subscript test_opt1 sliceop exprlist COMMA_expr_star_expr_rep testlist COMMA_test_rep
 %type<node>  test_star_expr classdef classdef_opt1 arglist COMMA_argument_rep argument comp_for_opt comp_iter sync_comp_for
 %type<node> comp_iter_opt comp_for ASYNC_opt comp_if yield_expr yield_arg async_stmt with_stmt class_name
-%type<node> finalfunc range_func
+%type<node> finalfunc range_func ifkeyword 
 
 
 %left OR
@@ -194,37 +192,62 @@ funcname : DEF NAME {
                 tab->SYMVAL[$2->label].line_no=$1->line_number;
               //  cout<<tab->SYMVAL[$2->label].name<<endl;
                SYMTAB* newtab=new SYMTAB();
-               
-               newtab->tag=$2->label;
+               newtab->SYMTAB_NAME = $2->label;
                newtab->SYMSCOPE=++curr_scope;
                newtab->parent=tab;
+               newtab->tab_type = FUNC;
               //  tab->childs.push_back(newtab);
                tab->childs[$2->label] = newtab;
                tab=newtab;
-               tablist[curr_scope]=tab;
              }
              else {
               cout<<"Function redeclared in line no "<< $2->line_number<<endl;
-                      exit(1);
+                      //exit(1);;
              }
             // cout<<"funcname "<<$1->line_number<<endl;
           }
          ;
 
 funcdef :  funcname parameters {
-             codepush("begin",$1->label,"","",-1);
-          
-        for(int i=0;i<arguments.size();i++) { 
-        string s1 = get<0>(arguments[i]);
-        codepush("","popparam","",tab->SYMVAL[s1].temp_var,-1);
-        codepush("",tab->SYMVAL[s1].temp_var,"",get<0>(arguments[i]),-1);}} ARROW test COLON suite{
+            codepush("begin",$1->label,"","",-1);
+            SYMTAB* newt = new SYMTAB();
+
+            newt = tab->parent;
+            if(newt->SYMVAL.find($1->label)!= newt->SYMVAL.end())
+            {
+                newt->SYMVAL[$1->label].identity=FUNC;
+                newt->SYMVAL[$1->label].scope=curr_scope;
+                newt->SYMVAL[$1->label].line_no=$1->line_number;
+                newt->SYMVAL[$1->label].name=$1->label;
+                newt->SYMVAL[$1->label].size=$2->count;
+                newt->SYMVAL[$1->label].params=$2->p_f;
+            }
+            for(int i=0;i<arguments.size();i++) { 
+              string s1 = get<0>(arguments[i]);
+              codepush("","popparam","",tab->SYMVAL[s1].temp_var,-1);
+              codepush("",tab->SYMVAL[s1].temp_var,"",get<0>(arguments[i]),-1);}
+            } 
+            ARROW test {
+            SYMTAB* newt = new SYMTAB();
+            newt = tab->parent;
+            if(newt->SYMVAL.find($1->label)!= newt->SYMVAL.end())
+            {
+                newt->SYMVAL[$1->label].identity=FUNC;
+                newt->SYMVAL[$1->label].scope=curr_scope;
+                newt->SYMVAL[$1->label].line_no=$1->line_number;
+                newt->SYMVAL[$1->label].name=$1->label;
+                newt->SYMVAL[$1->label].type=$5->type;
+                newt->SYMVAL[$1->label].size=$2->count;
+                newt->SYMVAL[$1->label].params=$2->p_f;
+            }
+            }COLON suite{
              Node* n = create_node("Function");
              n->children.push_back($1);
              n->children.push_back($2);
              n->children.push_back($4);
              n->children.push_back($5);
-             n->children.push_back($6);
              n->children.push_back($7);
+             n->children.push_back($8);
              $$ =n;
              tab=tab->parent;
              if(tab->SYMVAL.find($1->label)!= tab->SYMVAL.end()){
@@ -234,39 +257,37 @@ funcdef :  funcname parameters {
                 tab->SYMVAL[$1->label].type=$5->type;
                 tab->SYMVAL[$1->label].name=$1->label;
                 tab->SYMVAL[$1->label].size=$2->count;
-                // tab-SYMVAL[$1->labe].params = 
-                //int g_index;
-                //int reg_name;
-                for(int i=0;i<$2->children.size();i++){
-                  Node* t=$2->children[i];
-                  string temp=t->label;
-                   if(temp!="[" && temp!="]"){
-                      tab->SYMVAL[$1->label].params=$2->p_f;
-                   }
-                }              
+                tab->SYMVAL[$1->label].params=$2->p_f;
              }
 
              else{
               cout<<"error in inserting function" << endl;
-              exit(1);
+              //exit(1);;
              }
-             
-              if(($5->type == "bool" && $7->type == "int")||($5->type == "float" && $7->type =="int"))
+              if(($5->type == "bool" && $8->type == "int")||($5->type == "float" && $8->type =="int"))
               {
 
               }
               else {
-                if($5->type != $7->type)cout<<"Function return ";
-                check_type($5->type , $7->type , $1->line_number);
+                if($5->type != $8->type)cout<<"Function return ";
+                check_type($5->type , $8->type , $1->line_number);
               }
-            //  cout<<$1->line_number<<endl;
-            // check_type($4->type , $5->type , $1->line_number);
              codepush("","$ra","","goto",-1);
              arguments.clear();
          }
        | funcname parameters{
              codepush("begin",$1->label,"","",-1);
-          
+            SYMTAB* newt = new SYMTAB();
+            newt = tab->parent;
+            if(newt->SYMVAL.find($1->label)!= newt->SYMVAL.end())
+            {
+                newt->SYMVAL[$1->label].identity=FUNC;
+                newt->SYMVAL[$1->label].scope=curr_scope;
+                newt->SYMVAL[$1->label].line_no=$1->line_number;
+                newt->SYMVAL[$1->label].name=$1->label;
+                newt->SYMVAL[$1->label].size=$2->count;
+                newt->SYMVAL[$1->label].params=$2->p_f;
+            }
         for(int i=0;i<arguments.size();i++) { 
         string s1 = get<0>(arguments[i]);
         codepush("","popparam","",tab->SYMVAL[s1].temp_var,-1);
@@ -287,16 +308,7 @@ funcdef :  funcname parameters {
                   tab->SYMVAL[$1->label].type="None";
                   tab->SYMVAL[$1->label].name=$1->label;
                   tab->SYMVAL[$1->label].size=$2->count;
-                  //int g_index;
-                  //int reg_name;
-                  for(int i=0;i<$2->children.size();i++){
-                    Node* t=$2->children[i];
-                    string temp=t->label;
-                     if(temp!="[" && temp!="]"){
-                        tab->SYMVAL[$1->label].params=$2->p_f;
-                     }
-                  }
-
+                  tab->SYMVAL[$1->label].params=$2->p_f;
                }
                else{
                 cout<<"error in inserting function "<<endl;
@@ -352,8 +364,14 @@ typedargslist : NAME {
                   n->children.push_back($1);
                   Param* temp=new Param();
                   temp->par_name=$1->label;
-                  n->p_f.push_back(temp);
-                  n->count=1;
+                  // cout<<tab->tab_type<<endl;
+                  if((tab->parent->tab_type ==  CLS )&& ($1->label == "self")){ 
+                    n->count = 0;
+                  }
+                  else{
+                    n->p_f.push_back(temp);
+                    n->count=1;
+                  } 
                   $$=n;
                   arguments.push_back(make_tuple($1->label,"",$1->type,0,0));
                   } 
@@ -370,7 +388,7 @@ typedargslist : NAME {
                   n->p_f.push_back(temp);
                   if(tab->SYMVAL.find($1->label)!=tab->SYMVAL.end()){
                   cout<<"Already declared "<<$1->label<<" in line no "<<$1->line_number<<endl;
-                    exit(1);
+                    //exit(1);;
                   }
                   tab->SYMVAL[$1->label].identity=NORMIE;
                   tab->SYMVAL[$1->label].scope=curr_scope;
@@ -391,16 +409,25 @@ typedargslist : NAME {
                     n->children.push_back($3->children[i]);
                   }
                   $$ = n;
-                  n->count=1+$3->count;
                   Param* temp=new Param();
                   temp->par_type=$1->label;
                   vector<Param*> t2;
-                  t2.push_back(temp);
+                  if((tab->parent->tab_type == 3 )&& ($1->label == "self") )
+                  {
+                    n->count = $3->count;
+
+                  }
+                  else {
+                    // cout<<"yes"<<endl;
+                    n->count=1+$3->count;
+                    t2.push_back(temp);
+                  }
+
                   t2.insert(t2.end(),$3->p_f.begin(),$3->p_f.end());
+                  // cout<<t2.size()<<endl;
                   n->p_f=t2;
                 }
               | NAME COLON datatype COMMA typedargslist {
-                  if(yybye) cout<<"LINE 203";
                   Node *n = create_node("Typedargslist4");
                   n->children.push_back($1);
                   n->children.push_back($2);
@@ -463,6 +490,7 @@ simple_stmt : small_stmt NEWLINE{
                n->children.push_back($1);
                $$=n;
                $$->type = $1->type;
+              //  cout<<" entered simple-stmt"<<yylineno<<<<endl;
                $$->line_number = $2->line_number;
             }
             |small_stmt small_stmt_list NEWLINE{
@@ -524,9 +552,8 @@ expr_stmt : testlist_star_expr expr_stmt_tail{
                 if(tab->SYMVAL.find($1->label)!=tab->SYMVAL.end()){
                   cout<<"Already declared "<<$1->label<<endl;
                   cout<<endl;
-                          exit(1);
+                          //exit(1);;
                 }
-                  // cout<<"enterd expr_stmt "<<$2->type<<endl;
                   tab->SYMVAL[$1->label].identity=NORMIE;
                   tab->SYMVAL[$1->label].scope=curr_scope;
                   tab->SYMVAL[$1->label].line_no=$1->line_number;
@@ -541,35 +568,54 @@ expr_stmt : testlist_star_expr expr_stmt_tail{
                   {
                     if($1->type == "float" && $2->type == "int"){}
                     else if($1->type == "int" && $2->type=="bool"){}
-                    else 
-                      check_type($1->type , $2->type, $1->line_number);
+                    else
+                    {
+                      check_type($1->type , $2->type, $2->line_number);
+                    } 
                   }
               }
               else if(tab->SYMVAL.find($1->label)!=tab->SYMVAL.end())
               {
-                check_type($1->type , $2->type, $1->line_number);
+                check_type($1->type , $2->type, $2->line_number);
                 // cout<<yylineno<<endl;
                 // if($1->type != $2->type)
                 // {
                 //   cout<<"Different datatypes compared in line no "<<$1->line_no<<endl;
-                //           exit(1);
+                //           //exit(1);;
                 // }
               }
               else if($2->label=="annassign_op")
               {
-                // cout<<$1->label<<endl;
-                if(tab->SYMVAL.find($1->label)==tab->SYMVAL.end())
+
+
+
+                //this part to check expression like self.x
+                if(($1->label == "self") && (tab->parent->tab_type == CLS) &&($1->p_f.size() ==1))
+                {
+                  // cout<<$1->p_f.size()<<" expr_stmt "<<endl;
+                  if( tab->parent->SYMVAL.find($1->p_f[0]->par_name)==tab->SYMVAL.end())
+                  {
+                    cout<<"Use of undeclared attribute for class "<< endl;
+                    //exit(1);;
+                  }
+                  else {
+
+                      check_type(tab->parent->SYMVAL[$1->p_f[0]->par_name].type ,$2->type,$2->line_number );
+                  }
+                }
+                else if(tab->SYMVAL.find($1->label)==tab->SYMVAL.end())
                 {
                   if(gt->SYMVAL.find($1->label)==gt->SYMVAL.end()){
-                  cout<<"Use of undeclared variable " <<" in line number "<<$2->line_number<<endl;
-                  exit(1);}
+                  cout<<"Use of undeclared variable " << $1->label <<" in line number "<<$2->line_number<<endl;
+                  //exit(1);;
+                  }
+                  
                 }
 
 
               }
-            //   cout << $1->temp_var<<"inside expr_stmt"<<endl;
+              // cout << $1->temp_var<<"inside expr_stmt "<<yylineno<<endl;
               codepush("",$2->temp_var,"",$1->temp_var,-1);
-                // cout<<$1->type <<" hii "<<$2->type<<endl;
              }
              |testlist_star_expr { $$ = $1;}
           ;
@@ -580,6 +626,7 @@ expr_stmt_tail : COLON decl_type annassign {
                   $$->children.push_back($2);
                   $$->children.push_back($3);
                   $$->type = $2->type;
+                  
                   check_type($2->type, $3->type, $1->line_number);
                   $$->temp_var = $3->temp_var;
                   }
@@ -598,6 +645,7 @@ expr_stmt_tail : COLON decl_type annassign {
                   n->children.push_back($2);
                   $$=n;
                   $$->type = $2->type;
+                  $$->line_number = $1->line_number;
                   // cout<<$$->type <<" expr_stmt_tail"<<endl;
                }
                /* | rep_expr_stmt_tail{
@@ -613,7 +661,7 @@ decl_type: NAME {
                 $$ = create_node("decl_type");
                if($1->label != "list"){
                   cout << "Invalid datatype at line no: " << $1->line_number << endl;
-                  exit(1);
+                  //exit(1);;
                 }
                 $$->children.push_back($1);
                 $$->children.push_back($2);
@@ -655,10 +703,11 @@ annassign : EQUAL_SIGN test{
                    if($2->type == $2->label)
                    {
                       cout<<"Variable not declared or invalid comparison in line no "<<$1->line_number<<endl;
-                      exit(1);
+                      //exit(1);;
                    }
                    else 
                    $$->type = $2->type;
+
                    $$->temp_var = $2->temp_var;
 }
 ;
@@ -744,6 +793,9 @@ return_stmt: RETURN testlist{
               n->children.push_back($2);      
               $$=n;
               $$->type = $2->type;
+              // cout<<gt->SYMVAL[tab->SYMTAB_NAME].type <<"hii"<<endl;
+              // cout<<$2->type<<endl;
+              check_type($$->type , gt->SYMVAL[tab->SYMTAB_NAME].type,$1->line_number);
               codepush("",$2->temp_var,"","pushparam",-1);
             }
             | RETURN { $$ = $1; $$->type = "None";}
@@ -782,8 +834,16 @@ async_stmt : ASYNC async_stmt_content
 async_stmt_content : funcdef
                    | for_stmt
                    ;
-
-if_stmt : IF test COLON suite elif_stmt_rep ELSE COLON suite{
+ifkeyword : IF test{ Node* n = create_node("ifkeyword");
+                    n->children.push_back($1);
+                    n->children.push_back($2);
+                    codepush("if",$2->temp_var,"0",">",-1);
+                    $$->i_number = inst_num-1;
+                    $$=n;
+                    $$->line_number = $1->line_number;
+                  }
+          
+if_stmt : ifkeyword  COLON suite elif_stmt_rep ELSE COLON suite{
     Node* n=create_node("if_stmt");
     n->children.push_back($1);
     n->children.push_back($2); 
@@ -792,42 +852,43 @@ if_stmt : IF test COLON suite elif_stmt_rep ELSE COLON suite{
     n->children.push_back($5);
     n->children.push_back($6); 
     n->children.push_back($7);
-    n->children.push_back($8); 
     $$=n;
     $$->line_number = $1->line_number;
+    codepush("","","","end else",-1);
   }
-    | IF test COLON suite elif_stmt_rep{
+    |ifkeyword  COLON suite elif_stmt_rep{
 
       Node* n=create_node("if_stmt");
       n->children.push_back($1);
       n->children.push_back($2); 
       n->children.push_back($3);
       n->children.push_back($4); 
-      n->children.push_back($5);
       $$=n;
       $$->line_number = $1->line_number;
-
+      
   }
-    | IF test COLON suite ELSE COLON suite{ 
+    | ifkeyword  COLON suite ELSE{codepush("","","","else",-1);
+    code[$1->i_number].index = inst_num;} COLON suite{ 
       Node* n=create_node("if_stmt");
       n->children.push_back($1);
       n->children.push_back($2); 
       n->children.push_back($3);
       n->children.push_back($4); 
-      n->children.push_back($5);
-      n->children.push_back($6); 
       n->children.push_back($7);
+      n->children.push_back($6); 
       $$=n;
     $$->line_number = $1->line_number;
+      codepush("","","","end else",-1);
     }
-    | IF test COLON suite{ 
+    | ifkeyword  COLON suite{ 
       Node* n=create_node("if_stmt");
       n->children.push_back($1);
       n->children.push_back($2); 
       n->children.push_back($3);
-      n->children.push_back($4); 
       $$=n;
       $$->line_number = $1->line_number;
+      codepush("","","","end if",-1);
+      code[$1->i_number].index = inst_num;
     }
 ;
 elif_stmt_rep : elif_stmt_rep ELIF test COLON suite {
@@ -869,6 +930,7 @@ for_stmt: FOR exprlist IN range_func{
         codepush("","","","loop:",-1);
         string s2 = $4->temp_var;
         codepush("if",$2->label,s2,">",-1);
+        $1->i_number = inst_num-1;
         codepush("+",$2->label,"1",$2->label,-1);
         loop_stack.push_back(inst_num-2);
          } COLON suite {
@@ -893,11 +955,12 @@ for_stmt: FOR exprlist IN range_func{
       }
       else {
         cout<<"Undeclared variable used as iterator in for statement in line no "<< $1->line_number<<endl;
-         exit(1);
+         //exit(1);
       }
 
       $$=n;
       codepush("",to_string(loop_stack[(loop_stack.size())-1]),"","goto",-1); loop_stack.pop_back();codepush("","","","end loop",-1);
+      code[$1->i_number].index = inst_num;
     }
 ;
 range_func : NAME LPAREN test RPAREN{
@@ -909,7 +972,7 @@ range_func : NAME LPAREN test RPAREN{
       $$->temp_var = $3->temp_var;
       if($1->label != "range"){
         cout<<"For loop supports only range function in line no "<<$1->line_number<<endl;
-        exit(1);
+        //exit(1);;
       }
 
 
@@ -925,12 +988,12 @@ range_func : NAME LPAREN test RPAREN{
       $$->temp_var = $3->temp_var;
       if($1->label != "range"){
         cout<<"For loop supports only range function"<<endl;
-         exit(1);
+         //exit(1);;
       }
       else if(($3->type != "int")&& ($5->type != "int"))
       {
         cout<<"Invalid datatype used in range function in line no "<<$1->line_number<<endl;
-        exit(1);
+        //exit(1);;
       }
   }
 ;
@@ -999,7 +1062,7 @@ or_test_rep :
     if(($3->type != "bool") && ($3->type != "int") || (($1->type != "bool") && ($1->type != "int") ))
     {
       cout<<"Non compatible operand type used for OR operator in line no "<<$1->line_number<<endl;
-      exit(1);
+      //exit(1);;
     }  
     $$->type = "bool";
     string s1=new_temporary();
@@ -1014,7 +1077,7 @@ or_test_rep :
     if(($2->type != "bool") && ($2->type != "int"))
     {
       cout<<"Non compatible operand type used for OR operator in line no "<<$1->line_number<<endl;
-      exit(1);
+      //exit(1);;
     }  
     $$->temp_op = "or";
     $$->temp_var = $2->temp_var;
@@ -1029,7 +1092,7 @@ and_test :
     if(($2->type != "bool") && ($2->type != "int") || (($1->type != "bool") && ($1->type != "int") ))
     {
       cout<<"Non compatible operand type used for AND    operator in line no "<<$1->line_number<<endl;
-      exit(1);
+      //exit(1);;
     }
     $$->type ="bool";
     string s1=new_temporary();
@@ -1050,8 +1113,8 @@ and_test_rep :
     n->children.push_back($3);
     if(($3->type != "bool") && ($3->type != "int") || (($1->type != "bool") && ($1->type != "int") ))
     {
-      cout<<"Non compatible operand type used for AND hii operator in line no "<<$1->line_number<<endl;
-      exit(1);
+      cout<<"Non compatible operand type used for AND operator in line no "<<$1->line_number<<endl;
+      //exit(1);;
     }  
     $$->type = "bool";
     string s1=new_temporary();
@@ -1067,7 +1130,7 @@ and_test_rep :
     {
       // cout<<$2->type<<endl;
       cout<<"Non compatible operand type used for AND  no operator in line no "<<$1->line_number<<endl;
-      exit(1);
+      //exit(1);;
     }
     $$->type = "bool";
     $$->temp_var = $2->temp_var;
@@ -1085,7 +1148,7 @@ not_test :
     if(($2->type != "bool") && ($2->type != "int"))
     {
       cout<<"Non compatible operand type used for NOT operator in line no "<<$1->line_number<<endl;
-      exit(1);
+      //exit(1);;
     }
         $$->type = "bool";
     string s1=new_temporary();
@@ -1347,7 +1410,7 @@ arith_expr :
     $$->temp_var = s1;
     // cout<<$$->type<< " "<<$1->line_number<<endl;
   }
-  |term { $$=$1;}
+  |term {$$=$1;}
 ;
 arith_expr_rep : 
   arith_expr_rep arith_expr_rep_c1 term {
@@ -1362,8 +1425,9 @@ arith_expr_rep :
       $$->type = "float";
       else if(($1->type == "int"|| $1->type =="bool" ) && ($3->type == "int"|| $3->type =="bool" ))
       $$->type = "int";
-      else 
-      check_type($1->type , $3->type, $3->line_number);
+      else {
+        check_type($1->type , $3->type, $3->line_number);
+      }
     }
     else 
       $$->type = $3->type;
@@ -1403,11 +1467,11 @@ term :
       else if(($1->type == "int"|| $1->type =="bool" ) && ($2->type == "int"|| $2->type =="bool" ))
       $$->type = "int";
       else 
-      check_type($1->type , $2->type, $2->line_number);
+      check_type($1->type , $2->type, $1->line_number);
     }
     else 
       $$->type = $2->type;
-
+    $$->line_number = $1->line_number;
     string s1=new_temporary();
     codepush($2->temp_op,$1->temp_var,$2->temp_var,s1,-1);
     $$->temp_var = s1; 
@@ -1423,6 +1487,24 @@ term_rep :
     n->children.push_back($2);
     n->children.push_back($3);
     $$ = n;
+    if((($1->type != "int")&&($1->type != "float"))&&(($2->type != "float")&&($2->type != "int")))
+    {
+      cout<<"Invalid datatype "<< $1->type << " and "<<$3->type <<" used for operator "<<$2->label<<endl;
+      //exit(1);;
+      
+    }
+    if($3->type != $1->type)
+    {
+      if(($3->type == "int"|| $3->type =="float" ) && ($1->type == "int"|| $1->type =="float" ))
+      $$->type = "float";
+      else 
+      check_type($1->type , $1->type, $1->line_number);
+    }
+    if($2->type == "/")
+     $$->type = "float";
+    else 
+      $$->type = $3->type;
+    $$->line_number = $3->line_number;
     string s1=new_temporary();
     codepush($2->temp_op,$1->temp_var,$3->temp_var,s1,-1);
     $$->temp_var = s1;
@@ -1432,7 +1514,15 @@ term_rep :
     n->children.push_back($1);
     n->children.push_back($2);
     $$ = n;
+    $$->line_number = $2->line_number;
     $$->type = $2->type;
+    if(($2->type != "bool")&&($2->type != "float")&&($2->type != "int"))
+    {
+      cout<<"Invalid datatype used for operator "<<$1->label<<" in line no "<<$1->line_number<<endl;
+      // //exit(1);;
+    }
+    if($1->type == "/")
+     $$->type = "float";
     $$->temp_var = $2->temp_var;
     $$->temp_op = $1->temp_op;
     }
@@ -1449,6 +1539,8 @@ factor :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    $$->line_number = $2->line_number;
+    $$->type = $2->type;
     $$->temp_op=$1->temp_op;
     $$->temp_var=$2->temp_var;
   }
@@ -1497,12 +1589,11 @@ atom_expr :
     $$->temp_var = $2->temp_var;
   }
   |atom trailer_rep{
-
-   
     Node* n = create_node("Atom Expression2");
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+
 
     if($2->type == "list")
     {
@@ -1515,23 +1606,63 @@ atom_expr :
       {
         $$->type = extractSubstring(gt->SYMVAL[$1->label].type);
       }
+      $$->label = $1->label;
+      // cout<<$$->type <<endl;
     }
-    if((gt->SYMVAL.find($1->label) != gt->SYMVAL.end()) && $2->category == "Func")
-    { 
-
+    if((gt->SYMVAL.find($1->label) != gt->SYMVAL.end()) && ($2->category == "Func") && (gt->childs[$1->label]->tab_type != CLS))
+    {
       vector<Param*> p = gt->SYMVAL[$1->label].params;
-      
       if(p.size() > $2->p_f.size())
       {
         cout<<"Lesser number of arguments for function call "<< $1->label <<" in line number "<< $1->line_number<<endl;
-                exit(1);
+
+        //exit(1);;
       }
       else if(p.size() < $2->p_f.size())
       {
         cout<<"Greater number of arguments for function call "<< $1->label <<" in line number "<< $1->line_number<<endl;
-                exit(1);
+                //exit(1);;
       }
       else {
+        for(int i=0;i<p.size();i++)
+        {
+          if(p[i]->par_type != $2->p_f[i]->par_type)
+          {
+            if(isCompatible(p[i]->par_type,$2->p_f[i]->par_type,$2->p_f[i]->par_name))
+            {
+
+            }
+            else{
+              cout<<" Type mismatch for argument "<<i<<" in function call "<< $1->label <<" in line number "<<$1->line_number<<endl;
+                      //exit(1);;
+            }
+          }
+        }
+      }
+      $$->type = gt->SYMVAL[$1->label].type ;
+      
+    }
+    else if((gt->SYMVAL.find($1->label) != gt->SYMVAL.end()) && ($2->category == "Func") && (gt->childs[$1->label]->tab_type == CLS))
+    {
+      $$->type = gt->SYMVAL[$1->label].type;
+      SYMTAB* s = gt->childs[$1->label];
+      string y = "__init__";
+
+      if(s->SYMVAL.find("__init__")!= s->SYMVAL.end())
+      {
+        vector<Param*> p = s->SYMVAL[y].params;
+        if(p.size() > $2->p_f.size())
+        {
+         cout<<"Lesser number of arguments for constructor call "<< $1->label <<" in line number "<< $1->line_number<<endl;
+
+         //exit(1);;
+        }
+        else if(p.size() < $2->p_f.size())
+        {
+          cout<<"Greater number of arguments for constructor call "<< $1->label <<" in line number "<< $1->line_number<<endl;
+                //exit(1);;
+        }
+        else {
         for(int i=0;i<p.size();i++)
         {
 
@@ -1543,77 +1674,117 @@ atom_expr :
             }
             else{
               cout<<" Type mismatch for argument "<<i<<" in function call "<< $1->label <<" in line number "<<$1->line_number<<endl;
-                      exit(1);
+                      //exit(1);;
             }
           }
         }
+        }
+        // cout<<p.size()<<endl;
+
       }
-      $$->type = gt->SYMVAL[$1->label].type ;
-      
     }
     else if($2->category == "Func")
     {
+      // to support function which are pre defined like len print and range
       if($1->label == "len"){
         std::regex pattern("list\\[\\w+\\]");
         // cout<<$2->type<<endl;
         if (std::regex_match($2->type, pattern)) {
 
         } else {
-            cout<<$2->type <<endl;
+            // cout<<$2->type <<endl;
+
             std::cout <<" Invalid datatype use for len function in line no : "<<$1->line_number<<"\n";
-            exit(1);
+            //exit(1);;
         }
         $$->type ="int";
       }
       else if( $1->label == "print")
       {
+        if($2->p_f.size() >1)
+        {
+          cout<<"More than one argument given in print in line number "<<$2->line_number <<endl;
+          //exit(1);
+        }
         for(int i = 0;i<$2->p_f.size() ; i++)
         {
+          // cout<<$2->p_f[i]->par_type<<" "<<endl;
           if($2->p_f[i]->par_type == "string"){}
           else{
-                if(tab->SYMVAL.find($2->p_f[i]->par_name)==tab->SYMVAL.end())
+                if($2->p_f[i]->par_type == $2->p_f[i]->par_name)
                 {
-                  if(gt->SYMVAL.find(($2->p_f[i]->par_name))==gt->SYMVAL.end()){
                   cout<<"Use of undeclared variable inside print function " <<" in line number "<<$2->line_number<<endl;
-                  exit(1);}
+                  //exit(1);;
                 }
           }
 
         }
       }
+      
       else{
+
         cout<<"Undeclared Function in line no : "<< $1->line_number<<endl;
-        exit(1);
+        //exit(1);;
       }
     }
     else if($2->label == "Trailer5")
     {
-      //  to check class datatypes
-      if(gt->childs[$1->type]->SYMVAL.find($2->type) == gt->childs[$1->type]->SYMVAL.end()) 
+      //  to check class datatypes  x.a.b.c abhi ispe kaam bcha h 
+      if($1->label == "self")
       {
-        cout<<"yes"<<endl;
-        cout<<"Undefined property "<<$2->type<<" for class "<<$1->type<<" used by object "<<$1->label<<"in line no "<<$1->line_number<<endl;
+        
+        if(tab->parent->SYMVAL.find($2->type) == tab->parent->SYMVAL.end()) 
+        {
+          cout<<"Undefined property "<<$2->type<<" for class "<<$1->type<<" used by object "<<$1->label<<" in line no "<<$1->line_number<<endl;
+          //exit(1);;
+        }
+        $$->type = tab->parent->SYMVAL[$2->type].type;
       }
-      $$->type = gt->childs[$1->type]->SYMVAL[$2->type].type;
-      cout<<$$->type<<endl;
+      else 
+      {
+
+        if(gt->childs[$1->type]->SYMVAL.find($2->type) == gt->childs[$1->type]->SYMVAL.end()) 
+        {
+          cout<<"Undefined property "<<$2->type<<" for class "<<$1->type<<" used by object "<<$1->label<<"in line no "<<$1->line_number<<endl;
+          //exit(1);;
+        }
+        $$->type = gt->childs[$1->type]->SYMVAL[$2->type].type;
+      }
+      $$->label = $1->label;
+
+      // cout<<$2->p_f[0]->par_type<<" sadv" <<endl;
+      // string s_s = $2->p_f[$2->p_f.size()-1]->par_name ;
+      // strings cls_label = $1->label;
+      // for(int i=0;i<$2->p_f.size()<i++)
+      // {
+      //   s_s = $2->p_f[$2->p_f.size()-1]->par_name;
+        
+      //   cls_label = $2->p_f[i]->par_name 
+      // }
+      if($2->p_f.size()==1)
+      {
+        $2->p_f[0]->par_type = gt->childs[$1->type]->SYMVAL[$2->p_f[0]->par_name].type;
+      }
+      $$->p_f = $2->p_f;
 
 
     }
-    
     $$->temp_var = $1->temp_var;
-        for(int i=0;i<arguments.size();i++) { 
-        string s1 = get<0>(arguments[i]);
-        if(tab->SYMVAL.find(s1)!=tab->SYMVAL.end()){
-        codepush("",tab->SYMVAL[s1].temp_var,"","pushparam",-1);
-        
-        } 
-        else{
-            codepush("",get<1>(arguments[i]),"","pushparam",-1);
-        } }
-       
-        codepush("call",$1->label,"","",-1);
-        
-        arguments.clear();
+    for(int i=0;i<arguments.size();i++) { 
+      string s1 = get<0>(arguments[i]);
+      if(tab->SYMVAL.find(s1)!=tab->SYMVAL.end()){
+      codepush("",tab->SYMVAL[s1].temp_var,"","pushparam",-1);
+      } 
+      else{
+        codepush("",get<1>(arguments[i]),"","pushparam",-1);
+      } 
+    }
+    if($1->type=="None")
+    codepush("call",$1->label,"","",-1);
+    else{
+      codepush(" ","call",$1->label,"",-1);
+    }
+    arguments.clear();
   }
   |atom{
     $$ = $1;
@@ -1634,6 +1805,9 @@ trailer_rep :
       n->children.push_back($1->children[i]);
     }
     n->children.push_back($2);
+    cout<<" Datatypes like in line number "<<$2->line_number <<" not supported for now "<<endl;
+    //exit(1);;
+
   }
   | trailer { 
     $$ =$1;
@@ -1660,7 +1834,6 @@ atom : LPAREN atom_opt1 RPAREN {
         n->children.push_back($3);
         $$->type = "list" + $1->type + $2->type +$3->type;
         $$->line_number = $1->line_number;
-        // cout<<$$->type<<" "<<yylineno<<endl;
         $$->temp_var = $2->temp_var;
 
       }
@@ -1679,11 +1852,9 @@ atom : LPAREN atom_opt1 RPAREN {
                   // cout<<"Already declared"<<endl;
                   $$->type = tab->SYMVAL[$1->label].type;
                   $$->temp_var = tab->SYMVAL[$1->label].temp_var;
-                  // cout<<$$->type<<" Name "<< yylineno << " "<< $$->label<<endl;
                 }
                 else if(gt->SYMVAL.find($1->label)!=gt->SYMVAL.end())
                 {
-                  // cout<<$$->type << " "<<$$->label<<endl;
                   $$->type = gt->SYMVAL[$1->label].type;
                 }
                 else{
@@ -1698,10 +1869,12 @@ atom : LPAREN atom_opt1 RPAREN {
                   $$->type = "bool";
                 else if($1->label == "len")
                   $$->type = "int";
+                else{
                 string t = new_temporary();
+
                 $$->temp_var = t;
                 // cout << t;
-                codepush("",t,"",$1->label,-1);  
+                codepush("",t,"",$1->label,-1);}  
                 }
               
 
@@ -1749,7 +1922,9 @@ testlist_comp :
     n->children.push_back($2);
     $$->type = $1->type;
     $$->line_number = $1->line_number;
-    
+    check_type($1->type , $2->type , $2->line_number);
+    // cout<<"Yes  "<<endl;
+    $$->type = $1->type;
   }
   |testlist_comp_c1{$$ =$1;}
 ;
@@ -1855,7 +2030,12 @@ trailer :
     $$ = n;
     n->children.push_back($1);
     n->children.push_back($2);
+    $$->type = $2->type;
     $$->line_number = $1->line_number;
+    // attributes of a class
+    Param* temp = new Param();
+    temp->par_name = $2->label;
+    $$->p_f.push_back(temp);
   }
 ;
 subscriptlist: 
@@ -2050,19 +2230,19 @@ class_name :CLASS NAME{
                 tab->SYMVAL[$2->label].identity=CLS;
                 tab->SYMVAL[$2->label].scope=curr_scope;
                 tab->SYMVAL[$2->label].line_no=$1->line_number;
-               cout<<tab->SYMVAL[$2->label].name<<endl;
                SYMTAB* newtab=new SYMTAB();
+               newtab->SYMTAB_NAME = $2->label;
                newtab->SYMSCOPE=++curr_scope;
                newtab->parent=tab;
+               newtab->tab_type = 3;
               //  tab->childs.push_back(newtab);
                tab->childs[$2->label] = newtab;
+              //  cout<<gt->childs[$2->label]->tab_type<<"funck"<<endl;
                tab=newtab;
-
-               tablist[curr_scope]=tab;
              }
              else {
               cout<<"Class redeclared in line no "<< $2->line_number<<endl;
-                      exit(1);
+                      //exit(1);;
              }
 };
 classdef : class_name LPAREN arglist RPAREN COLON suite{
@@ -2075,24 +2255,15 @@ classdef : class_name LPAREN arglist RPAREN COLON suite{
     n->children.push_back($6);
     $$ = n;
     tab=tab->parent;
-  //   if(tab->SYMVAL.find($1->label)!= tab->SYMVAL.end()){
-  //     tab->SYMVAL[$1->label].identity=CLS;
-  //     tab->SYMVAL[$1->label].scope=curr_scope;
-  //     tab->SYMVAL[$1->label].line_no=$1->line_number;
-  //     tab->SYMVAL[$1->label].type=$4->type;
-  //     tab->SYMVAL[$1->label].name=$1->label;
-  //     tab->SYMVAL[$1->label].size=$2->count;
-  //     // tab-SYMVAL[$1->labe].params = 
-  //     //int g_index;
-  //     //int reg_name;
-  //     for(int i=0;i<$2->children.size();i++){
-  //       Node* t=$2->children[i];
-  //       string temp=t->label;
-  //        if(temp!="[" && temp!="]"){
-  //           tab->SYMVAL[$1->label].params=$2->p_f;
-  //        }
-  //     }              
-  //  }
+    if(tab->SYMVAL.find($1->label)!= tab->SYMVAL.end()){
+      tab->SYMVAL[$1->label].identity=CLS;
+      tab->SYMVAL[$1->label].scope=curr_scope;
+      tab->SYMVAL[$1->label].line_no=$1->line_number;
+      tab->SYMVAL[$1->label].type=$1->label;
+      tab->SYMVAL[$1->label].name=$1->label;
+      tab->SYMVAL[$1->label].size=$3->count;
+      tab->SYMVAL[$1->label].params=$3->p_f;
+   }
 
   //  else{
   //   cout<<"error"<<endl;
@@ -2109,24 +2280,24 @@ classdef : class_name LPAREN arglist RPAREN COLON suite{
     n->children.push_back($5);
     $$ = n;
     tab=tab->parent;
-  //   if(tab->SYMVAL.find($1->label)!= tab->SYMVAL.end()){
-  //     tab->SYMVAL[$1->label].identity=CLS;
-  //     tab->SYMVAL[$1->label].scope=curr_scope;
-  //     tab->SYMVAL[$1->label].line_no=$1->line_number;
-  //     tab->SYMVAL[$1->label].type=$4->type;
-  //     tab->SYMVAL[$1->label].name=$1->label;
-  //     tab->SYMVAL[$1->label].size=$2->count;
-  //     // tab-SYMVAL[$1->labe].params = 
-  //     //int g_index;
-  //     //int reg_name;
-  //     for(int i=0;i<$2->children.size();i++){
-  //       Node* t=$2->children[i];
-  //       string temp=t->label;
-  //        if(temp!="[" && temp!="]"){
-  //           tab->SYMVAL[$1->label].params=$2->p_f;
-  //        }
-  //     }              
-  //  }
+    if(tab->SYMVAL.find($1->label)!= tab->SYMVAL.end()){
+      tab->SYMVAL[$1->label].identity=CLS;
+      tab->SYMVAL[$1->label].scope=curr_scope;
+      tab->SYMVAL[$1->label].line_no=$1->line_number;
+      tab->SYMVAL[$1->label].type=$1->label;
+      tab->SYMVAL[$1->label].name=$1->label;
+      // tab->SYMVAL[$1->label].size=$2->count;
+      // tab-SYMVAL[$1->labe].params = 
+      //int g_index;
+      //int reg_name;
+      // for(int i=0;i<$2->children.size();i++){
+      //   Node* t=$2->children[i];
+      //   string temp=t->label;
+      //    if(temp!="[" && temp!="]"){
+      //       tab->SYMVAL[$1->label].params=$2->p_f;
+      //    }
+      // }              
+   }
 
   //  else{
   //   cout<<"error"<<endl;
@@ -2206,6 +2377,7 @@ arglist :
     Param* temp = new Param();
     temp->par_type=$1->type;
     temp->par_name=$1->label;
+    // cout<<temp->par_type<<" ARGLIST "<<temp->par_name<<endl;
     $$->p_f.push_back(temp);
     $$->p_f.insert($$->p_f.end(), $2->p_f.begin(), $2->p_f.end());
     // for (auto it = $$->parameters.begin(); it != $$->parameters.end(); ++it) {
@@ -2218,7 +2390,7 @@ arglist :
     Param* temp = new Param();
     temp->par_type=$1->type;
     temp->par_name=$1->label;
-    $$->p_f.push_back(temp);
+        $$->p_f.push_back(temp);
     arguments.push_back(make_tuple($1->label,$1->temp_var, $1->type,0,0));
   }
 ;
@@ -2279,7 +2451,7 @@ argument :
    n->children.push_back($1);
    n->children.push_back($2);    
   }
-  |test{$$ =$1;}
+  |test{$$ =$1; }
 ;
 comp_iter : comp_for {$$ = $1;}
           | comp_if {$$ = $1;}
@@ -2378,7 +2550,7 @@ int main(int argc, char* argv[]) {
     yyin = fopen(input_filename, "r");
     if(yyin == NULL) {
         cerr << ": Error: Input file " << input_filename << " not found.\n";
-        exit(1); 
+        //exit(1);; 
     }
     yyparse();
     cout<<endl;

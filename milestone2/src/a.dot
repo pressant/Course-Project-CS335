@@ -1,280 +1,643 @@
 digraph parse_tree {
-"0x56467a58beb0" [label="File_input"];
-"0x56467a58beb0" -> "0x56467a5b5320";
-"0x56467a5b5320" [label="newline_stat_rep"];
-"0x56467a5b5320" -> "0x56467a5a23f0";
-"0x56467a5a23f0" [label="expr_stmt"];
-"0x56467a5a23f0" -> "0x56467a5a13a0";
-"0x56467a5a13a0" [label="NAME
-count"];
-"0x56467a5a23f0" -> "0x56467a5a2210";
-"0x56467a5a2210" [label="annassign"];
-"0x56467a5a2210" -> "0x56467a5a15c0";
-"0x56467a5a15c0" [label="DELIMITER
-:"];
-"0x56467a5a2210" -> "0x56467a5a1a70";
-"0x56467a5a1a70" [label="decl_type"];
-"0x56467a5a2210" -> "0x56467a5a2040";
-"0x56467a5a2040" [label="annassign_op"];
-"0x56467a5a2040" -> "0x56467a5a18e0";
-"0x56467a5a18e0" [label="OPERATOR
-="];
-"0x56467a5a2040" -> "0x56467a5a1c00";
-"0x56467a5a1c00" [label="INTEGER
-0"];
-"0x56467a5b5320" -> "0x56467a5a64f0";
-"0x56467a5a64f0" [label="expr_stmt"];
-"0x56467a5a64f0" -> "0x56467a5a2ae0";
-"0x56467a5a2ae0" [label="NAME
-z"];
-"0x56467a5a64f0" -> "0x56467a5a60a0";
-"0x56467a5a60a0" [label="annassign"];
-"0x56467a5a60a0" -> "0x56467a5a2c70";
-"0x56467a5a2c70" [label="DELIMITER
-:"];
-"0x56467a5a60a0" -> "0x56467a5a3440";
-"0x56467a5a3440" [label="decl_type"];
-"0x56467a5a3440" -> "0x56467a5a2e00";
-"0x56467a5a2e00" [label="NAME
-list"];
-"0x56467a5a3440" -> "0x56467a5a2f90";
-"0x56467a5a2f90" [label="DELIMITER
-["];
-"0x56467a5a3440" -> "0x56467a5a3120";
-"0x56467a5a3120" [label="NAME
-int"];
-"0x56467a5a3440" -> "0x56467a5a32b0";
-"0x56467a5a32b0" [label="DELIMITER
-]"];
-"0x56467a5a60a0" -> "0x56467a5a5f10";
-"0x56467a5a5f10" [label="annassign_op"];
-"0x56467a5a5f10" -> "0x56467a5a3640";
-"0x56467a5a3640" [label="OPERATOR
-="];
-"0x56467a5a5f10" -> "0x56467a5a5bf0";
-"0x56467a5a5bf0" [label="Atom"];
-"0x56467a5a5bf0" -> "0x56467a5a37d0";
-"0x56467a5a37d0" [label="DELIMITER
-["];
-"0x56467a5a5bf0" -> "0x56467a5a5a60";
-"0x56467a5a5a60" [label="Testlist comp"];
-"0x56467a5a5a60" -> "0x56467a5a3960";
-"0x56467a5a3960" [label="INTEGER
-1"];
-"0x56467a5a5a60" -> "0x56467a5a3c80";
-"0x56467a5a3c80" [label="Testlist Comp C2 rep"];
-"0x56467a5a3c80" -> "0x56467a5a3f40";
-"0x56467a5a3f40" [label="DELIMITER
-,"];
-"0x56467a5a3c80" -> "0x56467a5a40d0";
-"0x56467a5a40d0" [label="INTEGER
-2"];
-"0x56467a5a3c80" -> "0x56467a5a4260";
-"0x56467a5a4260" [label="DELIMITER
-,"];
-"0x56467a5a3c80" -> "0x56467a5a45b0";
-"0x56467a5a45b0" [label="INTEGER
-3"];
-"0x56467a5a3c80" -> "0x56467a5a4740";
-"0x56467a5a4740" [label="DELIMITER
-,"];
-"0x56467a5a3c80" -> "0x56467a5a4ae0";
-"0x56467a5a4ae0" [label="INTEGER
-4"];
-"0x56467a5a3c80" -> "0x56467a5a4c70";
-"0x56467a5a4c70" [label="DELIMITER
-,"];
-"0x56467a5a3c80" -> "0x56467a5a5040";
-"0x56467a5a5040" [label="INTEGER
-5"];
-"0x56467a5a5bf0" -> "0x56467a5a3af0";
-"0x56467a5a3af0" [label="DELIMITER
-]"];
-"0x56467a5b5320" -> "0x56467a5a58c0";
-"0x56467a5a58c0" [label="Function"];
-"0x56467a5a58c0" -> "0x56467a5a6b60";
-"0x56467a5a6b60" [label="edd"];
-"0x56467a5a6b60" -> "0x56467a5a6840";
-"0x56467a5a6840" [label="KEYWORD
+"0x55bb9eb43eb0" [label="File_input"];
+"0x55bb9eb43eb0" -> "0x55bb9eb804c0";
+"0x55bb9eb804c0" [label="newline_stat_rep"];
+"0x55bb9eb804c0" -> "0x55bb9eb59690";
+"0x55bb9eb59690" [label="add"];
+"0x55bb9eb59690" -> "0x55bb9eb59370";
+"0x55bb9eb59370" [label="KEYWORD
 DEF"];
-"0x56467a5a6b60" -> "0x56467a5a69d0";
-"0x56467a5a69d0" [label="NAME
-edd"];
-"0x56467a5a58c0" -> "0x56467a5a8ae0";
-"0x56467a5a8ae0" [label="Parameters"];
-"0x56467a5a8ae0" -> "0x56467a5a7040";
-"0x56467a5a7040" [label="DELIMITER
+"0x55bb9eb59690" -> "0x55bb9eb59500";
+"0x55bb9eb59500" [label="NAME
+add"];
+"0x55bb9eb804c0" -> "0x55bb9eb5b580";
+"0x55bb9eb5b580" [label="Parameters"];
+"0x55bb9eb5b580" -> "0x55bb9eb59b40";
+"0x55bb9eb59b40" [label="DELIMITER
 ("];
-"0x56467a5a8ae0" -> "0x56467a5a8630";
-"0x56467a5a8630" [label="Typedargslist4"];
-"0x56467a5a8630" -> "0x56467a5a71d0";
-"0x56467a5a71d0" [label="NAME
-a"];
-"0x56467a5a8630" -> "0x56467a5a7360";
-"0x56467a5a7360" [label="DELIMITER
+"0x55bb9eb5b580" -> "0x55bb9eb5b0f0";
+"0x55bb9eb5b0f0" [label="Typedargslist4"];
+"0x55bb9eb5b0f0" -> "0x55bb9eb59cd0";
+"0x55bb9eb59cd0" [label="NAME
+x"];
+"0x55bb9eb5b0f0" -> "0x55bb9eb59e60";
+"0x55bb9eb59e60" [label="DELIMITER
 :"];
-"0x56467a5a8630" -> "0x56467a5a7810";
-"0x56467a5a7810" [label="NAME
-string"];
-"0x56467a5a8630" -> "0x56467a5a7680";
-"0x56467a5a7680" [label="DELIMITER
+"0x55bb9eb5b0f0" -> "0x55bb9eb5a310";
+"0x55bb9eb5a310" [label="NAME
+int"];
+"0x55bb9eb5b0f0" -> "0x55bb9eb5a180";
+"0x55bb9eb5a180" [label="DELIMITER
 ,"];
-"0x56467a5a8630" -> "0x56467a5a79c0";
-"0x56467a5a79c0" [label="NAME
-b"];
-"0x56467a5a8630" -> "0x56467a5a7b50";
-"0x56467a5a7b50" [label="DELIMITER
+"0x55bb9eb5b0f0" -> "0x55bb9eb5a4a0";
+"0x55bb9eb5a4a0" [label="NAME
+y"];
+"0x55bb9eb5b0f0" -> "0x55bb9eb5a630";
+"0x55bb9eb5a630" [label="DELIMITER
 :"];
-"0x56467a5a8630" -> "0x56467a5a8000";
-"0x56467a5a8000" [label="NAME
-string"];
-"0x56467a5a8ae0" -> "0x56467a5a7e70";
-"0x56467a5a7e70" [label="DELIMITER
+"0x55bb9eb5b0f0" -> "0x55bb9eb5aae0";
+"0x55bb9eb5aae0" [label="NAME
+int"];
+"0x55bb9eb5b580" -> "0x55bb9eb5a950";
+"0x55bb9eb5a950" [label="DELIMITER
 )"];
-"0x56467a5a58c0" -> "0x56467a5a8c90";
-"0x56467a5a8c90" [label="DELIMITER
+"0x55bb9eb804c0" -> "0x55bb9eb5b730";
+"0x55bb9eb5b730" [label="DELIMITER
 ->"];
-"0x56467a5a58c0" -> "0x56467a5a8e20";
-"0x56467a5a8e20" [label="NAME
-string"];
-"0x56467a5a58c0" -> "0x56467a5a8fb0";
-"0x56467a5a8fb0" [label="DELIMITER
+"0x55bb9eb804c0" -> "0x55bb9eb5c1a0";
+"0x55bb9eb5c1a0" [label="NAME
+int"];
+"0x55bb9eb804c0" -> "0x55bb9eb5c330";
+"0x55bb9eb5c330" [label="DELIMITER
 :"];
-"0x56467a5a58c0" -> "0x56467a5a56c0";
-"0x56467a5a56c0" [label="Suite"];
-"0x56467a5a56c0" -> "0x56467a5a92d0";
-"0x56467a5a92d0" [label="INDENT"];
-"0x56467a5a56c0" -> "0x56467a5a5380";
-"0x56467a5a5380" [label="return_stmt"];
-"0x56467a5a5380" -> "0x56467a5a9460";
-"0x56467a5a9460" [label="KEYWORD
+"0x55bb9eb804c0" -> "0x55bb9eb5d930";
+"0x55bb9eb5d930" [label="Suite"];
+"0x55bb9eb5d930" -> "0x55bb9eb5c700";
+"0x55bb9eb5c700" [label="INDENT"];
+"0x55bb9eb5d930" -> "0x55bb9eb5d5f0";
+"0x55bb9eb5d5f0" [label="return_stmt"];
+"0x55bb9eb5d5f0" -> "0x55bb9eb5c890";
+"0x55bb9eb5c890" [label="KEYWORD
 RETURN"];
-"0x56467a5a5380" -> "0x56467a5a9e40";
-"0x56467a5a9e40" [label="Arithmetic Expression"];
-"0x56467a5a9e40" -> "0x56467a5a95f0";
-"0x56467a5a95f0" [label="NAME
-a"];
-"0x56467a5a9e40" -> "0x56467a5a9c60";
-"0x56467a5a9c60" [label="Arithmetic Expression Rep2"];
-"0x56467a5a9c60" -> "0x56467a5a9780";
-"0x56467a5a9780" [label="OPERATOR
+"0x55bb9eb5d5f0" -> "0x55bb9eb5d290";
+"0x55bb9eb5d290" [label="Arithmetic Expression"];
+"0x55bb9eb5d290" -> "0x55bb9eb5ca20";
+"0x55bb9eb5ca20" [label="NAME
+x"];
+"0x55bb9eb5d290" -> "0x55bb9eb5d090";
+"0x55bb9eb5d090" [label="Arithmetic Expression Rep2"];
+"0x55bb9eb5d090" -> "0x55bb9eb5cbb0";
+"0x55bb9eb5cbb0" [label="OPERATOR
 +"];
-"0x56467a5a9c60" -> "0x56467a5a9910";
-"0x56467a5a9910" [label="NAME
-b"];
-"0x56467a5a56c0" -> "0x56467a5a5530";
-"0x56467a5a5530" [label="DEDENT"];
-"0x56467a5b5320" -> "0x56467a5ac480";
-"0x56467a5ac480" [label="expr_stmt"];
-"0x56467a5ac480" -> "0x56467a5ab360";
-"0x56467a5ab360" [label="NAME
-bett"];
-"0x56467a5ac480" -> "0x56467a5abfe0";
-"0x56467a5abfe0" [label="annassign"];
-"0x56467a5abfe0" -> "0x56467a5ab4f0";
-"0x56467a5ab4f0" [label="DELIMITER
-:"];
-"0x56467a5abfe0" -> "0x56467a5ab9a0";
-"0x56467a5ab9a0" [label="decl_type"];
-"0x56467a5abfe0" -> "0x56467a5abe50";
-"0x56467a5abe50" [label="annassign_op"];
-"0x56467a5abe50" -> "0x56467a5ab810";
-"0x56467a5ab810" [label="OPERATOR
-="];
-"0x56467a5abe50" -> "0x56467a5abb30";
-"0x56467a5abb30" [label="STRING
-\"bye\""];
-"0x56467a5b5320" -> "0x56467a5aaa70";
-"0x56467a5aaa70" [label="while_stmt"];
-"0x56467a5aaa70" -> "0x56467a5ac840";
-"0x56467a5ac840" [label="KEYWORD
-WHILE"];
-"0x56467a5aaa70" -> "0x56467a5ad1a0";
-"0x56467a5ad1a0" [label="Comparison"];
-"0x56467a5ad1a0" -> "0x56467a5ac9d0";
-"0x56467a5ac9d0" [label="NAME
-count"];
-"0x56467a5ad1a0" -> "0x56467a5ad010";
-"0x56467a5ad010" [label="Comparison Rep"];
-"0x56467a5ad010" -> "0x56467a5acb60";
-"0x56467a5acb60" [label="OPERATOR
-<"];
-"0x56467a5ad010" -> "0x56467a5accf0";
-"0x56467a5accf0" [label="INTEGER
-5"];
-"0x56467a5aaa70" -> "0x56467a5ace80";
-"0x56467a5ace80" [label="DELIMITER
-:"];
-"0x56467a5aaa70" -> "0x56467a5ace80";
-"0x56467a5ace80" [label="DELIMITER
-:"];
-"0x56467a5b5320" -> "0x56467a5b4180";
-"0x56467a5b4180" [label="for_stmt"];
-"0x56467a5b4180" -> "0x56467a5aae70";
-"0x56467a5aae70" [label="KEYWORD
-FOR"];
-"0x56467a5b4180" -> "0x56467a5b1a60";
-"0x56467a5b1a60" [label="NAME
-count"];
-"0x56467a5b4180" -> "0x56467a5b1bf0";
-"0x56467a5b1bf0" [label="KEYWORD
-IN"];
-"0x56467a5b4180" -> "0x56467a5b1d80";
-"0x56467a5b1d80" [label="NAME
-range"];
-"0x56467a5b4180" -> "0x56467a5b2550";
-"0x56467a5b2550" [label="DELIMITER
-:"];
-"0x56467a5b4180" -> "0x56467a5b3f80";
-"0x56467a5b3f80" [label="Suite"];
-"0x56467a5b3f80" -> "0x56467a5b2870";
-"0x56467a5b2870" [label="INDENT"];
-"0x56467a5b3f80" -> "0x56467a5b3c40";
-"0x56467a5b3c40" [label="Atom Expression2"];
-"0x56467a5b3c40" -> "0x56467a5b2a00";
-"0x56467a5b2a00" [label="NAME
-print"];
-"0x56467a5b3c40" -> "0x56467a5b36f0";
-"0x56467a5b36f0" [label="Func
-Trailer1"];
-"0x56467a5b36f0" -> "0x56467a5b2b90";
-"0x56467a5b2b90" [label="DELIMITER
+"0x55bb9eb5d090" -> "0x55bb9eb5cd40";
+"0x55bb9eb5cd40" [label="NAME
+y"];
+"0x55bb9eb5d930" -> "0x55bb9eb5d7a0";
+"0x55bb9eb5d7a0" [label="DEDENT"];
+"0x55bb9eb804c0" -> "0x55bb9eb61e00";
+"0x55bb9eb61e00" [label="Function"];
+"0x55bb9eb61e00" -> "0x55bb9eb5e060";
+"0x55bb9eb5e060" [label="subtract"];
+"0x55bb9eb5e060" -> "0x55bb9eb5dd40";
+"0x55bb9eb5dd40" [label="KEYWORD
+DEF"];
+"0x55bb9eb5e060" -> "0x55bb9eb5ded0";
+"0x55bb9eb5ded0" [label="NAME
+subtract"];
+"0x55bb9eb61e00" -> "0x55bb9eb5fc40";
+"0x55bb9eb5fc40" [label="Parameters"];
+"0x55bb9eb5fc40" -> "0x55bb9eb5e3f0";
+"0x55bb9eb5e3f0" [label="DELIMITER
 ("];
-"0x56467a5b36f0" -> "0x56467a5b34f0";
-"0x56467a5b34f0" [label="Arglist"];
-"0x56467a5b34f0" -> "0x56467a5b2d20";
-"0x56467a5b2d20" [label="STRING
-\"Coun:\""];
-"0x56467a5b34f0" -> "0x56467a5b3360";
-"0x56467a5b3360" [label="Comma Argument rep2"];
-"0x56467a5b3360" -> "0x56467a5b2eb0";
-"0x56467a5b2eb0" [label="DELIMITER
+"0x55bb9eb5fc40" -> "0x55bb9eb5f890";
+"0x55bb9eb5f890" [label="Typedargslist4"];
+"0x55bb9eb5f890" -> "0x55bb9eb5e580";
+"0x55bb9eb5e580" [label="NAME
+x"];
+"0x55bb9eb5f890" -> "0x55bb9eb5e710";
+"0x55bb9eb5e710" [label="DELIMITER
+:"];
+"0x55bb9eb5f890" -> "0x55bb9eb5ebc0";
+"0x55bb9eb5ebc0" [label="NAME
+int"];
+"0x55bb9eb5f890" -> "0x55bb9eb5ea30";
+"0x55bb9eb5ea30" [label="DELIMITER
 ,"];
-"0x56467a5b3360" -> "0x56467a5b3040";
-"0x56467a5b3040" [label="NAME
-count"];
-"0x56467a5b36f0" -> "0x56467a5b31d0";
-"0x56467a5b31d0" [label="DELIMITER
+"0x55bb9eb5f890" -> "0x55bb9eb5ed50";
+"0x55bb9eb5ed50" [label="NAME
+y"];
+"0x55bb9eb5f890" -> "0x55bb9eb5eee0";
+"0x55bb9eb5eee0" [label="DELIMITER
+:"];
+"0x55bb9eb5f890" -> "0x55bb9eb5f390";
+"0x55bb9eb5f390" [label="NAME
+int"];
+"0x55bb9eb5fc40" -> "0x55bb9eb5f200";
+"0x55bb9eb5f200" [label="DELIMITER
 )"];
-"0x56467a5b3f80" -> "0x56467a5b3df0";
-"0x56467a5b3df0" [label="DEDENT"];
-"0x56467a5b5320" -> "0x56467a5b5170";
-"0x56467a5b5170" [label="Atom Expression2"];
-"0x56467a5b5170" -> "0x56467a5b45a0";
-"0x56467a5b45a0" [label="NAME
-print"];
-"0x56467a5b5170" -> "0x56467a5b4c50";
-"0x56467a5b4c50" [label="Func
-Trailer1"];
-"0x56467a5b4c50" -> "0x56467a5b4730";
-"0x56467a5b4730" [label="DELIMITER
+"0x55bb9eb61e00" -> "0x55bb9eb5fdf0";
+"0x55bb9eb5fdf0" [label="DELIMITER
+->"];
+"0x55bb9eb61e00" -> "0x55bb9eb5be00";
+"0x55bb9eb5be00" [label="NAME
+int"];
+"0x55bb9eb61e00" -> "0x55bb9eb5bf90";
+"0x55bb9eb5bf90" [label="DELIMITER
+:"];
+"0x55bb9eb61e00" -> "0x55bb9eb61c00";
+"0x55bb9eb61c00" [label="Suite"];
+"0x55bb9eb61c00" -> "0x55bb9eb60a50";
+"0x55bb9eb60a50" [label="INDENT"];
+"0x55bb9eb61c00" -> "0x55bb9eb618c0";
+"0x55bb9eb618c0" [label="return_stmt"];
+"0x55bb9eb618c0" -> "0x55bb9eb60be0";
+"0x55bb9eb60be0" [label="KEYWORD
+RETURN"];
+"0x55bb9eb618c0" -> "0x55bb9eb61560";
+"0x55bb9eb61560" [label="Arithmetic Expression"];
+"0x55bb9eb61560" -> "0x55bb9eb60d70";
+"0x55bb9eb60d70" [label="NAME
+x"];
+"0x55bb9eb61560" -> "0x55bb9eb613b0";
+"0x55bb9eb613b0" [label="Arithmetic Expression Rep2"];
+"0x55bb9eb613b0" -> "0x55bb9eb60f00";
+"0x55bb9eb60f00" [label="OPERATOR
+-"];
+"0x55bb9eb613b0" -> "0x55bb9eb61090";
+"0x55bb9eb61090" [label="NAME
+y"];
+"0x55bb9eb61c00" -> "0x55bb9eb61a70";
+"0x55bb9eb61a70" [label="DEDENT"];
+"0x55bb9eb804c0" -> "0x55bb9eb66740";
+"0x55bb9eb66740" [label="Function"];
+"0x55bb9eb66740" -> "0x55bb9eb62540";
+"0x55bb9eb62540" [label="multiply"];
+"0x55bb9eb62540" -> "0x55bb9eb62220";
+"0x55bb9eb62220" [label="KEYWORD
+DEF"];
+"0x55bb9eb62540" -> "0x55bb9eb623b0";
+"0x55bb9eb623b0" [label="NAME
+multiply"];
+"0x55bb9eb66740" -> "0x55bb9eb64190";
+"0x55bb9eb64190" [label="Parameters"];
+"0x55bb9eb64190" -> "0x55bb9eb628d0";
+"0x55bb9eb628d0" [label="DELIMITER
 ("];
-"0x56467a5b4c50" -> "0x56467a5b48c0";
-"0x56467a5b48c0" [label="STRING
-\"Loop finished\""];
-"0x56467a5b4c50" -> "0x56467a5b4a50";
-"0x56467a5b4a50" [label="DELIMITER
+"0x55bb9eb64190" -> "0x55bb9eb63de0";
+"0x55bb9eb63de0" [label="Typedargslist4"];
+"0x55bb9eb63de0" -> "0x55bb9eb62a60";
+"0x55bb9eb62a60" [label="NAME
+x"];
+"0x55bb9eb63de0" -> "0x55bb9eb62bf0";
+"0x55bb9eb62bf0" [label="DELIMITER
+:"];
+"0x55bb9eb63de0" -> "0x55bb9eb630a0";
+"0x55bb9eb630a0" [label="NAME
+int"];
+"0x55bb9eb63de0" -> "0x55bb9eb62f10";
+"0x55bb9eb62f10" [label="DELIMITER
+,"];
+"0x55bb9eb63de0" -> "0x55bb9eb63230";
+"0x55bb9eb63230" [label="NAME
+y"];
+"0x55bb9eb63de0" -> "0x55bb9eb633c0";
+"0x55bb9eb633c0" [label="DELIMITER
+:"];
+"0x55bb9eb63de0" -> "0x55bb9eb63870";
+"0x55bb9eb63870" [label="NAME
+int"];
+"0x55bb9eb64190" -> "0x55bb9eb636e0";
+"0x55bb9eb636e0" [label="DELIMITER
 )"];
-"0x56467a58beb0" -> "0x56467a5b5580";
-"0x56467a5b5580" [label="ENDMARKER"];
+"0x55bb9eb66740" -> "0x55bb9eb64340";
+"0x55bb9eb64340" [label="DELIMITER
+->"];
+"0x55bb9eb66740" -> "0x55bb9eb60030";
+"0x55bb9eb60030" [label="NAME
+int"];
+"0x55bb9eb66740" -> "0x55bb9eb601c0";
+"0x55bb9eb601c0" [label="DELIMITER
+:"];
+"0x55bb9eb66740" -> "0x55bb9eb66580";
+"0x55bb9eb66580" [label="Suite"];
+"0x55bb9eb66580" -> "0x55bb9eb60590";
+"0x55bb9eb60590" [label="INDENT"];
+"0x55bb9eb66580" -> "0x55bb9eb66260";
+"0x55bb9eb66260" [label="return_stmt"];
+"0x55bb9eb66260" -> "0x55bb9eb655e0";
+"0x55bb9eb655e0" [label="KEYWORD
+RETURN"];
+"0x55bb9eb66260" -> "0x55bb9eb65f40";
+"0x55bb9eb65f40" [label="TERM"];
+"0x55bb9eb65f40" -> "0x55bb9eb65770";
+"0x55bb9eb65770" [label="NAME
+x"];
+"0x55bb9eb65f40" -> "0x55bb9eb65db0";
+"0x55bb9eb65db0" [label="TERM Rep"];
+"0x55bb9eb65db0" -> "0x55bb9eb65900";
+"0x55bb9eb65900" [label="OPERATOR
+*"];
+"0x55bb9eb65db0" -> "0x55bb9eb65a90";
+"0x55bb9eb65a90" [label="NAME
+y"];
+"0x55bb9eb66580" -> "0x55bb9eb663f0";
+"0x55bb9eb663f0" [label="DEDENT"];
+"0x55bb9eb804c0" -> "0x55bb9eb6d7f0";
+"0x55bb9eb6d7f0" [label="Function"];
+"0x55bb9eb6d7f0" -> "0x55bb9eb66e70";
+"0x55bb9eb66e70" [label="divide"];
+"0x55bb9eb66e70" -> "0x55bb9eb66b50";
+"0x55bb9eb66b50" [label="KEYWORD
+DEF"];
+"0x55bb9eb66e70" -> "0x55bb9eb66ce0";
+"0x55bb9eb66ce0" [label="NAME
+divide"];
+"0x55bb9eb6d7f0" -> "0x55bb9eb68ac0";
+"0x55bb9eb68ac0" [label="Parameters"];
+"0x55bb9eb68ac0" -> "0x55bb9eb67200";
+"0x55bb9eb67200" [label="DELIMITER
+("];
+"0x55bb9eb68ac0" -> "0x55bb9eb68710";
+"0x55bb9eb68710" [label="Typedargslist4"];
+"0x55bb9eb68710" -> "0x55bb9eb67390";
+"0x55bb9eb67390" [label="NAME
+x"];
+"0x55bb9eb68710" -> "0x55bb9eb67520";
+"0x55bb9eb67520" [label="DELIMITER
+:"];
+"0x55bb9eb68710" -> "0x55bb9eb679d0";
+"0x55bb9eb679d0" [label="NAME
+int"];
+"0x55bb9eb68710" -> "0x55bb9eb67840";
+"0x55bb9eb67840" [label="DELIMITER
+,"];
+"0x55bb9eb68710" -> "0x55bb9eb67b60";
+"0x55bb9eb67b60" [label="NAME
+y"];
+"0x55bb9eb68710" -> "0x55bb9eb67cf0";
+"0x55bb9eb67cf0" [label="DELIMITER
+:"];
+"0x55bb9eb68710" -> "0x55bb9eb681a0";
+"0x55bb9eb681a0" [label="NAME
+int"];
+"0x55bb9eb68ac0" -> "0x55bb9eb68010";
+"0x55bb9eb68010" [label="DELIMITER
+)"];
+"0x55bb9eb6d7f0" -> "0x55bb9eb68c70";
+"0x55bb9eb68c70" [label="DELIMITER
+->"];
+"0x55bb9eb6d7f0" -> "0x55bb9eb68eb0";
+"0x55bb9eb68eb0" [label="NAME
+float"];
+"0x55bb9eb6d7f0" -> "0x55bb9eb69040";
+"0x55bb9eb69040" [label="DELIMITER
+:"];
+"0x55bb9eb6d7f0" -> "0x55bb9eb6d610";
+"0x55bb9eb6d610" [label="Suite"];
+"0x55bb9eb6d610" -> "0x55bb9eb69410";
+"0x55bb9eb69410" [label="INDENT"];
+"0x55bb9eb6d610" -> "0x55bb9eb6d2c0";
+"0x55bb9eb6d2c0" [label="Multi Statements"];
+"0x55bb9eb6d2c0" -> "0x55bb9eb6a0f0";
+"0x55bb9eb6a0f0" [label="ifkeyword"];
+"0x55bb9eb6a0f0" -> "0x55bb9eb695a0";
+"0x55bb9eb695a0" [label="KEYWORD
+IF"];
+"0x55bb9eb6a0f0" -> "0x55bb9eb69f40";
+"0x55bb9eb69f40" [label="Comparison"];
+"0x55bb9eb69f40" -> "0x55bb9eb69730";
+"0x55bb9eb69730" [label="NAME
+y"];
+"0x55bb9eb69f40" -> "0x55bb9eb69d70";
+"0x55bb9eb69d70" [label="Comparison Rep"];
+"0x55bb9eb69d70" -> "0x55bb9eb698c0";
+"0x55bb9eb698c0" [label="OPERATOR
+=="];
+"0x55bb9eb69d70" -> "0x55bb9eb69a50";
+"0x55bb9eb69a50" [label="INTEGER
+0"];
+"0x55bb9eb6d2c0" -> "0x55bb9eb69be0";
+"0x55bb9eb69be0" [label="DELIMITER
+:"];
+"0x55bb9eb6d2c0" -> "0x55bb9eb64b30";
+"0x55bb9eb64b30" [label="Suite"];
+"0x55bb9eb64b30" -> "0x55bb9eb6a430";
+"0x55bb9eb6a430" [label="INDENT"];
+"0x55bb9eb64b30" -> "0x55bb9eb64810";
+"0x55bb9eb64810" [label="return_stmt"];
+"0x55bb9eb64810" -> "0x55bb9eb6a5c0";
+"0x55bb9eb6a5c0" [label="KEYWORD
+RETURN"];
+"0x55bb9eb64810" -> "0x55bb9eb6a750";
+"0x55bb9eb6a750" [label="FLOAT
+1.1"];
+"0x55bb9eb64b30" -> "0x55bb9eb649a0";
+"0x55bb9eb649a0" [label="DEDENT"];
+"0x55bb9eb6d2c0" -> "0x55bb9eb6d130";
+"0x55bb9eb6d130" [label="return_stmt"];
+"0x55bb9eb6d130" -> "0x55bb9eb64d30";
+"0x55bb9eb64d30" [label="KEYWORD
+RETURN"];
+"0x55bb9eb6d130" -> "0x55bb9eb6ce10";
+"0x55bb9eb6ce10" [label="TERM"];
+"0x55bb9eb6ce10" -> "0x55bb9eb65080";
+"0x55bb9eb65080" [label="NAME
+x"];
+"0x55bb9eb6ce10" -> "0x55bb9eb6cc80";
+"0x55bb9eb6cc80" [label="TERM Rep"];
+"0x55bb9eb6cc80" -> "0x55bb9eb65210";
+"0x55bb9eb65210" [label="OPERATOR
+/"];
+"0x55bb9eb6cc80" -> "0x55bb9eb653a0";
+"0x55bb9eb653a0" [label="NAME
+y"];
+"0x55bb9eb6d610" -> "0x55bb9eb6d480";
+"0x55bb9eb6d480" [label="DEDENT"];
+"0x55bb9eb804c0" -> "0x55bb9eb71850";
+"0x55bb9eb71850" [label="Function"];
+"0x55bb9eb71850" -> "0x55bb9eb6df30";
+"0x55bb9eb6df30" [label="power"];
+"0x55bb9eb6df30" -> "0x55bb9eb6dc10";
+"0x55bb9eb6dc10" [label="KEYWORD
+DEF"];
+"0x55bb9eb6df30" -> "0x55bb9eb6dda0";
+"0x55bb9eb6dda0" [label="NAME
+power"];
+"0x55bb9eb71850" -> "0x55bb9eb6fb30";
+"0x55bb9eb6fb30" [label="Parameters"];
+"0x55bb9eb6fb30" -> "0x55bb9eb6e2c0";
+"0x55bb9eb6e2c0" [label="DELIMITER
+("];
+"0x55bb9eb6fb30" -> "0x55bb9eb6f7d0";
+"0x55bb9eb6f7d0" [label="Typedargslist4"];
+"0x55bb9eb6f7d0" -> "0x55bb9eb6e450";
+"0x55bb9eb6e450" [label="NAME
+x"];
+"0x55bb9eb6f7d0" -> "0x55bb9eb6e5e0";
+"0x55bb9eb6e5e0" [label="DELIMITER
+:"];
+"0x55bb9eb6f7d0" -> "0x55bb9eb6ea90";
+"0x55bb9eb6ea90" [label="NAME
+int"];
+"0x55bb9eb6f7d0" -> "0x55bb9eb6e900";
+"0x55bb9eb6e900" [label="DELIMITER
+,"];
+"0x55bb9eb6f7d0" -> "0x55bb9eb6ec20";
+"0x55bb9eb6ec20" [label="NAME
+y"];
+"0x55bb9eb6f7d0" -> "0x55bb9eb6edb0";
+"0x55bb9eb6edb0" [label="DELIMITER
+:"];
+"0x55bb9eb6f7d0" -> "0x55bb9eb6f260";
+"0x55bb9eb6f260" [label="NAME
+int"];
+"0x55bb9eb6fb30" -> "0x55bb9eb6f0d0";
+"0x55bb9eb6f0d0" [label="DELIMITER
+)"];
+"0x55bb9eb71850" -> "0x55bb9eb6fce0";
+"0x55bb9eb6fce0" [label="DELIMITER
+->"];
+"0x55bb9eb71850" -> "0x55bb9eb6ff20";
+"0x55bb9eb6ff20" [label="NAME
+int"];
+"0x55bb9eb71850" -> "0x55bb9eb700b0";
+"0x55bb9eb700b0" [label="DELIMITER
+:"];
+"0x55bb9eb71850" -> "0x55bb9eb71650";
+"0x55bb9eb71650" [label="Suite"];
+"0x55bb9eb71650" -> "0x55bb9eb70480";
+"0x55bb9eb70480" [label="INDENT"];
+"0x55bb9eb71650" -> "0x55bb9eb71310";
+"0x55bb9eb71310" [label="return_stmt"];
+"0x55bb9eb71310" -> "0x55bb9eb70610";
+"0x55bb9eb70610" [label="KEYWORD
+RETURN"];
+"0x55bb9eb71310" -> "0x55bb9eb70fb0";
+"0x55bb9eb70fb0" [label="Power"];
+"0x55bb9eb70fb0" -> "0x55bb9eb707a0";
+"0x55bb9eb707a0" [label="NAME
+x"];
+"0x55bb9eb70fb0" -> "0x55bb9eb70de0";
+"0x55bb9eb70de0" [label="Power Opt"];
+"0x55bb9eb70de0" -> "0x55bb9eb70930";
+"0x55bb9eb70930" [label="OPERATOR
+**"];
+"0x55bb9eb70de0" -> "0x55bb9eb70ac0";
+"0x55bb9eb70ac0" [label="NAME
+y"];
+"0x55bb9eb71650" -> "0x55bb9eb714c0";
+"0x55bb9eb714c0" [label="DEDENT"];
+"0x55bb9eb804c0" -> "0x55bb9eb6bb00";
+"0x55bb9eb6bb00" [label="Function"];
+"0x55bb9eb6bb00" -> "0x55bb9eb72020";
+"0x55bb9eb72020" [label="main"];
+"0x55bb9eb72020" -> "0x55bb9eb71d00";
+"0x55bb9eb71d00" [label="KEYWORD
+DEF"];
+"0x55bb9eb72020" -> "0x55bb9eb71e90";
+"0x55bb9eb71e90" [label="NAME
+main"];
+"0x55bb9eb6bb00" -> "0x55bb9eb726d0";
+"0x55bb9eb726d0" [label="Parameters"];
+"0x55bb9eb726d0" -> "0x55bb9eb723b0";
+"0x55bb9eb723b0" [label="DELIMITER
+("];
+"0x55bb9eb726d0" -> "0x55bb9eb72540";
+"0x55bb9eb72540" [label="DELIMITER
+)"];
+"0x55bb9eb6bb00" -> "0x55bb9eb72880";
+"0x55bb9eb72880" [label="DELIMITER
+:"];
+"0x55bb9eb6bb00" -> "0x55bb9eb6b940";
+"0x55bb9eb6b940" [label="Suite"];
+"0x55bb9eb6b940" -> "0x55bb9eb72c50";
+"0x55bb9eb72c50" [label="INDENT"];
+"0x55bb9eb6b940" -> "0x55bb9eb6b5f0";
+"0x55bb9eb6b5f0" [label="Multi Statements"];
+"0x55bb9eb6b5f0" -> "0x55bb9eb73760";
+"0x55bb9eb73760" [label="expr_stmt"];
+"0x55bb9eb73760" -> "0x55bb9eb72de0";
+"0x55bb9eb72de0" [label="NAME
+num1"];
+"0x55bb9eb73760" -> "0x55bb9eb735b0";
+"0x55bb9eb735b0" [label="annassign"];
+"0x55bb9eb735b0" -> "0x55bb9eb72f70";
+"0x55bb9eb72f70" [label="DELIMITER
+:"];
+"0x55bb9eb735b0" -> "0x55bb9eb73420";
+"0x55bb9eb73420" [label="decl_type"];
+"0x55bb9eb6b5f0" -> "0x55bb9eb74880";
+"0x55bb9eb74880" [label="expr_stmt"];
+"0x55bb9eb74880" -> "0x55bb9eb73c20";
+"0x55bb9eb73c20" [label="NAME
+num2"];
+"0x55bb9eb74880" -> "0x55bb9eb743f0";
+"0x55bb9eb743f0" [label="annassign"];
+"0x55bb9eb743f0" -> "0x55bb9eb73db0";
+"0x55bb9eb73db0" [label="DELIMITER
+:"];
+"0x55bb9eb743f0" -> "0x55bb9eb74260";
+"0x55bb9eb74260" [label="decl_type"];
+"0x55bb9eb6b5f0" -> "0x55bb9eb75820";
+"0x55bb9eb75820" [label="expr_stmt"];
+"0x55bb9eb75820" -> "0x55bb9eb74be0";
+"0x55bb9eb74be0" [label="NAME
+choice"];
+"0x55bb9eb75820" -> "0x55bb9eb753b0";
+"0x55bb9eb753b0" [label="annassign"];
+"0x55bb9eb753b0" -> "0x55bb9eb74d70";
+"0x55bb9eb74d70" [label="DELIMITER
+:"];
+"0x55bb9eb753b0" -> "0x55bb9eb75220";
+"0x55bb9eb75220" [label="decl_type"];
+"0x55bb9eb6b5f0" -> "0x55bb9eb6b430";
+"0x55bb9eb6b430" [label="if_stmt"];
+"0x55bb9eb6b430" -> "0x55bb9eb766f0";
+"0x55bb9eb766f0" [label="ifkeyword"];
+"0x55bb9eb766f0" -> "0x55bb9eb75be0";
+"0x55bb9eb75be0" [label="KEYWORD
+IF"];
+"0x55bb9eb766f0" -> "0x55bb9eb76540";
+"0x55bb9eb76540" [label="Comparison"];
+"0x55bb9eb76540" -> "0x55bb9eb75d70";
+"0x55bb9eb75d70" [label="NAME
+choice"];
+"0x55bb9eb76540" -> "0x55bb9eb763b0";
+"0x55bb9eb763b0" [label="Comparison Rep"];
+"0x55bb9eb763b0" -> "0x55bb9eb75f00";
+"0x55bb9eb75f00" [label="OPERATOR
+=="];
+"0x55bb9eb763b0" -> "0x55bb9eb76090";
+"0x55bb9eb76090" [label="INTEGER
+1"];
+"0x55bb9eb6b430" -> "0x55bb9eb76220";
+"0x55bb9eb76220" [label="DELIMITER
+:"];
+"0x55bb9eb6b430" -> "0x55bb9eb78b90";
+"0x55bb9eb78b90" [label="Suite"];
+"0x55bb9eb78b90" -> "0x55bb9eb76a30";
+"0x55bb9eb76a30" [label="INDENT"];
+"0x55bb9eb78b90" -> "0x55bb9eb78870";
+"0x55bb9eb78870" [label="Atom Expression2"];
+"0x55bb9eb78870" -> "0x55bb9eb76bc0";
+"0x55bb9eb76bc0" [label="NAME
+print"];
+"0x55bb9eb78870" -> "0x55bb9eb78300";
+"0x55bb9eb78300" [label="Func
+Trailer1"];
+"0x55bb9eb78300" -> "0x55bb9eb76d50";
+"0x55bb9eb76d50" [label="DELIMITER
+("];
+"0x55bb9eb78300" -> "0x55bb9eb78060";
+"0x55bb9eb78060" [label="Atom Expression2"];
+"0x55bb9eb78060" -> "0x55bb9eb76ee0";
+"0x55bb9eb76ee0" [label="NAME
+add"];
+"0x55bb9eb78060" -> "0x55bb9eb77cf0";
+"0x55bb9eb77cf0" [label="Func
+Trailer1"];
+"0x55bb9eb77cf0" -> "0x55bb9eb77070";
+"0x55bb9eb77070" [label="DELIMITER
+("];
+"0x55bb9eb77cf0" -> "0x55bb9eb77a90";
+"0x55bb9eb77a90" [label="Arglist"];
+"0x55bb9eb77a90" -> "0x55bb9eb77200";
+"0x55bb9eb77200" [label="NAME
+num1"];
+"0x55bb9eb77a90" -> "0x55bb9eb77840";
+"0x55bb9eb77840" [label="Comma Argument rep2"];
+"0x55bb9eb77840" -> "0x55bb9eb77390";
+"0x55bb9eb77390" [label="DELIMITER
+,"];
+"0x55bb9eb77840" -> "0x55bb9eb77520";
+"0x55bb9eb77520" [label="NAME
+num2"];
+"0x55bb9eb77cf0" -> "0x55bb9eb776b0";
+"0x55bb9eb776b0" [label="DELIMITER
+)"];
+"0x55bb9eb78300" -> "0x55bb9eb77ed0";
+"0x55bb9eb77ed0" [label="DELIMITER
+)"];
+"0x55bb9eb78b90" -> "0x55bb9eb78a00";
+"0x55bb9eb78a00" [label="DEDENT"];
+"0x55bb9eb6b430" -> "0x55bb9eb78d70";
+"0x55bb9eb78d70" [label="KEYWORD
+ELSE"];
+"0x55bb9eb6b430" -> "0x55bb9eb6b230";
+"0x55bb9eb6b230" [label="Suite"];
+"0x55bb9eb6b230" -> "0x55bb9eb79220";
+"0x55bb9eb79220" [label="INDENT"];
+"0x55bb9eb6b230" -> "0x55bb9eb6af10";
+"0x55bb9eb6af10" [label="Atom Expression2"];
+"0x55bb9eb6af10" -> "0x55bb9eb793b0";
+"0x55bb9eb793b0" [label="NAME
+print"];
+"0x55bb9eb6af10" -> "0x55bb9eb6a9a0";
+"0x55bb9eb6a9a0" [label="Func
+Trailer1"];
+"0x55bb9eb6a9a0" -> "0x55bb9eb79540";
+"0x55bb9eb79540" [label="DELIMITER
+("];
+"0x55bb9eb6a9a0" -> "0x55bb9eb7a830";
+"0x55bb9eb7a830" [label="Atom Expression2"];
+"0x55bb9eb7a830" -> "0x55bb9eb796d0";
+"0x55bb9eb796d0" [label="NAME
+subtract"];
+"0x55bb9eb7a830" -> "0x55bb9eb7a4c0";
+"0x55bb9eb7a4c0" [label="Func
+Trailer1"];
+"0x55bb9eb7a4c0" -> "0x55bb9eb79860";
+"0x55bb9eb79860" [label="DELIMITER
+("];
+"0x55bb9eb7a4c0" -> "0x55bb9eb7a260";
+"0x55bb9eb7a260" [label="Arglist"];
+"0x55bb9eb7a260" -> "0x55bb9eb799f0";
+"0x55bb9eb799f0" [label="NAME
+num1"];
+"0x55bb9eb7a260" -> "0x55bb9eb7a030";
+"0x55bb9eb7a030" [label="Comma Argument rep2"];
+"0x55bb9eb7a030" -> "0x55bb9eb79b80";
+"0x55bb9eb79b80" [label="DELIMITER
+,"];
+"0x55bb9eb7a030" -> "0x55bb9eb79d10";
+"0x55bb9eb79d10" [label="NAME
+num2"];
+"0x55bb9eb7a4c0" -> "0x55bb9eb79ea0";
+"0x55bb9eb79ea0" [label="DELIMITER
+)"];
+"0x55bb9eb6a9a0" -> "0x55bb9eb7a6a0";
+"0x55bb9eb7a6a0" [label="DELIMITER
+)"];
+"0x55bb9eb6b230" -> "0x55bb9eb6b0a0";
+"0x55bb9eb6b0a0" [label="DEDENT"];
+"0x55bb9eb6b430" -> "0x55bb9eb78f00";
+"0x55bb9eb78f00" [label="DELIMITER
+:"];
+"0x55bb9eb6b940" -> "0x55bb9eb6b7b0";
+"0x55bb9eb6b7b0" [label="DEDENT"];
+"0x55bb9eb804c0" -> "0x55bb9eb80300";
+"0x55bb9eb80300" [label="if_stmt"];
+"0x55bb9eb80300" -> "0x55bb9eb7ee20";
+"0x55bb9eb7ee20" [label="ifkeyword"];
+"0x55bb9eb7ee20" -> "0x55bb9eb6bf90";
+"0x55bb9eb6bf90" [label="KEYWORD
+IF"];
+"0x55bb9eb7ee20" -> "0x55bb9eb6c8f0";
+"0x55bb9eb6c8f0" [label="Comparison"];
+"0x55bb9eb6c8f0" -> "0x55bb9eb6c120";
+"0x55bb9eb6c120" [label="NAME
+__name__"];
+"0x55bb9eb6c8f0" -> "0x55bb9eb6c760";
+"0x55bb9eb6c760" [label="Comparison Rep"];
+"0x55bb9eb6c760" -> "0x55bb9eb6c2b0";
+"0x55bb9eb6c2b0" [label="OPERATOR
+=="];
+"0x55bb9eb6c760" -> "0x55bb9eb6c440";
+"0x55bb9eb6c440" [label="STRING
+\"__main__\""];
+"0x55bb9eb80300" -> "0x55bb9eb6c5d0";
+"0x55bb9eb6c5d0" [label="DELIMITER
+:"];
+"0x55bb9eb80300" -> "0x55bb9eb7ff70";
+"0x55bb9eb7ff70" [label="Suite"];
+"0x55bb9eb7ff70" -> "0x55bb9eb7f140";
+"0x55bb9eb7f140" [label="INDENT"];
+"0x55bb9eb7ff70" -> "0x55bb9eb7fc50";
+"0x55bb9eb7fc50" [label="Atom Expression2"];
+"0x55bb9eb7fc50" -> "0x55bb9eb7f2d0";
+"0x55bb9eb7f2d0" [label="NAME
+main"];
+"0x55bb9eb7fc50" -> "0x55bb9eb7f780";
+"0x55bb9eb7f780" [label="Func
+Trailer2"];
+"0x55bb9eb7f780" -> "0x55bb9eb7f460";
+"0x55bb9eb7f460" [label="DELIMITER
+("];
+"0x55bb9eb7f780" -> "0x55bb9eb7f5f0";
+"0x55bb9eb7f5f0" [label="DELIMITER
+)"];
+"0x55bb9eb7ff70" -> "0x55bb9eb7fde0";
+"0x55bb9eb7fde0" [label="DEDENT"];
+"0x55bb9eb43eb0" -> "0x55bb9eb80170";
+"0x55bb9eb80170" [label="ENDMARKER"];
 }

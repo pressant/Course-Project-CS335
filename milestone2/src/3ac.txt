@@ -1,51 +1,73 @@
-0:    count = t_0
-1:    t_1 = 0
-2:    t_0 = t_1
-3:    z = t_2
-4:    t_3 = 1
-5:    t_4 = 2
-6:    t_5 = 3
-7:    t_6 = 4
-8:    t_7 = 5
-9:    t_2 = 
-10: BeginFunc edd
-11:    t_8 = popparam
-12:    b = t_8
-13:    t_9 = popparam
-14:    a = t_9
-15:    string = t_10
-16:    t_11 = t_9 + t_8
-17:    pushparam = t_11
-18:    goto $ra
-19:    bett = t_12
-20:    t_13 = "bye"
-21:    t_12 = t_13
-22:    t_14 = 5
-23:    t_15 = t_1 < t_14
-24:    loop: = 
-25:    if t_15 == true
-26:    print = t_16
-27:    t_17 = "Count:"
-28:    pushparam = t_1
-29:    pushparam = t_17
-30:     = print call 
-31:    t_18 = 1
-32:    t_19 = t_1 + t_18
-33:    t_1 = t_19
-34:    goto 24
-35:    end loop = 
-36:    t_20 = 5
-37:    loop: = 
-38:    if count > t_20
-39:    count = count + 1
-40:    print = t_21
-41:    t_22 = "Coun:"
-42:    pushparam = t_1
-43:    pushparam = t_22
-44:     = print call 
-45:    goto 38
-46:    end loop = 
-47:    print = t_23
-48:    t_24 = "Loop finished"
-49:    pushparam = t_24
-50:     = print call 
+0:  BeginFunc add
+1:  t_0 = popparam
+2:  y = t_0
+3:  t_1 = popparam
+4:  x = t_1
+5:  t_2 = t_1 + t_0
+6:  pushparam = t_2
+7:  goto $ra
+8:  BeginFunc subtract
+9:  t_3 = popparam
+10:  y = t_3
+11:  t_4 = popparam
+12:  x = t_4
+13:  t_5 = t_4 - t_3
+14:  pushparam = t_5
+15:  goto $ra
+16:  BeginFunc multiply
+17:  t_6 = popparam
+18:  y = t_6
+19:  t_7 = popparam
+20:  x = t_7
+21:  t_8 = t_7 * t_6
+22:  pushparam = t_8
+23:  goto $ra
+24:  BeginFunc divide
+25:  t_9 = popparam
+26:  y = t_9
+27:  t_10 = popparam
+28:  x = t_10
+29:  t_11 = 0
+30:  t_12 = t_9 == t_11
+31:  if t_12 > 0 goto-1
+32:  t_13 = 1.1
+33:  pushparam = t_13
+34:  end if = 
+35:  t_14 = t_10 / t_9
+36:  pushparam = t_14
+37:  goto $ra
+38:  BeginFunc power
+39:  t_15 = popparam
+40:  y = t_15
+41:  t_16 = popparam
+42:  x = t_16
+43:  t_17 = t_16 ** t_15
+44:  pushparam = t_17
+45:  goto $ra
+46:  BeginFunc main
+47:  num1 = t_18
+48:  t_18 = 
+49:  num2 = t_19
+50:  t_19 = 
+51:  choice = t_20
+52:  t_20 = 
+53:  t_21 = 1
+54:  t_22 =  == t_21
+55:  if t_22 > 0 goto-1
+56:  print = t_23
+57:  pushparam = 
+58:  pushparam = 
+59:  pushparam = call add
+61:  else = call print
+63:  print = t_24
+64:  pushparam = 
+65:  pushparam = 
+66:  pushparam = call subtract
+68:  end else = call print
+70:  goto $ra
+71:  __name__ = t_25
+72:  t_26 = "__main__"
+73:  t_27 = t_25 == t_26
+74:  if t_27 > 0 goto-1
+75:   = main call 
+76:  end if = 

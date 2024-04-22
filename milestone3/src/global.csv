@@ -1,2 +1,5 @@
 token,type,line no,scope
-main,None Type,1,global
+main,function,10,global
+add,None Type,1,global
+b,int,1,global
+a,int,1,global

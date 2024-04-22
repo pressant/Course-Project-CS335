@@ -1,2 +1,3 @@
 token,type,line no,scope
-x,int,3,main
+z,int,13,main
+x,int,12,main

@@ -1,5 +1,30 @@
+BeginFunc add
+t_0 = popparam
+a = t_0
+t_1 = popparam
+b = t_1
+t_2 = 0
+c = t_2
+t_3 = 0
+i = t_3
+t_2 = t_1 + t_0
+for_loop1
+if t_3 > t_0  goto endfor_loop1
+t_2 = t_2 + t_1
+t_3 = t_3 + 1
+goto for_loop1
+endfor_loop1
+print t_2
+EndFunc
 BeginFunc main
-t_0 = 5
-x = t_0
-print t_0
+t_4 = 5
+x = t_4
+t_5 = 6
+z = t_5
+t_4 = pushparam
+x = t_4
+t_5 = pushparam
+z = t_5
+calladd
+t_6 = returnpop
 EndFunc
